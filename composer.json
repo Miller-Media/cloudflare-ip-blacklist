@@ -1,0 +1,11 @@
+{
+    "name": "millermedia/cloudflareip",
+    "description": "Cloudflare IP Blacklist",
+    "type": "project",
+    "require": {},
+	"autoload": {
+		"psr-4": {
+		  "MillerMedia\\CloudflareIP\\": "classes/"
+		}
+	}
+}
