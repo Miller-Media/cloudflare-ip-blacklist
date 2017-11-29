@@ -18,7 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Settings
  *
  * @Wordpress\Options
- * @Wordpress\Options\Section( title="General Settings" )
+ * @Wordpress\Options\Section( title="Cloudflare Credentials" )
+ * @Wordpress\Options\Field( name="cf_email", type="text", title="Email Address" )
+ * @Wordpress\Options\Field( name="cf_key", type="text", title="API Key" )
+ * @Wordpress\Options\Section( title="Blacklist Usernames Below" )
  * @Wordpress\Options\Field( name="banned_usernames", type="textarea", title="Blacklisted Usernames", description="Comma-separated list of usernames.")
  */
 class Settings extends \Modern\Wordpress\Plugin\Settings
