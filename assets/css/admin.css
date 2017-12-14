@@ -1,0 +1,15 @@
+/**
+ * Plugin Admin Styles
+ *
+ * Created     November 28, 2017
+ *
+ * @package    Cloudflare IP Blacklist
+ * @author     Michael Robinson
+ * @since      {build_version}
+ */
+
+.cfip_ajax_btn {
+    margin-left: 10px;
+}
+
+
