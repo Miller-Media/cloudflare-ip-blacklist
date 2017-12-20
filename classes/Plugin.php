@@ -1,14 +1,4 @@
 <?php
-/**
- * Plugin Class File
- *
- * @vendor: Miller Media
- * @package: Cloudflare IP Blacklist
- * @author: Michael Robinson
- * @link: 
- * @since: November 28, 2017
- */
-namespace MillerMedia\CloudflareIP;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Access denied.' );
@@ -17,99 +7,86 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin Class
  */
-class Plugin extends \Modern\Wordpress\Plugin
+class CFIPBlacklist
 {
-	/**
-	 * Instance Cache - Required
-	 * @var	self
-	 */
-	protected static $_instance;
-	
-	/**
-	 * @var string		Plugin Name
-	 */
-	public $name = 'Cloudflare IP Blacklist';
 
 	/**
+	 * The settings class.
+	 *
+	 * @var CFIPSettings
+	 */
+	public $settingsPage;
+
+	/**
+	 * The plugin settings.
+	 *
+	 * @var mixed
+	 */
+	public $settings;
+
+	/**
+	 * The API class.
+	 *
 	 * @var CloudflareAPIController
 	 */
 	public $API;
-	
-	/**
-	 * Main Stylesheet
-	 *
-	 * @Wordpress\Stylesheet
-	 */
-	public $mainStyle = 'assets/css/style.css';
-	
-	/**
-	 * Main Javascript Controller
-	 *
-	 * @Wordpress\Script( deps={"mwp"} )
-	 */
-	public $mainScript = 'assets/js/main.js';
 
 	/**
-	 * Admin Stylesheet
+	 * Admin stylesheet file.
 	 *
-	 * @Wordpress\Stylesheet
 	 */
-	public $adminStyle = 'assets/css/admin.css';
+	public $adminStyle;
 
 	/**
-	 * Main Admin Javascript Controller
+	 * Admin javascript file.
 	 *
-	 * @Wordpress\Script( deps={"jquery"} )
 	 */
-	public $adminScript = 'assets/js/admin.js';
+	public $adminScript;
 
 	/**
-	 * Initialize the plugin.
+	 * CFIPBlacklist constructor.
 	 *
-	 * @Wordpress\Action( for="init" )
+	 * Initialize plugin properties/hooks.
 	 *
-	 * @return void
 	 */
-	public function init()
+	public function __construct ()
 	{
+		$this->settingsPage = new CFIPSettings();
 		$this->API = new CloudflareAPIController();
-	}
-	
-	/**
-	 * Enqueue scripts and stylesheets
-	 * 
-	 * @Wordpress\Action( for="wp_enqueue_scripts" )
-	 *
-	 * @return	void
-	 */
-	public function enqueueScripts()
-	{
-		$this->useStyle( $this->mainStyle );
-		$this->useScript( $this->mainScript );
+		$this->settings = get_site_option('cfip_settings');
+
+		$this->adminStyle = plugins_url('cloudflare-ip-blacklist/assets/css/admin.css', 'cloudflare-ip-blacklist.php');
+		$this->adminScript = plugins_url('cloudflare-ip-blacklist/assets/js/admin.js', 'cloudflare-ip-blacklist.php');
+
+		// Hooks
+		add_action('admin_enqueue_scripts', array($this, 'adminEnqueueScripts'), 40, 1);
+		add_action('wp_authenticate', array($this, 'checkUserLoginName'), 10, 1);
+		add_action('wp_ajax_cfip_unblacklist_ip', array($this, 'ajaxUnblacklistIP'));
 	}
 
 	/**
 	 * Enqueue admin scripts and stylesheets.
 	 *
-	 * @Wordpress\Action( for="admin_enqueue_scripts" )
 	 */
-	public function adminEnqueueScripts()
+	public function adminEnqueueScripts($hook)
 	{
-		$this->useStyle( $this->adminStyle );
-		$this->useScript( $this->adminScript );
+		if( $hook !== 'toplevel_page_cfip-menu' )
+			return;
+
+		wp_enqueue_style('cfip_admin_style', $this->adminStyle );
+		wp_enqueue_script('cfip_admin_script', $this->adminScript, array('jquery') );
 	}
 
 	/**
 	 * Check if login name has been blacklisted.
 	 *
-	 * @Wordpress\Action( for="wp_authenticate", priority=10, args=1 )
 	 * @param $username string
 	 * @return void
 	 */
 	public function checkUserLoginName( $username )
 	{
 		// If IP Blacklisting is disabled, bail.
-		if( !$this->getSetting('enable_ip_blacklist') )
+		if( !$this->getSetting('enable_ip_blacklist') == 'on' )
 			return;
 
 		$banned_usernames = explode(', ', $this->getSetting('banned_usernames'));
@@ -174,7 +151,7 @@ class Plugin extends \Modern\Wordpress\Plugin
 	 */
 	public function getBannedIPs()
 	{
-		return ( get_site_option('cfipbl_banned_addresses') ?: array() );
+		return ( get_site_option('cfip_banned_addresses') ?: array() );
 	}
 
 	/**
@@ -187,7 +164,7 @@ class Plugin extends \Modern\Wordpress\Plugin
 		$banned_IPs = $this->getBannedIPs();
 		foreach( $ip_data as $ip => $data ){
 			$banned_IPs[$ip] = $data;
-			update_site_option('cfipbl_banned_addresses', $banned_IPs);
+			update_site_option('cfip_banned_addresses', $banned_IPs);
 		}
 	}
 
@@ -203,7 +180,7 @@ class Plugin extends \Modern\Wordpress\Plugin
 		if( isset($banned_IPs[$ip]) )
 			unset($banned_IPs[$ip]);
 
-		update_site_option('cfipbl_banned_addresses', $banned_IPs);
+		update_site_option('cfip_banned_addresses', $banned_IPs);
 	}
 
 	/**
@@ -225,7 +202,6 @@ class Plugin extends \Modern\Wordpress\Plugin
 	/**
 	 * Remove an IP address from Cloudflare firewall rules.
 	 *
-	 * @Wordpress\Action( for="wp_ajax_cfip_unblacklist_ip" )
 	 */
 	public function ajaxUnblacklistIP()
 	{
@@ -269,5 +245,16 @@ class Plugin extends \Modern\Wordpress\Plugin
 		$log = get_site_option('cfip_log') ?: array();
 		$log[] = $message;
 		update_site_option('cfip_log', $log);
+	}
+
+	/**
+	 * Helper function to get plugin settings.
+	 *
+	 * @param $setting
+	 * @return string|array|null
+	 */
+	public function getSetting($setting)
+	{
+		return $this->settings[$setting];
 	}
 }

@@ -1,15 +1,4 @@
 <?php
-/**
- * Plugin Class File
- *
- * Created:   December 14, 2017
- *
- * @package:  Cloudflare IP Blacklist
- * @author:   Michael Robinson
- * @since:    {build_version}
- */
-namespace MillerMedia\CloudflareIP;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Access denied.' );
 }
@@ -19,10 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CloudflareAPIController
 {
-	/**
-	 * @var 	\Modern\Wordpress\Plugin		Provides access to the plugin instance
-	 */
-	protected $plugin;
+
+	public $settings;
 
 	/**
 	 * The base URL for this API version.
@@ -32,35 +19,12 @@ class CloudflareAPIController
 	public $url = "https://api.cloudflare.com/client/v4/";
 	
 	/**
- 	 * Get plugin
-	 *
-	 * @return	\Modern\Wordpress\Plugin
-	 */
-	public function getPlugin()
-	{
-		return $this->plugin;
-	}
-
-	/**
-	 * Set plugin
-	 *
-	 * @param \Modern\Wordpress\Plugin|null $plugin
-	 * @return CloudflareAPIController
-	 */
-	public function setPlugin( \Modern\Wordpress\Plugin $plugin=NULL )
-	{
-		$this->plugin = $plugin;
-		return $this;
-	}
-	
-	/**
 	 * Constructor
 	 *
-	 * @param	\Modern\Wordpress\Plugin	$plugin			The plugin to associate this class with, or NULL to auto-associate
 	 */
-	public function __construct( \Modern\Wordpress\Plugin $plugin=NULL )
+	public function __construct()
 	{
-		$this->setPlugin( $plugin ?: \MillerMedia\CloudflareIP\Plugin::instance() );
+		$this->settings = get_site_option('cfip_settings');
 	}
 
 	/**
@@ -74,8 +38,11 @@ class CloudflareAPIController
 	public function request( $method, $url, $body=null )
 	{
 		// Get credentials from plugin settings.
-		$key = $this->plugin->getSetting('cf_key');
-		$email = $this->plugin->getSetting('cf_email');
+		$key = $this->getSetting('cf_key');
+		$email = $this->getSetting('cf_email');
+
+		if( !$key || !$email )
+			return false;
 
 		// Set headers.
 		$headers = array(
@@ -109,7 +76,7 @@ class CloudflareAPIController
 		// Handle errors
 		if( !$result->success && $result->errors ) {
 			foreach( $result->errors as $error ){
-				$this->plugin->log(sprintf("Error code %s: %s", $error->code, $error->message));
+				$this->log(sprintf("Error code %s: %s", $error->code, $error->message));
 			}
 		}
 
@@ -172,8 +139,8 @@ class CloudflareAPIController
 	 */
 	public function getZoneIDs()
 	{
-		$domains = $this->plugin->getMultisiteDomains();
-		// $domains = array('trimhealthymembership.com', 'trimhealthymama.com'); // for testing
+		$domains = $this->getMultisiteDomains();
+//		$domains = array('trimhealthymembership.com', 'trimhealthymama.com'); // for testing
 		$zone_ids = array();
 		foreach( $domains as $domain ){
 			$url = $this->url . "zones?name=$domain";
@@ -194,5 +161,44 @@ class CloudflareAPIController
 		$url = $this->url . "zones/$zone_id/firewall/access_rules/rules?mode=block&scope_type=zone&configuration_target=ip";
 		$result = $this->request("GET", $url);
 		return json_decode($result['body']);
+	}
+
+	/**
+	 * Function to log events in a site option.
+	 *
+	 * @param $message
+	 */
+	public function log( $message )
+	{
+		$log = get_site_option('cfip_log') ?: array();
+		$log[] = $message;
+		update_site_option('cfip_log', $log);
+	}
+
+	/**
+	 * Helper function to get plugin settings.
+	 *
+	 * @param $setting
+	 * @return string|array|null
+	 */
+	public function getSetting($setting)
+	{
+		return $this->settings[$setting];
+	}
+
+	/**
+	 * Get domains for each site on the multisite network.
+	 *
+	 * @return array|int
+	 */
+	public function getMultisiteDomains()
+	{
+		$sites = get_sites();
+		$domains = array();
+		// Loop through and get all domains; we'll use each of these in API call to blacklist IP.
+		foreach( $sites as $site ){
+			$domains[] = $site->domain;
+		}
+		return $domains;
 	}
 }
