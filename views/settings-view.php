@@ -18,12 +18,14 @@ $settings = array(
 			array(
 				'name' => 'cf_email',
 				'type' => 'text',
-				'title' => 'Email Address'
+				'title' => 'Email Address',
+				'description' => ''
 			),
 			array(
 				'name' => 'cf_key',
 				'type' => 'text',
-				'title' => 'API Key'
+				'title' => 'API Key',
+				'description' => ''
 			)
 		)
 	),
@@ -32,17 +34,20 @@ $settings = array(
 			array(
 				'name' => 'enable_ip_blacklist',
 				'type' => 'checkbox',
-				'title' => 'Enable IP Blacklisting?'
+				'title' => 'Enable IP Blacklisting?',
+                'description' => ''
 			),
 			array(
 				'name' => 'banned_usernames',
 				'type' => 'textarea',
-				'title' => 'Banned Usernames'
+				'title' => 'Banned Usernames',
+				'description' => '(a comma-separated string, e.g. admin, trimhealthy, etc)'
 			),
 			array(
 				'name' => 'unblacklist_ip',
 				'type' => 'select',
 				'title' => 'Unblacklist IP',
+				'description' => '',
 				'options' => $options?: null
 			)
 		)
@@ -63,7 +68,7 @@ $settings = array(
 					if( $data['type'] == 'select' ) {
 						?>
 						<tr>
-							<td><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></label></td>
+                            <td><label for="<?php echo $data['name']; ?>"><strong><?php echo $data['title']; ?></strong></label></td>
 							<td>
 								<select id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>">
 									<?php
@@ -83,7 +88,15 @@ $settings = array(
 					} else if( $data['type'] == 'textarea' ) {
 						?>
 						<tr>
-							<td><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></label></td>
+							<td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+                                <?php
+                                if( isset($data['description']) && $data['description'] ){
+                                    ?>
+                                    <br><?php echo $data['description']; ?>
+                                    <?php
+                                }
+                                ?>
+                            </td>
 							<td><textarea id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>" rows="4"
 							              cols="50"><?php echo(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
 							</td>
@@ -92,14 +105,30 @@ $settings = array(
 					} else if ( $data['type'] == 'checkbox' ) {
 						?>
 						<tr>
-							<td><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></label></td>
+							<td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+								<?php
+								if( isset($data['description']) && $data['description'] ){
+									?>
+                                    <br><?php echo $data['description']; ?>
+									<?php
+								}
+								?>
+                            </td>
 							<td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" <?php echo (array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked': ''); ?>></td>
 						</tr>
 						<?php
 					} else {
 						?>
 						<tr>
-							<td><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></label></td>
+							<td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+								<?php
+								if( isset($data['description']) && $data['description'] ){
+									?>
+                                    <br><?php echo $data['description']; ?>
+									<?php
+								}
+								?>
+                            </td>
 							<td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" value="<?php echo (array_key_exists($data['name'], $cfip_settings)?$cfip_settings[$data['name']]: ''); ?>"></td>
 						</tr>
 						<?php
