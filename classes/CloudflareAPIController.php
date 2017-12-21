@@ -75,9 +75,7 @@ class CloudflareAPIController
 
 		// Handle errors
 		if( !$result->success && $result->errors ) {
-			foreach( $result->errors as $error ){
-				$this->log(sprintf("Error code %s: %s", $error->code, $error->message));
-			}
+			$this->log($result);
 		}
 
 		return $result;
@@ -131,6 +129,65 @@ class CloudflareAPIController
 	}
 
 	/**
+	 * Clear product and category caches.
+	 *
+	 * @param $files array URLs to clear cache for
+	 * @return array|bool
+	 */
+	public function clearCacheByFiles($files)
+	{
+		// Get zone ID for this site.
+		$zone_id = $this->getZoneId();
+
+		if( !$zone_id )
+			return false;
+
+		// Configure endpoint url with zone id.
+		$url = $this->url . "zones/$zone_id/purge_cache/";
+
+		// Results array
+		$results = array();
+
+		$count = 0;
+		$urls = array();
+
+		foreach( $files as $file ){
+			// Limit body to 30 URLs per request.
+			if( $count%30 != 0 ) {
+				$urls[] = $file;
+				$count++;
+			} else {
+				// Add $urls array to body argument.
+				$body = json_encode(array(
+					"files" => $urls
+				));
+
+				// Make request.
+				$result = $this->request("DELETE", $url, $body);
+				$results[] = $result;
+
+				// Empty $urls array.
+				$urls = array();
+				$count++;
+			}
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Get all Cloudflare zones.
+	 *
+	 * @return array|mixed|object
+	 */
+	public function getZones()
+	{
+		$url = $this->url . "zones";
+		$result = $this->request("GET", $url);
+		return $result;
+	}
+
+	/**
 	 * Get Cloudflare domain zone IDs.
 	 *
 	 * @see     https://api.cloudflare.com/#zone-list-zones
@@ -140,14 +197,32 @@ class CloudflareAPIController
 	public function getZoneIDs()
 	{
 		$domains = $this->getMultisiteDomains();
-//		$domains = array('trimhealthymembership.com', 'trimhealthymama.com'); // for testing
 		$zone_ids = array();
 		foreach( $domains as $domain ){
 			$url = $this->url . "zones?name=$domain";
 			$result = $this->request("GET", $url);
-			$zone_ids[] = $result->result[0]->id;
+			if( !$result->errors )
+				$zone_ids[] = $result->result[0]->id;
 		}
 		return $zone_ids;
+	}
+
+	/**
+	 * Get zone ID for current site.
+	 *
+	 * @return mixed
+	 */
+	public function getZoneId()
+	{
+		$domain = $this->getCurrentSiteDomain();
+		$url = $this->url . "zones?name=$domain";
+		$result = $this->request("GET", $url);
+		if( $result->errors || !$result->result ){
+			$this->log($result);
+			return false;
+		}
+
+		return $result->result[0]->id;
 	}
 
 	/**
@@ -200,5 +275,12 @@ class CloudflareAPIController
 			$domains[] = $site->domain;
 		}
 		return $domains;
+	}
+
+	public function getCurrentSiteDomain()
+	{
+		$site = get_current_site();
+		$domain = $site->domain;
+		return $domain;
 	}
 }

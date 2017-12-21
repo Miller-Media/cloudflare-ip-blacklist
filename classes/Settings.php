@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CFIPSettings
 {
-	public $plugin;
 
 	/**
 	 * CFIPSettings constructor.
@@ -92,10 +91,17 @@ class CFIPSettings
 
 		if (isset($_POST['cfip_settings_nonce'])) {
 
+			// Cloudflare Credentials
 			$settings['cf_email'] = isset($_POST['cf_email']) ? sanitize_text_field($_POST['cf_email']) : '';
 			$settings['cf_key'] = isset($_POST['cf_key']) ?sanitize_text_field($_POST['cf_key']) : '';
+
+			// IP Blacklist Settings
 			$settings['enable_ip_blacklist'] = isset($_POST['enable_ip_blacklist']) ? $_POST['enable_ip_blacklist'] : '';
 			$settings['banned_usernames'] = isset($_POST['banned_usernames']) ? sanitize_text_field($_POST['banned_usernames']) : '';
+
+			// Cache Clearing settings
+			$settings['after_scheduled_sale'] = isset($_POST['after_scheduled_sale']) ? $_POST['after_scheduled_sale'] : '';
+			$settings['when_product_out_of_stock'] = isset($_POST['when_product_out_of_stock']) ? $_POST['when_product_out_of_stock'] : '';
 
 			if( update_site_option('cfip_settings', $settings) )
 				return true;
@@ -104,32 +110,6 @@ class CFIPSettings
 
 		return false;
 
-	}
-
-	/**
-	 * Get banned IP addresses from site option.
-	 * (found in wp_sitemeta)
-	 *
-	 * @return array
-	 */
-	public function getBannedIPs()
-	{
-		return ( get_site_option('cfip_banned_addresses') ?: array() );
-	}
-
-	/**
-	 * Blacklisted IPs
-	 *
-	 * @return	array
-	 */ 
-	public function blacklistedIPs()
-	{
-		$banned_IPs = $this->getBannedIPs();
-		$options = array();
-		foreach( $banned_IPs as $ip => $data ){
-			$options[$ip] = $ip;
-		}
-		return $options;
 	}
 		
 }

@@ -1,5 +1,6 @@
 <?php
 
+// Populate options array with banned IP addresses.
 $banned_IPs = get_site_option('cfip_banned_addresses') ?: array();
 $options = array();
 if( $banned_IPs ){
@@ -51,94 +52,132 @@ $settings = array(
 				'options' => $options?: null
 			)
 		)
-	)
+	),
+	'Clear Cache' => array(
+		'fields' => array(
+			array(
+				'name' => 'after_scheduled_sale',
+				'type' => 'checkbox',
+				'title' => 'After Scheduled Sale',
+				'description' => ''
+			),
+			array(
+				'name' => 'when_product_out_of_stock',
+				'type' => 'checkbox',
+				'title' => 'When Product Goes Out of Stock',
+				'description' => ''
+			)
+		)
+	),
 );
 ?>
-<form name="cfip_settings" method="post" action="">
-	<table>
-		<tbody>
-			<?php
-			foreach( $settings as $section=>$fields ){
-				?>
-				<tr>
-					<td><h2><?php echo $section; ?></h2></td>
-				</tr>
-				<?php
-				foreach( $fields['fields'] as $field=>$data ){
-					if( $data['type'] == 'select' ) {
-						?>
-						<tr>
-                            <td><label for="<?php echo $data['name']; ?>"><strong><?php echo $data['title']; ?></strong></label></td>
-							<td>
-								<select id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>">
-									<?php
-									if ($options) {
-										foreach ($options as $name => $val) {
-                                            ?>
-                                            <option name="<?php echo $name; ?>"
-                                                    value="<?php echo $val; ?>"><?php echo $val; ?></option>
-											<?php
-										}
-									}
-									?>
-								</select>
-							</td>
-						</tr>
-						<?php
-					} else if( $data['type'] == 'textarea' ) {
-						?>
-						<tr>
-							<td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
-                                <?php
-                                if( isset($data['description']) && $data['description'] ){
-                                    ?>
-                                    <br><?php echo $data['description']; ?>
-                                    <?php
-                                }
+<ul class="tabs clearfix" data-tabgroup="first-tab-group">
+    <li><a href="#tab1" class="active">Settings</a></li>
+    <li><a href="#tab2">Log</a></li>
+</ul>
+<section id="first-tab-group" class="tabgroup">
+    <div class="tab-panel" id="tab1">
+        <form name="cfip_settings" method="post" action="">
+            <table>
+                <tbody>
+                    <?php
+                    foreach( $settings as $section=>$fields ){
+                        ?>
+                        <tr class="tr-section-title">
+                            <td><h2><?php echo $section; ?></h2></td>
+                        </tr>
+                        <?php
+                        foreach( $fields['fields'] as $field=>$data ){
+                            if( $data['type'] == 'select' ) {
                                 ?>
-                            </td>
-							<td><textarea id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>" rows="4"
-							              cols="50"><?php echo(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
-							</td>
-						</tr>
-						<?php
-					} else if ( $data['type'] == 'checkbox' ) {
-						?>
-						<tr>
-							<td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
-								<?php
-								if( isset($data['description']) && $data['description'] ){
-									?>
-                                    <br><?php echo $data['description']; ?>
-									<?php
-								}
-								?>
-                            </td>
-							<td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" <?php echo (array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked': ''); ?>></td>
-						</tr>
-						<?php
-					} else {
-						?>
-						<tr>
-							<td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
-								<?php
-								if( isset($data['description']) && $data['description'] ){
-									?>
-                                    <br><?php echo $data['description']; ?>
-									<?php
-								}
-								?>
-                            </td>
-							<td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" value="<?php echo (array_key_exists($data['name'], $cfip_settings)?$cfip_settings[$data['name']]: ''); ?>"></td>
-						</tr>
-						<?php
-					}
-				}
-			}
-			?>
-		</tbody>
-	</table>
-	<?php wp_nonce_field('cfip_settings_nonce', 'cfip_settings_nonce'); ?>
-	<?php submit_button(); ?>
-</form>
+                                <tr>
+                                    <td><label for="<?php echo $data['name']; ?>"><strong><?php echo $data['title']; ?></strong></label></td>
+                                    <td>
+                                        <select id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>">
+                                            <?php
+                                            if ($options) {
+                                                foreach ($options as $name => $val) {
+                                                    ?>
+                                                    <option name="<?php echo $name; ?>"
+                                                            value="<?php echo $val; ?>"><?php echo $val; ?></option>
+                                                    <?php
+                                                }
+                                            }
+                                            ?>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <?php
+                            } else if( $data['type'] == 'textarea' ) {
+                                ?>
+                                <tr>
+                                    <td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+                                        <?php
+                                        if( isset($data['description']) && $data['description'] ){
+                                            ?>
+                                            <br><?php echo $data['description']; ?>
+                                            <?php
+                                        }
+                                        ?>
+                                    </td>
+                                    <td><textarea id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>" rows="4"
+                                                  cols="50"><?php echo(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
+                                    </td>
+                                </tr>
+                                <?php
+                            } else if ( $data['type'] == 'checkbox' ) {
+                                ?>
+                                <tr>
+                                    <td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+                                        <?php
+                                        if( isset($data['description']) && $data['description'] ){
+                                            ?>
+                                            <br><?php echo $data['description']; ?>
+                                            <?php
+                                        }
+                                        ?>
+                                    </td>
+                                    <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" <?php echo (array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked': ''); ?>></td>
+                                </tr>
+                                <?php
+                            } else {
+                                ?>
+                                <tr>
+                                    <td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+                                        <?php
+                                        if( isset($data['description']) && $data['description'] ){
+                                            ?>
+                                            <br><?php echo $data['description']; ?>
+                                            <?php
+                                        }
+                                        ?>
+                                    </td>
+                                    <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" value="<?php echo (array_key_exists($data['name'], $cfip_settings)?$cfip_settings[$data['name']]: ''); ?>"></td>
+                                </tr>
+                                <?php
+                            }
+                        }
+                    }
+                    ?>
+                </tbody>
+            </table>
+            <?php wp_nonce_field('cfip_settings_nonce', 'cfip_settings_nonce'); ?>
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <div class="tab-panel" id="tab2">
+        <div id="log_screen">
+            <pre>
+            <?php
+                $cfip_log = get_site_option('cfip_log')?:array();
+                if( $cfip_log ){
+                    foreach( $cfip_log as $entry ){
+                        print_r($entry);
+                    }
+                }
+            ?>
+            </pre>
+        </div>
+    </div>
+</section>
 <?php

@@ -60,21 +60,134 @@ class CFIPBlacklist
 
 		// Hooks
 		add_action('admin_enqueue_scripts', array($this, 'adminEnqueueScripts'), 40, 1);
+
+		// IP Blacklist
 		add_action('wp_authenticate', array($this, 'checkUserLoginName'), 10, 1);
 		add_action('wp_ajax_cfip_unblacklist_ip', array($this, 'ajaxUnblacklistIP'));
+
+		// Cache Clear on scheduled sale end (may update to use suggested actions).
+		add_action( 'delete_transient_wc_products_onsale', array($this, 'clearCacheScheduledSaleEnd'), 90, 1 );
+
+		// Cache Clear on product out-of-stock.
+		add_action( 'woocommerce_no_stock_notification', array($this, 'clearCacheProductOutOfStock'), 40, 1 );
 	}
 
 	/**
 	 * Enqueue admin scripts and stylesheets.
 	 *
+	 * @param $hook string
 	 */
 	public function adminEnqueueScripts($hook)
 	{
+		// Only enqueue on appropriate admin screen.
 		if( $hook !== 'toplevel_page_cfip-menu' )
 			return;
 
 		wp_enqueue_style('cfip_admin_style', $this->adminStyle );
 		wp_enqueue_script('cfip_admin_script', $this->adminScript, array('jquery') );
+	}
+
+	/**
+	 * Function that triggers a cache-clear for all product and
+	 * category endpoints when a scheduled sale ends.
+	 *
+	 * @param $transient string
+	 */
+	public function clearCacheScheduledSaleEnd($transient)
+	{
+		// If the option is disabled, bail.
+		if( !($this->getSetting('after_scheduled_sale') == 'on') )
+			return;
+
+		$files = $this->getAllProductAndCategoryURLs();
+		$results = $this->API->clearCacheByFiles($files);
+		$this->log($results);
+	}
+
+	/**
+	 * Function that triggers a cache-clear for a product and
+	 * its category endpoints when it crosses the Out-of-Stock
+	 * threshold.
+	 *
+	 * @param $product WC_Product
+	 */
+	public function clearCacheProductOutOfStock($product)
+	{
+		// If the option is disabled, bail.
+		if( !($this->getSetting('when_product_out_of_stock') == 'on') )
+			return;
+
+		$files = $this->getProductAndCategoryURLs($product);
+		$results = $this->API->clearCacheByFiles($files);
+		$this->log($results);
+	}
+
+	/**
+	 * Get product and category URLs for given product.
+	 *
+	 * @param $product WC_Product
+	 * @return array
+	 */
+	public function getProductAndCategoryURLs($product)
+	{
+		// Array to hold all product and category URLs
+		$files = array();
+
+		// Add product and category permalinks to $files array, skipping dupes.
+		$prod_id = $product->get_id();
+		$terms = get_the_terms( $prod_id, 'product_cat' );
+		if( $terms ){
+			foreach ($terms as $term) {
+				$product_cat_id = $term->term_id;
+				$cat_url = get_term_link( (int)$product_cat_id, 'product_cat' );
+				if( $cat_url && !in_array($cat_url, $files) )
+					$files[] = $cat_url;
+			}
+		}
+
+		$product_url = get_permalink($prod_id);
+		if( $product_url && !in_array($product_url, $files) )
+			$files[] = $product_url;
+
+		return $files;
+	}
+
+	/**
+	 * Get all product and category URLs
+	 *
+	 * @return array
+	 */
+	public function getAllProductAndCategoryURLs()
+	{
+		// Array to hold all product and category URLs
+		$files = array();
+
+		// Get all published products.
+		$args = array(
+			"status" => "publish",
+			"limit" => -1
+		);
+		$products = wc_get_products($args);
+
+		// Add product and category permalinks to $files array, skipping dupes.
+		foreach( $products as $product ){
+			$prod_id = $product->get_id();
+			$terms = get_the_terms( $prod_id, 'product_cat' );
+			if( $terms ){
+				foreach ($terms as $term) {
+					$product_cat_id = $term->term_id;
+					$cat_url = get_term_link( (int)$product_cat_id, 'product_cat' );
+					if( $cat_url && !in_array($cat_url, $files) )
+						$files[] = $cat_url;
+				}
+			}
+
+			$product_url = get_permalink($prod_id);
+			if( $product_url && !in_array($product_url, $files) )
+				$files[] = $product_url;
+		}
+
+		return $files;
 	}
 
 	/**
@@ -86,7 +199,7 @@ class CFIPBlacklist
 	public function checkUserLoginName( $username )
 	{
 		// If IP Blacklisting is disabled, bail.
-		if( !$this->getSetting('enable_ip_blacklist') == 'on' )
+		if( !($this->getSetting('enable_ip_blacklist') == 'on') )
 			return;
 
 		$banned_usernames = explode(', ', $this->getSetting('banned_usernames'));
@@ -131,9 +244,6 @@ class CFIPBlacklist
 			if (array_key_exists($key, $_SERVER) === true){
 				foreach (explode(',', $_SERVER[$key]) as $IP){
 					$IP = trim($IP);
-//					if (filter_var($IP, FILTER_VALIDATE_IP) !== false){
-//						return $IP;
-//					}
 					if (filter_var($IP, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false){
 						return $IP;
 					}
@@ -192,6 +302,7 @@ class CFIPBlacklist
 	{
 		$sites = get_sites();
 		$domains = array();
+
 		// Loop through and get all domains; we'll use each of these in API call to blacklist IP.
 		foreach( $sites as $site ){
 			$domains[] = $site->domain;
