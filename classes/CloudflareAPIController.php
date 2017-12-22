@@ -37,6 +37,14 @@ class CloudflareAPIController
 	 */
 	public function request( $method, $url, $body=null )
 	{
+		// Log request
+		$this->log("Timestamp: ".current_time('mysql'));
+		$this->log("Method: ".$method);
+		$this->log("URL: ".$url);
+		if( $body ){
+			$this->log(json_decode($body));
+		}
+
 		// Get credentials from plugin settings.
 		$key = $this->getSetting('cf_key');
 		$email = $this->getSetting('cf_email');
@@ -75,8 +83,11 @@ class CloudflareAPIController
 
 		// Handle errors
 		if( !$result->success && $result->errors ) {
-			$this->log($result);
+			$this->log("Response (Error):");
+		} else {
+			$this->log("Response (Success):");
 		}
+		$this->log($result);
 
 		return $result;
 	}
@@ -152,12 +163,25 @@ class CloudflareAPIController
 		$urls = array();
 
 		foreach( $files as $file ){
-			// Limit body to 30 URLs per request.
-			if( $count%30 != 0 ) {
+
+			if( count($files) == $count+1 ){
+				// If this is the last file, add it and make the request.
+				$urls[] = $file;
+
+				// Add $urls array to body argument.
+				$body = json_encode(array(
+					"files" => $urls
+				));
+
+				// Make request.
+				$result = $this->request("DELETE", $url, $body);
+				$results[] = $result;
+			} else if( $count%30 != 0 ) {
+				// Limit body to 30 URLs per request.
 				$urls[] = $file;
 				$count++;
 			} else {
-				// Add $urls array to body argument.
+				// Maximum payload, add $urls array to body argument and make request.
 				$body = json_encode(array(
 					"files" => $urls
 				));

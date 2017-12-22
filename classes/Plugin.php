@@ -63,13 +63,16 @@ class CFIPBlacklist
 
 		// IP Blacklist
 		add_action('wp_authenticate', array($this, 'checkUserLoginName'), 10, 1);
-		add_action('wp_ajax_cfip_unblacklist_ip', array($this, 'ajaxUnblacklistIP'));
 
 		// Cache Clear on scheduled sale end (may update to use suggested actions).
 		add_action( 'delete_transient_wc_products_onsale', array($this, 'clearCacheScheduledSaleEnd'), 90, 1 );
 
 		// Cache Clear on product out-of-stock.
 		add_action( 'woocommerce_no_stock_notification', array($this, 'clearCacheProductOutOfStock'), 40, 1 );
+
+		// AJAX requests
+		add_action('wp_ajax_cfip_unblacklist_ip', array($this, 'ajaxUnblacklistIP'));
+		add_action('wp_ajax_cfip_clearlog', array($this, 'ajaxClearLog'));
 	}
 
 	/**
@@ -101,7 +104,6 @@ class CFIPBlacklist
 
 		$files = $this->getAllProductAndCategoryURLs();
 		$results = $this->API->clearCacheByFiles($files);
-		$this->log($results);
 	}
 
 	/**
@@ -119,7 +121,6 @@ class CFIPBlacklist
 
 		$files = $this->getProductAndCategoryURLs($product);
 		$results = $this->API->clearCacheByFiles($files);
-		$this->log($results);
 	}
 
 	/**
@@ -316,13 +317,18 @@ class CFIPBlacklist
 	 */
 	public function ajaxUnblacklistIP()
 	{
-		$ip_address = preg_replace(array('/\s{2,}/', '/[\t\n]/'), '', $_POST['ip_address']);
-
 		$response = array(
 			'result' => '',
-			'errors' => array(),
-			'ip' => $ip_address
+			'errors' => array()
 		);
+
+		if( !isset($_POST['ip_address']) || !$_POST['ip_address']){
+			$response['errors'][] = array('error' => 'No IP address provided.');
+			wp_die(json_encode($response));
+		}
+
+		$ip_address = preg_replace(array('/\s{2,}/', '/[\t\n]/'), '', $_POST['ip_address']);
+		$response['ip'] = $ip_address;
 
 		$banned_IPs = $this->getBannedIPs();
 		foreach( $banned_IPs as $ip => $data ){
@@ -343,6 +349,23 @@ class CFIPBlacklist
 			$response['result'] = 'success';
 		}
 
+		wp_die(json_encode($response));
+	}
+
+	public function ajaxClearLog()
+	{
+		$response = array();
+		if(!isset($_POST['clear_log']) || !$_POST['clear_log']){
+			$response['error'] = 'An error occurred.';
+			wp_die(json_encode($response));
+		}
+
+		if( !update_site_option('cfip_log', array()) ){
+			$response['error'] = array('error' => 'Failed to clear log.');
+			wp_die(json_encode($response));
+		}
+
+		$response['result'] = 'success';
 		wp_die(json_encode($response));
 	}
 

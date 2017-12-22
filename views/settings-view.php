@@ -173,11 +173,14 @@ $settings = array(
                 if( $cfip_log ){
                     foreach( $cfip_log as $entry ){
                         print_r($entry);
+                        echo "<br>";
                     }
                 }
             ?>
             </pre>
         </div>
+        <button id="clear_log_button" class="button button-primary">Clear Log</button>
+        <div id="cfip_ajax_res_clearlog"></div>
     </div>
 </section>
 <?php

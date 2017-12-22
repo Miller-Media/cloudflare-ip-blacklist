@@ -43,6 +43,46 @@ jQuery(document).ready(function(){
         });
     });
 
+    jQuery("#clear_log_button").on('click', function(e){
+
+        e.preventDefault();
+
+        var $response = jQuery("#cfip_ajax_res_clearlog");
+        $response.fadeIn();
+        $response.text('Clearing log...');
+
+        var data = {
+            action: 'cfip_clearlog',
+            clear_log: true
+        };
+        jQuery.ajax({
+            url: ajaxurl,
+            type: 'post',
+            data: data,
+            success: function( data ){
+                data = JSON.parse(data);
+
+                // If the request was successful but the API returned an error.
+                if( data.errors && data.errors.length > 0 ) {
+                    $response.text("There was an error.");
+                    return;
+                }
+
+                // Clear log on front end.
+                jQuery('#log_screen').text("");
+
+                $response.text("Log cleared..");
+                setTimeout(function(){
+                    $response.fadeOut();
+                }, 1500);
+            },
+            error: function(errorThrown){
+                console.log('There was an error');
+                console.log(errorThrown);
+            }
+        });
+    });
+
     // Tabs
     jQuery('.tab-panel').fadeIn();
     jQuery('.tabgroup > div').hide();

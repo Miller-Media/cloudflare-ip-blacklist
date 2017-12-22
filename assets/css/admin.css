@@ -7,12 +7,19 @@ input[type="text"]{
 .cfip_ajax_btn {
     margin-left: 10px;
 }
-
-/* Tabs */
 #log_screen {
     padding: 20px;
     background: #dedede;
+    width: 800px;
+    height: 600px;
+    overflow: scroll;
 }
+#clear_log_button {
+    display: block;
+    margin-top: 20px;
+}
+
+/* Tabs */
 .tabs.clearfix {
     margin-bottom: 0;
 }
