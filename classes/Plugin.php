@@ -64,8 +64,8 @@ class CFIPBlacklist
 		// IP Blacklist
 		add_action('wp_authenticate', array($this, 'checkUserLoginName'), 10, 1);
 
-		// Cache Clear on scheduled sale end (may update to use suggested actions).
-		add_action( 'delete_transient_wc_products_onsale', array($this, 'clearCacheScheduledSaleEnd'), 90, 1 );
+		// Cache Clear on scheduled sale end.
+		add_action( 'wc_after_products_ending_sales', array($this, 'clearCacheScheduledSaleEnd'), 90, 1 );
 
 		// Cache Clear on product out-of-stock.
 		add_action( 'woocommerce_no_stock_notification', array($this, 'clearCacheProductOutOfStock'), 40, 1 );
@@ -94,9 +94,9 @@ class CFIPBlacklist
 	 * Function that triggers a cache-clear for all product and
 	 * category endpoints when a scheduled sale ends.
 	 *
-	 * @param $transient string
+	 * @param $product_ids
 	 */
-	public function clearCacheScheduledSaleEnd($transient)
+	public function clearCacheScheduledSaleEnd($product_ids)
 	{
 		// If the option is disabled, bail.
 		if( !($this->getSetting('after_scheduled_sale') == 'on') )
