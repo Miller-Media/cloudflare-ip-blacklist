@@ -39,6 +39,12 @@ $settings = array(
                 'description' => ''
 			),
 			array(
+				'name' => 'applicable_domains',
+				'type' => 'textarea',
+				'title' => 'Applicable Cloudflare Domains',
+				'description' => '(omit subdomains, e.g. example.com, website.com, etc)'
+			),
+			array(
 				'name' => 'banned_usernames',
 				'type' => 'textarea',
 				'title' => 'Banned Usernames',

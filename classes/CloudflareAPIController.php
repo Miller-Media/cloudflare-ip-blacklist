@@ -105,6 +105,9 @@ class CloudflareAPIController
 		$zone_ids = $this->getZoneIDs();
 		$results = array();
 		foreach( $zone_ids as $zone_id ){
+			if( !$zone_id )
+				continue;
+
 			$url = $this->url . "zones/$zone_id/firewall/access_rules/rules/";
 			$body = json_encode(array(
 				'mode' => 'block',
@@ -220,12 +223,12 @@ class CloudflareAPIController
 	 */
 	public function getZoneIDs()
 	{
-		$domains = $this->getMultisiteDomains();
+		$domains = $this->getDomains();
 		$zone_ids = array();
 		foreach( $domains as $domain ){
 			$url = $this->url . "zones?name=$domain";
 			$result = $this->request("GET", $url);
-			if( !$result->errors )
+			if( !$result->errors && $result->result )
 				$zone_ids[] = $result->result[0]->id;
 		}
 		return $zone_ids;
@@ -286,6 +289,17 @@ class CloudflareAPIController
 	}
 
 	/**
+	 * Get domains defined in plugin settings.
+	 * Domains should not include subdomains or 'www', etc.
+	 *
+	 * @return array
+	 */
+	public function getDomains()
+	{
+		return explode(', ', $this->getSetting('applicable_domains'));
+	}
+
+	/**
 	 * Get domains for each site on the multisite network.
 	 *
 	 * @return array|int
@@ -296,15 +310,20 @@ class CloudflareAPIController
 		$domains = array();
 		// Loop through and get all domains; we'll use each of these in API call to blacklist IP.
 		foreach( $sites as $site ){
-			$domains[] = $site->domain;
+			$domains[] = str_replace('www.', '', $site->domain);
 		}
 		return $domains;
 	}
 
+	/**
+	 * Get domain for current site.
+	 *
+	 * @return string
+	 */
 	public function getCurrentSiteDomain()
 	{
 		$site = get_current_site();
-		$domain = $site->domain;
+		$domain = str_replace('www.', '', $site->domain);
 		return $domain;
 	}
 }
