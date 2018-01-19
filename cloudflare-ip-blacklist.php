@@ -6,7 +6,7 @@
  * Author: Michael Robinson
  * Author URI:
  * Depends:
- * Version: 0.1.3
+ * Version: 0.1.4
  */
 
 include_once('classes/Plugin.php');

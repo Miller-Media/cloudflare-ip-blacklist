@@ -310,7 +310,7 @@ class CloudflareAPIController
 		$domains = array();
 		// Loop through and get all domains; we'll use each of these in API call to blacklist IP.
 		foreach( $sites as $site ){
-			$domains[] = str_replace('www.', '', $site->domain);
+			$domains[] = str_replace('store.', '', str_replace('www.', '', $site->domain));
 		}
 		return $domains;
 	}
@@ -323,7 +323,7 @@ class CloudflareAPIController
 	public function getCurrentSiteDomain()
 	{
 		$site = get_current_site();
-		$domain = str_replace('www.', '', $site->domain);
+		$domain = str_replace('store.', '', str_replace('www.', '', $site->domain));
 		return $domain;
 	}
 }

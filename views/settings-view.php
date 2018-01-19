@@ -72,6 +72,12 @@ $settings = array(
 				'type' => 'checkbox',
 				'title' => 'When Product Goes Out of Stock',
 				'description' => ''
+			),
+			array(
+				'name' => 'when_sitewide_notice_updated',
+				'type' => 'checkbox',
+				'title' => 'When Sitewide Store Notice is Updated',
+				'description' => ''
 			)
 		)
 	),

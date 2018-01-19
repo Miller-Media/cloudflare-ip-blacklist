@@ -103,6 +103,7 @@ class CFIPSettings
 			// Cache Clearing settings
 			$settings['after_scheduled_sale'] = isset($_POST['after_scheduled_sale']) ? $_POST['after_scheduled_sale'] : '';
 			$settings['when_product_out_of_stock'] = isset($_POST['when_product_out_of_stock']) ? $_POST['when_product_out_of_stock'] : '';
+			$settings['when_sitewide_notice_updated'] = isset($_POST['when_sitewide_notice_updated']) ? $_POST['when_sitewide_notice_updated'] : '';
 
 			if( update_site_option('cfip_settings', $settings) )
 				return true;
