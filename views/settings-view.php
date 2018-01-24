@@ -64,7 +64,7 @@ $settings = array(
 			array(
 				'name' => 'after_scheduled_sale',
 				'type' => 'checkbox',
-				'title' => 'After Scheduled Sale',
+				'title' => 'After Scheduled Sale (requires WooCommerce 3.3.0+)',
 				'description' => ''
 			),
 			array(
