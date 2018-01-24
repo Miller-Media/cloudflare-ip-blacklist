@@ -1,5 +1,20 @@
 <?php
 
+// Get API email and key from CloudFlare plugin settings, if available.
+$sites = get_sites();
+$cf_key = null;
+$cf_email = null;
+foreach( $sites as $site ){
+	switch_to_blog($site->blog_id);
+	$cf_key = get_option('cloudflare_api_key', null);
+	$cf_email = get_option('cloudflare_api_email', null);
+	restore_current_blog();
+
+	// If we retrieved a key and email, we're done.
+	if( $cf_key && $cf_email )
+		break;
+}
+
 // Populate options array with banned IP addresses.
 $banned_IPs = get_site_option('cfip_banned_addresses') ?: array();
 $options = array();
@@ -20,13 +35,15 @@ $settings = array(
 				'name' => 'cf_email',
 				'type' => 'text',
 				'title' => 'Email Address',
-				'description' => ''
+				'description' => '',
+                'value' => $cf_email
 			),
 			array(
 				'name' => 'cf_key',
 				'type' => 'text',
 				'title' => 'API Key',
-				'description' => ''
+				'description' => '',
+				'value' => $cf_key
 			)
 		)
 	),
@@ -164,7 +181,7 @@ $settings = array(
                                         }
                                         ?>
                                     </td>
-                                    <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" value="<?php echo (array_key_exists($data['name'], $cfip_settings)?$cfip_settings[$data['name']]: ''); ?>"></td>
+                                    <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" value="<?php echo (array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']]:($data['value'] ?: '')); ?>"></td>
                                 </tr>
                                 <?php
                             }
