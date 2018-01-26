@@ -1,0 +1,14 @@
+{
+  "name": "miller-media/cloudflare-ip-blacklist",
+  "description": "Blacklist IP addresses that attempt to login with a banned username.",
+  "version": "0.1.5",
+  "type": "wordpress-plugin",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Miller Media",
+      "email": "support@miller-media.com"
+    }
+  ],
+  "require": {}
+}
