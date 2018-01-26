@@ -411,6 +411,9 @@ class CFIPBlacklist
                 		continue;
 
                     $request_id = $zone_data['request_id'];
+                    if( !$request_id )
+                    	continue;
+                    
                     $r = $this->API->deleteBlacklistedIP($zone_id, $request_id);
                     if (!$r->success && $r->errors) {
                         foreach ($r->errors as $error){
