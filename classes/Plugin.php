@@ -407,11 +407,16 @@ class CFIPBlacklist
         foreach ($banned_IPs as $ip => $data) {
             if ($ip == $ip_address) {
                 foreach ($data['zones'] as $zone_id => $zone_data) {
+                	if( !$zone_id )
+                		continue;
+
                     $request_id = $zone_data['request_id'];
                     $r = $this->API->deleteBlacklistedIP($zone_id, $request_id);
                     if (!$r->success && $r->errors) {
-                        foreach ($r->errors as $error)
-                            $response['errors'][] = array ($error->code => $error->message);
+                        foreach ($r->errors as $error){
+                        	if( !in_array($error->code, array(1003, 7000)) )
+	                            $response['errors'][] = array ($error->code => $error->message);
+                        }
                     }
                 }
             }
