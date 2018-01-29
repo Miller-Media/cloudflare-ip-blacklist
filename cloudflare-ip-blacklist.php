@@ -6,7 +6,7 @@
  * Author: Michael Robinson
  * Author URI:
  * Depends:
- * Version: 0.1.6
+ * Version: 0.1.7
  */
 
 /** Detect if WooCommerce version is at least 3.3.0 (required for a couple of hooks).
