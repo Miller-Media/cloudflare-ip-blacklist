@@ -106,7 +106,7 @@ class CFIPBlacklist
             return;
 
         $files = $this->getAllProductAndCategoryURLs();
-        $results = $this->API->clearCacheByFiles($files);
+        $this->API->clearCacheByFiles($files);
     }
 
     /**
@@ -123,7 +123,7 @@ class CFIPBlacklist
             return;
 
         $files = $this->getProductAndCategoryURLs($product);
-        $results = $this->API->clearCacheByFiles($files);
+        $this->API->clearCacheByFiles($files);
     }
 
     /**
@@ -151,17 +151,17 @@ class CFIPBlacklist
 
         // Clear cache.
         $files = $this->getAllURLs();
-        $results = $this->API->clearCacheByFiles($files);
+	    $this->API->clearCacheByFiles($files);
 
         return $option;
     }
 
-    /**
-     * Get product and category URLs for given product.
-     *
-     * @param $product WC_Product
-     * @return array
-     */
+	/**
+	 * Get product and category URLs for given product.
+	 *
+	 * @param $product WC_Product
+	 * @return array
+	 */
     public function getProductAndCategoryURLs ($product)
     {
         // Array to hold all product and category URLs
@@ -186,11 +186,11 @@ class CFIPBlacklist
         return $files;
     }
 
-    /**
-     * Get all product and category URLs
-     *
-     * @return array
-     */
+	/**
+	 * Get all product and category URLs
+	 *
+	 * @return array
+	 */
     public function getAllProductAndCategoryURLs ()
     {
         // Array to hold all product and category URLs
@@ -205,6 +205,9 @@ class CFIPBlacklist
 
         // Add product and category permalinks to $files array, skipping dupes.
         foreach ($products as $product) {
+	        /**
+	         * @var $product WC_Product
+	         */
             $prod_id = $product->get_id();
             $terms = get_the_terms($prod_id, 'product_cat');
             if ($terms) {
@@ -224,11 +227,11 @@ class CFIPBlacklist
         return $files;
     }
 
-    /**
-     * Get all URLs for a site, including product and category URLs.
-     *
-     * @return array
-     */
+	/**
+	 * Get all URLs for a site, including product and category URLs.
+	 *
+	 * @return array
+	 */
     public function getAllURLs ()
     {
         $urls = $this->getAllProductAndCategoryURLs();

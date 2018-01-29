@@ -241,7 +241,7 @@ class CloudflareAPIController
 	 */
 	public function getZoneId()
 	{
-		$domain = $this->getCurrentSiteDomain();
+		$domain = $this->getCurrentSiteDomain( get_current_blog_id() );
 		$url = $this->url . "zones?name=$domain";
 		$result = $this->request("GET", $url);
 		if( $result->errors || !$result->result ){
@@ -310,7 +310,7 @@ class CloudflareAPIController
 		$domains = array();
 		// Loop through and get all domains; we'll use each of these in API call to blacklist IP.
 		foreach( $sites as $site ){
-			$domains[] = str_replace('store.', '', str_replace('www.', '', $site->domain));
+			$domains[] = $site->domain;
 		}
 		return $domains;
 	}
@@ -318,12 +318,23 @@ class CloudflareAPIController
 	/**
 	 * Get domain for current site.
 	 *
+	 * @param $blog_id
 	 * @return string
 	 */
-	public function getCurrentSiteDomain()
+	public function getCurrentSiteDomain($blog_id)
 	{
-		$site = get_current_site();
-		$domain = str_replace('store.', '', str_replace('www.', '', $site->domain));
-		return $domain;
+		$sites = get_sites( array( 'site__in' => array($blog_id) ) );
+		$domain = $sites[0]->domain;
+		$base_domain = '';
+		$applicable_domains = $this->getDomains();
+
+		// Extract base domain (sans any subdomain) according to applicable_domains setting.
+		foreach($applicable_domains as $ad){
+			if( strpos($domain, $ad) ){
+				$base_domain = $ad;
+				break;
+			}
+		}
+		return $base_domain;
 	}
 }
