@@ -102,7 +102,7 @@ $settings = array(
 ?>
 <ul class="tabs clearfix" data-tabgroup="first-tab-group">
     <li><a href="#tab1" class="active">Settings</a></li>
-    <li><a href="#tab2">Log</a></li>
+    <li><a href="#tab2" class="log_tab">Log</a></li>
 </ul>
 <section id="first-tab-group" class="tabgroup">
     <div class="tab-panel" id="tab1">
@@ -196,17 +196,7 @@ $settings = array(
     </div>
     <div class="tab-panel" id="tab2">
         <div id="log_screen">
-            <pre>
-            <?php
-                $cfip_log = get_site_option('cfip_log')?:array();
-                if( $cfip_log ){
-                    foreach( $cfip_log as $entry ){
-                        print_r($entry);
-                        echo "<br>";
-                    }
-                }
-            ?>
-            </pre>
+            <pre></pre>
         </div>
         <button id="clear_log_button" class="button button-primary">Clear Log</button>
         <div id="cfip_ajax_res_clearlog"></div>

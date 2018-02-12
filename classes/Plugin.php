@@ -76,6 +76,7 @@ class CFIPBlacklist
         // AJAX requests
         add_action('wp_ajax_cfip_unblacklist_ip', array ($this, 'ajaxUnblacklistIP'));
         add_action('wp_ajax_cfip_clearlog', array ($this, 'ajaxClearLog'));
+	    add_action('wp_ajax_cfip_loadlog', array ($this, 'ajaxLoadLog'));
     }
 
     /**
@@ -105,8 +106,7 @@ class CFIPBlacklist
         if (!($this->getSetting('after_scheduled_sale') == 'on'))
             return;
 
-        $files = $this->getAllProductAndCategoryURLs();
-        $this->API->clearCacheByFiles($files);
+        $this->API->purgeCache();
     }
 
     /**
@@ -150,8 +150,7 @@ class CFIPBlacklist
         update_option('cfip_previous_store_notice', $option);
 
         // Clear cache.
-        $files = $this->getAllURLs();
-	    $this->API->clearCacheByFiles($files);
+	    $this->API->purgeCache();
 
         return $option;
     }
@@ -436,6 +435,30 @@ class CFIPBlacklist
         wp_die(json_encode($response));
     }
 
+	/**
+	 * Load/refresh log via AJAX when log tab is opened.
+	 *
+	 */
+    public function ajaxLoadLog ()
+    {
+    	$response = array('log' => array());
+	    $cfip_log = get_site_option('cfip_log')?:array();
+	    if( $cfip_log ){
+		    foreach( $cfip_log as $entry ){
+		    	ob_start();
+			    print_r(PHP_EOL);
+		    	print_r($entry);
+		    	$response['log'][] = ob_get_clean();
+		    }
+	    }
+
+	    wp_die(json_encode($response));
+    }
+
+	/**
+	 * Clear log via AJAX.
+	 *
+	 */
     public function ajaxClearLog ()
     {
         $response = array ();

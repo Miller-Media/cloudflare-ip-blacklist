@@ -37,13 +37,22 @@ class CloudflareAPIController
 	 */
 	public function request( $method, $url, $body=null )
 	{
+		$log = array(
+			'Request' => array(),
+			'Response' => array(),
+			'Errors' => array(),
+		);
 		// Log request
-		$this->log("Timestamp: ".current_time('mysql'));
-		$this->log("Method: ".$method);
-		$this->log("URL: ".$url);
+		$request_log = array(
+			"Timestamp: "   => current_time('mysql'),
+			"Method: "      => $method,
+			"URL: "         => $url
+		);
 		if( $body ){
-			$this->log(json_decode($body));
+			$request_log['Body: '] = $body;
 		}
+
+		$log['Request'] = $request_log;
 
 		// Get credentials from plugin settings.
 		$key = $this->getSetting('cf_key');
@@ -83,11 +92,12 @@ class CloudflareAPIController
 
 		// Handle errors
 		if( !$result->success && $result->errors ) {
-			$this->log("Response (Error):");
+			$log['Errors'] = $result;
 		} else {
-			$this->log("Response (Success):");
+			$log['Response'] = $result;
 		}
-		$this->log($result);
+
+		$this->log($log);
 
 		return $result;
 	}
@@ -139,6 +149,31 @@ class CloudflareAPIController
 	{
 		$url = $this->url . "zones/$zone_id/firewall/access_rules/rules/$rule_id";
 		$result = $this->request("DELETE", $url);
+		return $result;
+	}
+
+	/**
+	 * Purge all caches.
+	 *
+	 * @return array|bool
+	 */
+	public function purgeCache()
+	{
+		// Get zone ID for this site.
+		$zone_id = $this->getZoneId();
+
+		if( !$zone_id )
+			return false;
+
+		// Configure endpoint url with zone id.
+		$url = $this->url . "zones/$zone_id/purge_cache/";
+
+		// Make request
+		$body = json_encode(array(
+			"purge_everything" => true
+		));
+		$result = $this->request("DELETE", $url, $body);
+
 		return $result;
 	}
 
@@ -245,7 +280,6 @@ class CloudflareAPIController
 		$url = $this->url . "zones?name=$domain";
 		$result = $this->request("GET", $url);
 		if( $result->errors || !$result->result ){
-			$this->log($result);
 			return false;
 		}
 

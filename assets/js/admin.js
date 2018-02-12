@@ -3,6 +3,7 @@ jQuery(document).ready(function(){
     var $ubSelect = jQuery('select[name="unblacklist_ip"]');
     $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn' name='cfip_ajax_btn'>Remove From Blacklist</button><div id='cfip_ajax_res_unblacklist'></div>");
 
+    // Clear blacklisted IP AJAX request.
     jQuery("#cfip_ajax_btn").on('click', function(e){
 
         e.preventDefault();
@@ -43,6 +44,7 @@ jQuery(document).ready(function(){
         });
     });
 
+    // Clear log AJAX request.
     jQuery("#clear_log_button").on('click', function(e){
 
         e.preventDefault();
@@ -75,6 +77,43 @@ jQuery(document).ready(function(){
                 setTimeout(function(){
                     $response.fadeOut();
                 }, 1500);
+            },
+            error: function(errorThrown){
+                console.log('There was an error');
+                console.log(errorThrown);
+            }
+        });
+    });
+
+    // View log AJAX request.
+    jQuery(".log_tab").on('click', function(e){
+        console.log('apple');
+
+        e.preventDefault();
+
+        var $response = jQuery("#log_screen > pre");
+        $response.fadeIn();
+        $response.text('Loading log...');
+
+        var data = {
+            action: 'cfip_loadlog',
+            load_log: true
+        };
+        jQuery.ajax({
+            url: ajaxurl,
+            type: 'post',
+            data: data,
+            success: function( data ){
+                data = JSON.parse(data);
+
+                // If the request was successful but the API returned an error.
+                if( data.errors && data.errors.length > 0 ) {
+                    $response.text("There was an error.");
+                    return;
+                }
+
+                // Load log on front end.
+                $response.text(data.log);
             },
             error: function(errorThrown){
                 console.log('There was an error');
