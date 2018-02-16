@@ -99,6 +99,7 @@ class CFIPSettings
 			$settings['enable_ip_blacklist'] = isset($_POST['enable_ip_blacklist']) ? $_POST['enable_ip_blacklist'] : '';
 			$settings['applicable_domains'] = isset($_POST['applicable_domains']) ? sanitize_text_field($_POST['applicable_domains']) : '';
 			$settings['banned_usernames'] = isset($_POST['banned_usernames']) ? sanitize_text_field($_POST['banned_usernames']) : '';
+			$settings['zone_ids'] = array();
 
 			// Cache Clearing settings
 			$settings['after_scheduled_sale'] = isset($_POST['after_scheduled_sale']) ? $_POST['after_scheduled_sale'] : '';

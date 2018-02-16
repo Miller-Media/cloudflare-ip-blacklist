@@ -37,22 +37,14 @@ class CloudflareAPIController
 	 */
 	public function request( $method, $url, $body=null )
 	{
-		$log = array(
-			'Request' => array(),
-			'Response' => array(),
-			'Errors' => array(),
-		);
 		// Log request
-		$request_log = array(
-			"Timestamp: "   => current_time('mysql'),
-			"Method: "      => $method,
-			"URL: "         => $url
-		);
+		$this->log("=== REQUEST ===");
+		$this->log("Timestamp: ".current_time('mysql'));
+		$this->log("Method: ".$method);
+		$this->log("URL: ".$url);
 		if( $body ){
-			$request_log['Body: '] = $body;
+			$this->log(json_decode($body));
 		}
-
-		$log['Request'] = $request_log;
 
 		// Get credentials from plugin settings.
 		$key = $this->getSetting('cf_key');
@@ -92,12 +84,11 @@ class CloudflareAPIController
 
 		// Handle errors
 		if( !$result->success && $result->errors ) {
-			$log['Errors'] = $result;
+			$this->log("=== RESPONSE (Error) ===");
 		} else {
-			$log['Response'] = $result;
+			$this->log("=== RESPONSE (Success) ===");
 		}
-
-		$this->log($log);
+		$this->log($result);
 
 		return $result;
 	}
@@ -214,7 +205,7 @@ class CloudflareAPIController
 				// Make request.
 				$result = $this->request("DELETE", $url, $body);
 				$results[] = $result;
-			} else if( $count%30 != 0 ) {
+			} else if( $count == 0 || $count%30 != 0 ) {
 				// Limit body to 30 URLs per request.
 				$urls[] = $file;
 				$count++;
@@ -277,13 +268,30 @@ class CloudflareAPIController
 	public function getZoneId()
 	{
 		$domain = $this->getCurrentSiteDomain( get_current_blog_id() );
+
+		// Check for saved zone ID and return, if exists. Saves an API call.
+		$zone_id = null;
+		if( isset( $this->settings['zone_ids'] ) && isset( $this->settings['zone_ids'][$domain] ) ){
+			$zone_id = $this->settings['zone_ids'][$domain];
+		}
+
+		if( $zone_id )
+			return $zone_id;
+
+		// Build URL and make request.
 		$url = $this->url . "zones?name=$domain";
 		$result = $this->request("GET", $url);
 		if( $result->errors || !$result->result ){
 			return false;
 		}
 
-		return $result->result[0]->id;
+		// Get zone ID and update settings for future use.
+		$zone_id = $result->result[0]->id;
+		$settings = get_site_option('cfip_settings');
+		$settings['zone_ids'][$domain] = $zone_id;
+		update_site_option('cfip_settings', $settings);
+
+		return $zone_id;
 	}
 
 	/**

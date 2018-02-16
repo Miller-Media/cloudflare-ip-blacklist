@@ -49,8 +49,7 @@ jQuery(document).ready(function(){
 
         e.preventDefault();
 
-        var $response = jQuery("#cfip_ajax_res_clearlog");
-        $response.fadeIn();
+        var $response = jQuery("#log_screen").find("pre");
         $response.text('Clearing log...');
 
         var data = {
@@ -71,11 +70,11 @@ jQuery(document).ready(function(){
                 }
 
                 // Clear log on front end.
-                jQuery('#log_screen').text("");
+                $response.text("");
 
-                $response.text("Log cleared..");
+                $response.text("Log cleared.");
                 setTimeout(function(){
-                    $response.fadeOut();
+                    $response.text("");
                 }, 1500);
             },
             error: function(errorThrown){
@@ -91,8 +90,7 @@ jQuery(document).ready(function(){
 
         e.preventDefault();
 
-        var $response = jQuery("#log_screen > pre");
-        $response.fadeIn();
+        var $response = jQuery("#log_screen").find("pre");
         $response.text('Loading log...');
 
         var data = {
