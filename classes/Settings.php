@@ -38,7 +38,8 @@ class CFIPSettings
 			'Cloudflare IP Blacklist',
 			'manage_options',
 			'cfip-menu',
-			array($this, 'addNetworkMenuCB')
+			array($this, 'addNetworkMenuCB'),
+			plugin_dir_url(plugin_dir_path(__FILE__)).'assets/media/cf-facebook-card.png'
 		);
 	}
 
