@@ -1,7 +1,7 @@
 jQuery(document).ready(function(){
 
     var $ubSelect = jQuery('select[name="unblacklist_ip"]');
-    $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn' name='cfip_ajax_btn'>Remove From Blacklist</button><div id='cfip_ajax_res_unblacklist'></div>");
+    $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn cf-btn cf-btn--primary' name='cfip_ajax_btn'>Remove From Blacklist</button><div id='cfip_ajax_res_unblacklist'></div>");
 
     // Clear blacklisted IP AJAX request.
     jQuery("#cfip_ajax_btn").on('click', function(e){

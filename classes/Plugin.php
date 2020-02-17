@@ -84,6 +84,20 @@ class CFIPBlacklist
 
         wp_enqueue_style('cfip_admin_style', $this->adminStyle);
         wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'));
+
+        // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
+        if($this->isCloudflarePluginActive()) {
+            wp_enqueue_style('cf-corecss', MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/cf.core.css');
+            wp_enqueue_style('cf-componentscss', MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/components.css');
+            wp_enqueue_style('cf-hackscss', MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/hacks.css');
+        }
+    }
+
+    /**
+     * Check if official Cloudflare Plugin is installed and active
+     */
+    public function isCloudflarePluginActive(){
+        return is_plugin_active( 'cloudflare/cloudflare.php' );
     }
     
     /**

@@ -9,6 +9,9 @@
  * Version: 1.0.0
  */
 
+define('CFIP_PLUGIN_VERSION', '1.0.0');
+define('MAIN_CLOUDFLARE_PLUGIN_DIR', plugins_url().'/cloudflare/');
+
 include_once('classes/Plugin.php');
 
 if(is_multisite())

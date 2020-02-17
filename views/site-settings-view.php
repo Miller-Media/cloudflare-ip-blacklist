@@ -70,6 +70,7 @@ $settings = array(
 </ul>
 <section id="first-tab-group" class="tabgroup">
     <div class="tab-panel" id="tab1">
+        <h1 class="cf-heading cf-heading--1"><span>Settings</span></h1>
         <form name="cfip_settings" method="post" action="">
             <table>
                 <tbody>
@@ -77,7 +78,7 @@ $settings = array(
                     foreach( $settings as $section=>$fields ){
                         ?>
                         <tr class="tr-section-title">
-                            <td><h2><?php echo $section; ?></h2></td>
+                            <td><h2 class="cf-heading cf-heading--2"><?php echo $section; ?></h2></td>
                         </tr>
 
                         <?php
@@ -95,7 +96,7 @@ $settings = array(
                             if( $data['type'] == 'select' ) {
                                 ?>
                                 <tr>
-                                    <td><label for="<?php echo $data['name']; ?>"><strong><?php echo $data['title']; ?></strong></label></td>
+                                    <td><label for="<?php echo $data['name']; ?>"><h3 class="cf-card__title"><?php echo $data['title']; ?></h3></label></td>
                                     <td>
                                         <select id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>">
                                             <?php
@@ -115,11 +116,11 @@ $settings = array(
                             } else if( $data['type'] == 'textarea' ) {
                                 ?>
                                 <tr>
-                                    <td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+                                    <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></h3></label>
                                         <?php
                                         if( isset($data['description']) && $data['description'] ){
                                             ?>
-                                            <br><?php echo $data['description']; ?>
+                                            <span class="cf-card__footer_message"><?php echo $data['description']; ?></span>
                                             <?php
                                         }
                                         ?>
@@ -132,11 +133,11 @@ $settings = array(
                             } else if ( $data['type'] == 'checkbox' ) {
                                 ?>
                                 <tr>
-                                    <td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+                                    <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></h3></label>
                                         <?php
                                         if( isset($data['description']) && $data['description'] ){
                                             ?>
-                                            <br><?php echo $data['description']; ?>
+                                            <span class="cf-card__footer_message"><?php echo $data['description']; ?></span>
                                             <?php
                                         }
                                         ?>
@@ -147,11 +148,11 @@ $settings = array(
                             } else {
                                 ?>
                                 <tr>
-                                    <td><strong><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></strong></label>
+                                    <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></h3></label>
                                         <?php
                                         if( isset($data['description']) && $data['description'] ){
                                             ?>
-                                            <br><?php echo $data['description']; ?>
+                                            <span class="cf-card__footer_message"><?php echo $data['description']; ?></span>
                                             <?php
                                         }
                                         ?>
@@ -166,14 +167,15 @@ $settings = array(
                 </tbody>
             </table>
             <?php wp_nonce_field('cfip_settings_nonce', 'cfip_settings_nonce'); ?>
-            <?php submit_button(); ?>
+            <?php submit_button('Save Changes', 'cf-btn cf-btn--primary'); ?>
         </form>
     </div>
     <div class="tab-panel" id="tab2">
+        <h1 class="cf-heading cf-heading--1"><span>Log</span></h1>
         <div id="log_screen">
             <pre></pre>
         </div>
-        <button id="clear_log_button" class="button button-primary">Clear Log</button>
+        <button id="clear_log_button" class="button button-primary cf-btn cf-btn--primary">Clear Log</button>
         <div id="cfip_ajax_res_clearlog"></div>
     </div>
 </section>
