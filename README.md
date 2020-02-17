@@ -3,7 +3,7 @@
 ![Banner](assets/banner-1544x500.png)  
 Automatically block IP addresses on Cloudflare for users attempting to use certain prohibited usernames.
 
-**Contributors:** [millermedianow](https://profiles.wordpress.org/millermedianow)
+**Contributors:** [millermedianow](https://profiles.wordpress.org/millermedianow)  
 **Tags:** [security](https://wordpress.org/plugins/tags/security), [login](https://wordpress.org/plugins/tags/login), [passwords](https://wordpress.org/plugins/tags/passwords), [profile](https://wordpress.org/plugins/tags/profile), [users](https://wordpress.org/plugins/tags/users)  
 **Tested up to:** 5.3.2  
 **Stable tag:** 1.0.0  
