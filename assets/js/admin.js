@@ -1,6 +1,6 @@
 jQuery(document).ready(function(){
 
-    var $ubSelect = jQuery('select[name="unblacklist_ip"]');
+    var $ubSelect = jQuery('select[name="blacklisted_ips"]');
     $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn cf-btn cf-btn--primary' name='cfip_ajax_btn'>Remove From Blacklist</button><div id='cfip_ajax_res_unblacklist'></div>");
 
     // Clear blacklisted IP AJAX request.
@@ -32,7 +32,7 @@ jQuery(document).ready(function(){
                 }
 
                 // Remove IP Address from select dropdown.
-                jQuery('select[name="unblacklist_ip"] option[value="'+ip_address+'"]').remove();
+                jQuery('select[name="blacklisted_ips"] option[value="'+ip_address+'"]').remove();
 
                 $response.text("IP address successfully removed from blacklist.");
                 console.log(data);
