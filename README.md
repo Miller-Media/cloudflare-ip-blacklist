@@ -1,6 +1,6 @@
 # Cloudflare IP Blacklist
 
-![Banner](assets/banner-1544x500.png)
+![Banner](assets/banner-1544x500.png)  
 Automatically block IP addresses on Cloudflare for users attempting to use certain prohibited usernames.
 
 **Contributors:** [millermedianow](https://profiles.wordpress.org/millermedianow)
