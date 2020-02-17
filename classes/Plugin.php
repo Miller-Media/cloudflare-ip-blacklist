@@ -69,6 +69,9 @@ class CFIPBlacklist
         add_action('wp_ajax_cfip_unblacklist_ip', array ($this, 'ajaxUnblacklistIP'));
         add_action('wp_ajax_cfip_clearlog', array ($this, 'ajaxClearLog'));
 	    add_action('wp_ajax_cfip_loadlog', array ($this, 'ajaxLoadLog'));
+
+        // Add 'Settings' link to plugin page
+        //add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), array ($this, 'cfip_add_action_links'), 10, 5);
     }
 
     /**
@@ -92,6 +95,18 @@ class CFIPBlacklist
             wp_enqueue_style('cf-hackscss', MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/hacks.css');
         }
     }
+
+    /**
+     * Add Links to main WP plugin page
+     */
+    /*public function cfip_add_action_links( $actions ) {
+        $custom_actions = array(
+            'settings' => sprintf( '<a href="%s">%s</a>', admin_url( 'admin.php?page=cfip-menu' ), 'Settings' )
+        );
+
+        // add the links to the front of the actions list
+        return array_merge( $custom_actions, $actions );
+    }*/
 
     /**
      * Check if official Cloudflare Plugin is installed and active

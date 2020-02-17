@@ -41,7 +41,7 @@ $settings = array(
 				'name' => 'banned_usernames',
 				'type' => 'textarea',
 				'title' => 'Banned Usernames',
-				'description' => 'Comma-separated string, e.g. admin, administrator, etc'
+				'description' => 'Comma-separated string, e.g. admin, administrator'
 			)
 		)
 	)
