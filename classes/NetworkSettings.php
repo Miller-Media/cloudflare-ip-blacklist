@@ -5,17 +5,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class CFIPSettings
+ * Class CFIPNetworkSettings
  *
- * Handles setting up the network admin settings menu
- * and screen.
+ * Handles setting up the admin settings menus
+ * and screens.
  *
  */
-class CFIPSettings
+class CFIPNetworkSettings
 {
 
 	/**
-	 * CFIPSettings constructor.
+	 * CFIPNetworkSettings constructor.
 	 *
 	 * Runs on instantiation.
 	 *
@@ -23,12 +23,17 @@ class CFIPSettings
 	public function __construct()
 	{
 		// Hooks
+		// Multi-site Settings Screen
 		add_action('network_admin_menu', array($this, 'addNetworkMenu'));
 		add_action('network_admin_menu', array($this, 'verifyNonce'));
 	}
 
+	public function isCloudflarePluginActive(){
+		return is_plugin_active( 'cloudflare/cloudflare.php' );
+	}
+
 	/**
-	 * Registers the admin menu page.
+	 * Registers the network admin menu page.
 	 *
 	 */
 	public function addNetworkMenu()
@@ -50,16 +55,16 @@ class CFIPSettings
 	 */
 	public function addNetworkMenuCB()
 	{
-		$this->displaySettingsMenu();
+		$this->displayNetworkSettingsMenu();
 	}
 
 	/**
 	 * Include the settings menu template.
 	 *
 	 */
-	public function displaySettingsMenu()
+	public function displayNetworkSettingsMenu()
 	{
-		include_once(plugin_dir_path(plugin_dir_path(__FILE__)).'views/settings-view.php');
+		include_once(plugin_dir_path(plugin_dir_path(__FILE__)).'views/network-settings-view.php');
 	}
 
 	/**
@@ -101,11 +106,6 @@ class CFIPSettings
 			$settings['applicable_domains'] = isset($_POST['applicable_domains']) ? sanitize_text_field($_POST['applicable_domains']) : '';
 			$settings['banned_usernames'] = isset($_POST['banned_usernames']) ? sanitize_text_field($_POST['banned_usernames']) : '';
 			$settings['zone_ids'] = array();
-
-			// Cache Clearing settings
-			$settings['after_scheduled_sale'] = isset($_POST['after_scheduled_sale']) ? $_POST['after_scheduled_sale'] : '';
-			$settings['when_product_out_of_stock'] = isset($_POST['when_product_out_of_stock']) ? $_POST['when_product_out_of_stock'] : '';
-			$settings['when_sitewide_notice_updated'] = isset($_POST['when_sitewide_notice_updated']) ? $_POST['when_sitewide_notice_updated'] : '';
 
 			if( update_site_option('cfip_settings', $settings) )
 				return true;

@@ -3,10 +3,10 @@
  * Plugin Name: Cloudflare IP Blacklist
  * Plugin URI:
  * Description: Blacklist IP addresses that attempt to login with a banned username.
- * Author: Michael Robinson
+ * Author: Miller Media
  * Author URI:
  * Depends:
- * Version: 0.1.10
+ * Version: 1.0.0
  */
 
 /** Detect if WooCommerce version is at least 3.3.0 (required for a couple of hooks).
@@ -54,7 +54,8 @@ function cfip_version_check()
 add_action('network_admin_notices', 'cfip_version_check');
 
 include_once('classes/Plugin.php');
-include_once('classes/Settings.php');
+include_once('classes/NetworkSettings.php');
+include_once('classes/SiteSettings.php');
 include_once('classes/CloudflareAPIController.php');
 
 $CFIPBlacklist = new CFIPBlacklist();

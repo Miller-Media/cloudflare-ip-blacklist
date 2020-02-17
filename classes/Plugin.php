@@ -51,7 +51,8 @@ class CFIPBlacklist
      */
     public function __construct ()
     {
-        $this->settingsPage = new CFIPSettings();
+        $this->settingsPage = is_multisite() ? new CFIPNetworkSettings() : new CFIPSiteSettings();
+        
         $this->API = new CloudflareAPIController();
         $this->settings = get_site_option('cfip_settings');
 
@@ -63,15 +64,6 @@ class CFIPBlacklist
 
         // IP Blacklist
         add_action('wp_authenticate', array ($this, 'checkUserLoginName'), 10, 1);
-
-        // Cache Clear on scheduled sale end.
-        add_action('wc_after_products_ending_sales', array ($this, 'clearCacheScheduledSaleEnd'), 90, 1);
-
-        // Cache Clear on product out-of-stock.
-        add_action('woocommerce_no_stock_notification', array ($this, 'clearCacheProductOutOfStock'), 40, 1);
-
-        // Cache Clear on store notice update.
-        add_action('pre_update_option_woocommerce_demo_store_notice', array ($this, 'clearCacheSitewideStoreNoticeUpdated'), 40, 1);
 
         // AJAX requests
         add_action('wp_ajax_cfip_unblacklist_ip', array ($this, 'ajaxUnblacklistIP'));
@@ -93,177 +85,7 @@ class CFIPBlacklist
         wp_enqueue_style('cfip_admin_style', $this->adminStyle);
         wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'));
     }
-
-    /**
-     * Function that triggers a cache-clear for all product and
-     * category endpoints when a scheduled sale ends.
-     *
-     * @param $product_ids
-     */
-    public function clearCacheScheduledSaleEnd ($product_ids)
-    {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('after_scheduled_sale') == 'on'))
-            return;
-
-        $this->API->purgeCache();
-    }
-
-    /**
-     * Function that triggers a cache-clear for a product and
-     * its category endpoints when it crosses the Out-of-Stock
-     * threshold.
-     *
-     * @param $product WC_Product
-     */
-    public function clearCacheProductOutOfStock ($product)
-    {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('when_product_out_of_stock') == 'on'))
-            return;
-
-        $files = $this->getProductAndCategoryURLs($product);
-        $this->API->clearCacheByFiles($files);
-    }
-
-    /**
-     * Function that triggers a cache-clear for all product and
-     * category endpoints when the sitewide store notice is updated.
-     *
-     * @param $option | string
-     * @return string
-     */
-    public function clearCacheSitewideStoreNoticeUpdated ($option)
-    {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('when_sitewide_notice_updated') == 'on'))
-            return $option;
-
-        // Get old value of store notice.
-        $previous_notice = get_option('cfip_previous_store_notice', '');
-
-        // If the store notice has not changed, bail.
-        if ($option == $previous_notice)
-            return $option;
-
-        // Store new notice as previous notice.
-        update_option('cfip_previous_store_notice', $option);
-
-        // Clear cache.
-	    $this->API->purgeCache();
-
-        return $option;
-    }
-
-	/**
-	 * Get product and category URLs for given product.
-	 *
-	 * @param $product WC_Product
-	 * @return array
-	 */
-    public function getProductAndCategoryURLs ($product)
-    {
-        // Array to hold all product and category URLs
-        $files = array ();
-
-        // Add product and category permalinks to $files array, skipping dupes.
-        $prod_id = $product->get_id();
-        $terms = get_the_terms($prod_id, 'product_cat');
-        if ($terms) {
-            foreach ($terms as $term) {
-                $product_cat_id = $term->term_id;
-                $cat_url = get_term_link((int)$product_cat_id, 'product_cat');
-                if ($cat_url && !in_array($cat_url, $files))
-                    $files[] = $cat_url;
-            }
-        }
-
-        $product_url = get_permalink($prod_id);
-        if ($product_url && !in_array($product_url, $files))
-            $files[] = $product_url;
-
-        return $files;
-    }
-
-	/**
-	 * Get all product and category URLs
-	 *
-	 * @return array
-	 */
-    public function getAllProductAndCategoryURLs ()
-    {
-        // Array to hold all product and category URLs
-        $files = array ();
-
-        // Get all published products.
-        $args = array (
-            "status" => "publish",
-            "limit" => -1
-        );
-        $products = wc_get_products($args);
-
-        // Add product and category permalinks to $files array, skipping dupes.
-        foreach ($products as $product) {
-	        /**
-	         * @var $product WC_Product
-	         */
-            $prod_id = $product->get_id();
-            $terms = get_the_terms($prod_id, 'product_cat');
-            if ($terms) {
-                foreach ($terms as $term) {
-                    $product_cat_id = $term->term_id;
-                    $cat_url = get_term_link((int)$product_cat_id, 'product_cat');
-                    if ($cat_url && !in_array($cat_url, $files))
-                        $files[] = $cat_url;
-                }
-            }
-
-            $product_url = get_permalink($prod_id);
-            if ($product_url && !in_array($product_url, $files))
-                $files[] = $product_url;
-        }
-
-        return $files;
-    }
-
-	/**
-	 * Get all URLs for a site, including product and category URLs.
-	 *
-	 * @return array
-	 */
-    public function getAllURLs ()
-    {
-        $urls = $this->getAllProductAndCategoryURLs();
-
-        $posts = new WP_Query('post_type=any&posts_per_page=-1&post_status=publish');
-        $posts = $posts->posts;
-
-        foreach ($posts as $post) {
-            $permalink = null;
-            switch ($post->post_type) {
-                case 'revision':
-                case 'nav_menu_item':
-                case 'attachment':
-                case 'product':
-                    break;
-                case 'page':
-                    $permalink = get_page_link($post->ID);
-                    break;
-                case 'post':
-                    $permalink = get_permalink($post->ID);
-                    break;
-                default:
-                    $permalink = get_post_permalink($post->ID);
-                    break;
-            }
-            if ($permalink && !in_array($permalink, $urls)) {
-                $urls[] = $permalink;
-            }
-        }
-
-        return $urls;
-    }
-
+    
     /**
      * Check if login name has been blacklisted.
      *

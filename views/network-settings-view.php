@@ -65,7 +65,7 @@ $settings = array(
 				'name' => 'banned_usernames',
 				'type' => 'textarea',
 				'title' => 'Banned Usernames',
-				'description' => '(a comma-separated string, e.g. admin, trimhealthy, etc)'
+				'description' => '(a comma-separated string, e.g. admin, administrator, etc)'
 			),
 			array(
 				'name' => 'unblacklist_ip',
@@ -75,29 +75,7 @@ $settings = array(
 				'options' => $options?: null
 			)
 		)
-	),
-	'Clear Cache' => array(
-		'fields' => array(
-			array(
-				'name' => 'after_scheduled_sale',
-				'type' => 'checkbox',
-				'title' => 'After Scheduled Sale (requires WooCommerce 3.3.0+)',
-				'description' => ''
-			),
-			array(
-				'name' => 'when_product_out_of_stock',
-				'type' => 'checkbox',
-				'title' => 'When Product Goes Out of Stock',
-				'description' => ''
-			),
-			array(
-				'name' => 'when_sitewide_notice_updated',
-				'type' => 'checkbox',
-				'title' => 'When Sitewide Store Notice is Updated',
-				'description' => ''
-			)
-		)
-	),
+	)
 );
 ?>
 <ul class="tabs clearfix" data-tabgroup="first-tab-group">
@@ -115,7 +93,18 @@ $settings = array(
                         <tr class="tr-section-title">
                             <td><h2><?php echo $section; ?></h2></td>
                         </tr>
+
                         <?php
+                        // If Cloudflare credentials are filled out from Cloudflare plugin
+                        if($section=='Cloudflare Credentials' && $this->isCloudflarePluginActive()) {
+                            $cloudflare_admin_url = admin_url()."options-general.php?page=cloudflare";
+                            ?>
+                            <tr>
+                                <td>Credentials imported from <a href="<?php echo $cloudflare_admin_url; ?>">Cloudflare</a> plugin.</td>
+                            </tr>
+                            <?php continue;
+                        }
+
                         foreach( $fields['fields'] as $field=>$data ){
                             if( $data['type'] == 'select' ) {
                                 ?>
