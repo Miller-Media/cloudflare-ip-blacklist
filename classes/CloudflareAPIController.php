@@ -317,6 +317,10 @@ class CloudflareAPIController
 	 */
 	public function log( $message )
 	{
+        $settings = get_site_option('cfip_settings');
+        if( $settings['enable_logging'] !== 'on' )
+            return;
+
 		$log = get_site_option('cfip_log') ?: array();
 		$log[] = $message;
 		update_site_option('cfip_log', $log);

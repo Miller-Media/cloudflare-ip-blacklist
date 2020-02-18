@@ -483,6 +483,9 @@ class CFIPBlacklist
      */
     public function log ($message)
     {
+        if( $this->getSetting('enable_logging') !== 'on' )
+            return;
+
         $log = get_site_option('cfip_log') ?: array ();
         $log[] = $message;
         update_site_option('cfip_log', $log);
