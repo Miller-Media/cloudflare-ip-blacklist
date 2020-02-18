@@ -55,6 +55,12 @@ $settings = array(
 				'title' => 'Enable IP Blacklisting?',
                 'description' => ''
 			),
+            array(
+                'name' => 'enable_logging',
+                'type' => 'checkbox',
+                'title' => 'Enable Logging?',
+                'description' => ''
+            ),
 			array(
 				'name' => 'applicable_domains',
 				'type' => 'textarea',
@@ -195,6 +201,14 @@ $settings = array(
         </form>
     </div>
     <div class="tab-panel" id="tab2">
+        <h1 class="cf-heading cf-heading--1"><span>Log</span></h1>
+        <?php
+        if($cfip_settings['enable_logging']!=='on') {
+           ?>
+        <span class="cf-card__footer_message">Logging is currently disabled. To start logging, enable checkbox on settings tab.</span>
+        <?php
+        }
+        ?>
         <div id="log_screen">
             <pre></pre>
         </div>
