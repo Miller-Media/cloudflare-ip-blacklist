@@ -117,8 +117,8 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     <td>
                                         <select id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>">
                                             <?php
-                                            if ($options) {
-                                                foreach ($options as $name => $val) {
+                                            if ($banned_IPs) {
+                                                foreach ($banned_IPs_list as $name => $val) {
                                                     ?>
                                                     <option name="<?php echo $name; ?>"
                                                             value="<?php echo $val; ?>"><?php echo $val; ?></option>
@@ -205,7 +205,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
     <div class="tab-panel" id="tab2">
         <h1 class="cf-heading cf-heading--1"><span>Log</span></h1>
         <?php
-        if($cfip_settings['enable_logging']) {
+        if($cfip_settings['enable_logging']!=='on') {
             ?>
         <span class="cf-card__footer_message">Logging is currently disabled. To start logging, enable checkbox on settings tab.</span>
             <?php
