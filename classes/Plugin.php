@@ -146,7 +146,7 @@ class CFIPBlacklist
         if(!$zone_id)
             return false;
 
-        return $this->API->blacklistIP( $zone_id, $ip );
+        return array($zone_id => $this->API->blacklistIP( $zone_id, $ip ));
     }
 
     /**
@@ -180,7 +180,7 @@ class CFIPBlacklist
 
         // If an IP address was retrieved, add to site option along with zone/request data and blacklist in Cloudflare.
         if ($ip) {
-            $results = is_multisite() ? $this->multisiteBlacklistIP( $ip ) : (array)$this->singleSiteBlacklistIP( $ip );
+            $results = is_multisite() ? $this->multisiteBlacklistIP( $ip ) : $this->singleSiteBlacklistIP( $ip );
 
             $ip_data = array(
                 $ip => array(
