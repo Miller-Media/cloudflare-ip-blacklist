@@ -9,6 +9,8 @@
  * Version: 1.0.0
  */
 
+// Commit to preserve network settings
+
 define('CFIP_PLUGIN_VERSION', '1.0.0');
 define('MAIN_CLOUDFLARE_PLUGIN_DIR', plugins_url().'/cloudflare/');
 
