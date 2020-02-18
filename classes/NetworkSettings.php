@@ -103,6 +103,7 @@ class CFIPNetworkSettings
 
 			// IP Blacklist Settings
 			$settings['enable_ip_blacklist'] = isset($_POST['enable_ip_blacklist']) ? $_POST['enable_ip_blacklist'] : '';
+            $settings['enable_logging'] = isset($_POST['enable_logging']) ? $_POST['enable_logging'] : '';
 			$settings['applicable_domains'] = isset($_POST['applicable_domains']) ? sanitize_text_field($_POST['applicable_domains']) : '';
 			$settings['banned_usernames'] = isset($_POST['banned_usernames']) ? sanitize_text_field($_POST['banned_usernames']) : '';
 			$settings['zone_ids'] = array();

@@ -67,6 +67,12 @@ $settings = array(
 				'title' => 'Banned Usernames',
 				'description' => '(a comma-separated string, e.g. admin, administrator, etc)'
 			),
+            array(
+                'name' => 'enable_logging',
+                'type' => 'checkbox',
+                'title' => 'Enable Logging?',
+                'description' => ''
+            ),
 			array(
 				'name' => 'unblacklist_ip',
 				'type' => 'select',

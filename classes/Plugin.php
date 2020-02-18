@@ -334,9 +334,11 @@ class CFIPBlacklist
      */
     public function log ($message)
     {
-        $log = get_site_option('cfip_log') ?: array ();
-        $log[] = $message;
-        update_site_option('cfip_log', $log);
+        if ($this->getSetting('enable_logging') == 'on'){
+            $log = get_site_option('cfip_log') ?: array();
+            $log[] = $message;
+            update_site_option('cfip_log', $log);
+        }
     }
 
     /**

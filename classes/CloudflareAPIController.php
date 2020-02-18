@@ -314,9 +314,14 @@ class CloudflareAPIController
 	 */
 	public function log( $message )
 	{
-		$log = get_site_option('cfip_log') ?: array();
-		$log[] = $message;
-		update_site_option('cfip_log', $log);
+        $settings = get_site_option('cfip_settings');
+
+        // Only log if logging is enabled
+        if ($settings('enable_logging') == 'on') {
+            $log = get_site_option('cfip_log') ?: array();
+            $log[] = $message;
+            update_site_option('cfip_log', $log);
+        }
 	}
 
 	/**
