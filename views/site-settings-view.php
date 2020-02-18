@@ -1,13 +1,18 @@
 <?php
-
-// Get API email and key from CloudFlare plugin settings, if available.
-$cloudflare_credentials = $this->areCloudflareCredentialsSet();
-
-$cf_key = $cloudflare_credentials ? $cloudflare_credentials['cf_key'] : '';
-$cf_email = $cloudflare_credentials ? $cloudflare_credentials['cf_email'] : '';
-
 // Get the existing settings.
 $cfip_settings = get_option('cfip_settings') ?: array();
+
+// First, get API email and key from CloudFlare plugin settings, if available.
+if($cloudflare_plugin_credentials = $this->areCloudflarePluginCredentialsSet()){
+    $cf_key = $cloudflare_plugin_credentials['cf_key'];
+    $cf_email = $cloudflare_plugin_credentials['cf_email'];
+} else if($cloudflare_ip_plugin_credentials = (!empty($cfip_settings['cf_key']) && !empty($cfip_settings['cf_email']))){
+    $cf_key = $cfip_settings['cf_key'];
+    $cf_email = $cfip_settings['cf_email'];
+} else {
+    $cf_key = '';
+    $cf_email = '';
+}
 
 // The plugin settings. Add new sections/fields accordingly.
 $settings = array(
@@ -93,105 +98,134 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                 <tbody>
                     <?php
                     foreach( $settings as $section=>$fields ){
-                        ?>
-                        <tr class="tr-section-title">
-                            <td><h2 class="cf-heading cf-heading--2"><?php echo $section; ?></h2></td>
-                        </tr>
-
-                        <?php
-                        // If Cloudflare credentials are filled out from Cloudflare plugin
-                        if($section=='Cloudflare Credentials' && $this->isCloudflarePluginActive() && $cloudflare_credentials) {
-                            $cloudflare_admin_url = admin_url()."options-general.php?page=cloudflare";
+                        /**
+                        * Only display full form if credentials are set
+                        */
+                        if($section=='Cloudflare Credentials' || ($section!=='Cloudflare Credentials' && ($cloudflare_plugin_credentials || $cloudflare_ip_plugin_credentials))) {
                             ?>
-                            <tr>
-                                <td>Credentials imported from <a href="<?php echo $cloudflare_admin_url; ?>">Cloudflare</a> plugin.</td>
+                            <tr class="tr-section-title">
+                                <td><h2 class="cf-heading cf-heading--2"><?php echo $section; ?></h2></td>
                             </tr>
-                            <?php continue;
-                        }
 
-                        foreach( $fields['fields'] as $field=>$data ){
-                            if( $data['type'] == 'select' ) {
+                            <?php
+                            // If Cloudflare credentials are filled out from Cloudflare plugin
+                            if($section=='Cloudflare Credentials' && $this->isCloudflarePluginActive() && $cloudflare_plugin_credentials) {
+                                $cloudflare_admin_url = admin_url()."options-general.php?page=cloudflare";
                                 ?>
                                 <tr>
-                                    <td><label for="<?php echo $data['name']; ?>"><h3 class="cf-card__title"><?php echo $data['title']; ?></h3></label></td>
-                                    <td>
-                                        <select id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>">
-                                            <?php
-                                            if ($banned_IPs) {
-                                                foreach ($banned_IPs_list as $name => $val) {
-                                                    ?>
-                                                    <option name="<?php echo $name; ?>"
-                                                            value="<?php echo $val; ?>"><?php echo $val; ?></option>
-                                                    <?php
+                                    <td>Credentials imported from <a href="<?php echo $cloudflare_admin_url; ?>">Cloudflare</a> plugin.</td>
+                                </tr>
+                                <?php continue;
+                            }
+
+
+                            foreach ($fields['fields'] as $field => $data) {
+                                if ($data['type'] == 'select') {
+                                    ?>
+                                    <tr>
+                                        <td><label for="<?php echo $data['name']; ?>"><h3
+                                                    class="cf-card__title"><?php echo $data['title']; ?></h3></label>
+                                        </td>
+                                        <td>
+                                            <select id="<?php echo $data['name']; ?>"
+                                                    name="<?php echo $data['name']; ?>">
+                                                <?php
+                                                if ($banned_IPs) {
+                                                    foreach ($banned_IPs_list as $name => $val) {
+                                                        ?>
+                                                        <option name="<?php echo $name; ?>"
+                                                                value="<?php echo $val; ?>"><?php echo $val; ?></option>
+                                                        <?php
+                                                    }
                                                 }
+                                                ?>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                } else if ($data['type'] == 'textarea') {
+                                    ?>
+                                    <tr>
+                                        <td><h3 class="cf-card__title"><label
+                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                            </h3></label>
+                                            <?php
+                                            if (isset($data['description']) && $data['description']) {
+                                                ?>
+                                                <span
+                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                                                <?php
                                             }
                                             ?>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <?php
-                            } else if( $data['type'] == 'textarea' ) {
-                                ?>
-                                <tr>
-                                    <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></h3></label>
-                                        <?php
-                                        if( isset($data['description']) && $data['description'] ){
-                                            ?>
-                                            <span class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                                        </td>
+                                        <td><textarea id="<?php echo $data['name']; ?>"
+                                                      name="<?php echo $data['name']; ?>" rows="4"
+                                                      cols="50"><?php echo(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                } else if ($data['type'] == 'checkbox') {
+                                    ?>
+                                    <tr>
+                                        <td><h3 class="cf-card__title"><label
+                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                            </h3></label>
                                             <?php
-                                        }
-                                        ?>
-                                    </td>
-                                    <td><textarea id="<?php echo $data['name']; ?>" name="<?php echo $data['name']; ?>" rows="4"
-                                                  cols="50"><?php echo(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
-                                    </td>
-                                </tr>
-                                <?php
-                            } else if ( $data['type'] == 'checkbox' ) {
-                                ?>
-                                <tr>
-                                    <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></h3></label>
-                                        <?php
-                                        if( isset($data['description']) && $data['description'] ){
+                                            if (isset($data['description']) && $data['description']) {
+                                                ?>
+                                                <span
+                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                                                <?php
+                                            }
                                             ?>
-                                            <span class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                                        </td>
+                                        <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>"
+                                                   name="<?php echo $data['name']; ?>" <?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked' : ''); ?>>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                } else if ($data['type'] == 'span') {
+                                    ?>
+                                    <tr>
+                                        <td><h3 class="cf-card__title"><label
+                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                            </h3></label>
                                             <?php
-                                        }
-                                        ?>
-                                    </td>
-                                    <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" <?php echo (array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked': ''); ?>></td>
-                                </tr>
-                                <?php
-                            } else if ( $data['type'] == 'span' ) {
-                                ?>
-                                <tr>
-                                    <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></h3></label>
-                                <?php
-                                        if( isset($data['description']) && $data['description'] ){
+                                            if (isset($data['description']) && $data['description']) {
+                                                ?>
+                                                <span
+                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                                                <?php
+                                            }
                                             ?>
-                                            <span class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                                        </td>
+                                        <td><span
+                                                id="<?php echo $data['name']; ?>"><?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?></span>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                } else {
+                                    ?>
+                                    <tr>
+                                        <td><h3 class="cf-card__title"><label
+                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                            </h3></label>
                                             <?php
-                                        }
-                                        ?>
-                                </td>
-                                <td><span id="<?php echo $data['name']; ?>"><?php echo (array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']]:($data['value'] ?: '')); ?></span></td>
-                                </tr>
-                                <?php
-                            } else {
-                                ?>
-                                <tr>
-                                    <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></h3></label>
-                                        <?php
-                                        if( isset($data['description']) && $data['description'] ){
+                                            if (isset($data['description']) && $data['description']) {
+                                                ?>
+                                                <span
+                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                                                <?php
+                                            }
                                             ?>
-                                            <span class="cf-card__footer_message"><?php echo $data['description']; ?></span>
-                                            <?php
-                                        }
-                                        ?>
-                                    </td>
-                                    <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>" name="<?php echo $data['name']; ?>" value="<?php echo (array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']]:($data['value'] ?: '')); ?>"></td>
-                                </tr>
-                                <?php
+                                        </td>
+                                        <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>"
+                                                   name="<?php echo $data['name']; ?>"
+                                                   value="<?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?>">
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
                             }
                         }
                     }

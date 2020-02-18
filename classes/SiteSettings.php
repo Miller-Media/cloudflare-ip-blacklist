@@ -32,7 +32,7 @@ class CFIPSiteSettings
 		return is_plugin_active( 'cloudflare/cloudflare.php' );
 	}
 	
-	public function areCloudflareCredentialsSet(){
+	public function areCloudflarePluginCredentialsSet(){
 		if(!empty(get_option('cloudflare_api_key', null)) && !empty(get_option('cloudflare_api_email', null)))
 			return array('cf_key'=>get_option('cloudflare_api_key', null),'cf_email'=>get_option('cloudflare_api_email', null));
 
