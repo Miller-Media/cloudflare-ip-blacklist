@@ -1,18 +1,22 @@
 <?php
 // Get the existing settings.
 $cfip_settings = get_option('cfip_settings') ?: array();
+$use_cloudflare_plugin_credentials = false;
+$use_cloudflare_ip_plugin_credentials = false;
 
 // First, get API email and key from CloudFlare plugin settings, if available.
-if($cloudflare_plugin_credentials = $this->areCloudflarePluginCredentialsSet()){
-    $cf_key = $cloudflare_plugin_credentials['cf_key'];
-    $cf_email = $cloudflare_plugin_credentials['cf_email'];
-} else if($cloudflare_ip_plugin_credentials = (!empty($cfip_settings['cf_key']) && !empty($cfip_settings['cf_email']))){
+if($use_cloudflare_plugin_credentials = $this->areCloudflarePluginCredentialsSet()){
+    $cf_key = $use_cloudflare_plugin_credentials['cf_key'];
+    $cf_email = $use_cloudflare_plugin_credentials['cf_email'];
+} else if($use_cloudflare_ip_plugin_credentials = (!empty($cfip_settings['cf_key']) && !empty($cfip_settings['cf_email']))){
     $cf_key = $cfip_settings['cf_key'];
     $cf_email = $cfip_settings['cf_email'];
 } else {
     $cf_key = '';
     $cf_email = '';
 }
+
+$credentials_set = ($use_cloudflare_plugin_credentials || $use_cloudflare_ip_plugin_credentials);
 
 // The plugin settings. Add new sections/fields accordingly.
 $settings = array(
@@ -101,15 +105,20 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                         /**
                         * Only display full form if credentials are set
                         */
-                        if($section=='Cloudflare Credentials' || ($section!=='Cloudflare Credentials' && ($cloudflare_plugin_credentials || $cloudflare_ip_plugin_credentials))) {
+                        if($section=='Cloudflare Credentials' || ($section!=='Cloudflare Credentials' && $credentials_set)) {
                             ?>
                             <tr class="tr-section-title">
                                 <td><h2 class="cf-heading cf-heading--2"><?php echo $section; ?></h2></td>
+                                <?php
+                                if($section=='Cloudflare Credentials' && !$credentials_set){
+                                    echo '<span class="cf-card__footer_message">Please manually set credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.</span>';
+                                }
+                                ?>
                             </tr>
 
                             <?php
                             // If Cloudflare credentials are filled out from Cloudflare plugin
-                            if($section=='Cloudflare Credentials' && $this->isCloudflarePluginActive() && $cloudflare_plugin_credentials) {
+                            if($section=='Cloudflare Credentials' && $this->isCloudflarePluginActive() && $use_cloudflare_plugin_credentials) {
                                 $cloudflare_admin_url = admin_url()."options-general.php?page=cloudflare";
                                 ?>
                                 <tr>
