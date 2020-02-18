@@ -51,7 +51,7 @@ class CFIPBlacklist
      */
     public function __construct ()
     {
-        $this->settingsPage = is_multisite() ? new CFIPNetworkSettings() : new CFIPSiteSettings();
+        $this->settingsPage = new CFIPSiteSettings();
         
         $this->API = new CloudflareAPIController();
         $this->settings = get_site_option('cfip_settings');
@@ -127,7 +127,7 @@ class CFIPBlacklist
         if (!($this->getSetting('enable_ip_blacklist') == 'on'))
             return;
 
-        $banned_usernames = explode(', ', $this->getSetting('banned_usernames'));
+        $banned_usernames = array_map('trim', explode(',', $this->getSetting('banned_usernames')));
         if (in_array($username, $banned_usernames)) {
             $this->blacklistIPAddress();
         }
@@ -150,25 +150,6 @@ class CFIPBlacklist
     }
 
     /**
-     * MULTISITE: Blacklist multiple IPs in CloudFlare via API call.
-     *
-     *
-     * @param $ip
-     * @return array|mixed|object
-     */
-    public function multisiteBlacklistIP( $ip ){
-        $zone_ids = $this->API->getZoneIDs();
-        $results = array();
-
-        foreach( $zone_ids as $zone_id ){
-            $result = $this->API->blacklistIP( $zone_id, $ip );
-            $results[$zone_id] = $result;
-        }
-
-        return $results;
-    }
-
-    /**
      * Add user's IP address to site option and blacklist it in Cloudflare.
      *
      * @return void
@@ -180,7 +161,7 @@ class CFIPBlacklist
 
         // If an IP address was retrieved, add to site option along with zone/request data and blacklist in Cloudflare.
         if ($ip) {
-            $results = is_multisite() ? $this->multisiteBlacklistIP( $ip ) : $this->singleSiteBlacklistIP( $ip );
+            $results = $this->singleSiteBlacklistIP( $ip );
 
             $ip_data = array(
                 $ip => array(
@@ -255,24 +236,6 @@ class CFIPBlacklist
             unset($banned_IPs[$ip]);
 
         update_site_option('cfip_banned_addresses', $banned_IPs);
-    }
-
-    /**
-     * Get domains for each site on the multisite network.
-     *
-     * @return array|int
-     */
-    public function getMultisiteDomains ()
-    {
-        $sites = get_sites();
-        $domains = array ();
-
-        // Loop through and get all domains; we'll use each of these in API call to blacklist IP.
-        foreach ($sites as $site) {
-            $domains[] = $site->domain;
-        }
-
-        return $domains;
     }
 
     /**

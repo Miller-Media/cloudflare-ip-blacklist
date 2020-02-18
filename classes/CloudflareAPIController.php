@@ -242,7 +242,7 @@ class CloudflareAPIController
      */
     public function getZoneId( $domain )
     {
-        $domain = is_multisite() ? $this->getCurrentSiteDomain( $domain ) : get_site_url();
+        $domain = get_site_url();
 
         // Check for saved zone ID and return, if exists. Saves an API call.
         $zone_id = null;
@@ -270,24 +270,6 @@ class CloudflareAPIController
 
         return $zone_id;
     }
-
-	/**
-	 * MULTISITE: Get multiple Cloudflare domain zone IDs.
-	 *
-	 * @return array|mixed|object
-	 */
-	public function getZoneIDs()
-	{
-        $domains = $this->getDomains();
-		$zone_ids = array();
-
-		foreach( $domains as $domain ){
-		    if($zone_id = $this->getZoneID($domain))
-		        $zone_ids[] = $zone_id;
-		}
-
-		return $zone_ids;
-	}
 
 	/**
 	 * Get access rules for a given zone_id.
@@ -328,33 +310,6 @@ class CloudflareAPIController
 	public function getSetting($setting)
 	{
 		return $this->settings[$setting];
-	}
-
-	/**
-	 * Get domains defined in plugin settings.
-	 * Domains should not include subdomains or 'www', etc.
-	 *
-	 * @return array
-	 */
-	public function getDomains()
-	{
-		return explode(', ', $this->getSetting('applicable_domains'));
-	}
-
-	/**
-	 * Get domains for each site on the multisite network.
-	 *
-	 * @return array|int
-	 */
-	public function getMultisiteDomains()
-	{
-		$sites = get_sites();
-		$domains = array();
-		// Loop through and get all domains; we'll use each of these in API call to blacklist IP.
-		foreach( $sites as $site ){
-			$domains[] = $site->domain;
-		}
-		return $domains;
 	}
 
 	/**
