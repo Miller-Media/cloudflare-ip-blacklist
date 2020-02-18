@@ -25,6 +25,10 @@ class CloudflareAPIController
 	public function __construct()
 	{
 		$this->settings = get_site_option('cfip_settings');
+
+		// Inherit API and Key from Cloudflare plugin if non-existent
+        if(empty($this->settings['cf_email'])){$this->settings['cf_email'] = get_site_option('cloudflare_api_email');}
+        if(empty($this->settings['cf_key'])){$this->settings['cf_key'] = get_site_option('cloudflare_api_key');}
 	}
 
 	/**
@@ -83,7 +87,7 @@ class CloudflareAPIController
 		$result = json_decode($result['body']);
 
 		// Handle errors
-		if( !$result->success && $result->errors ) {
+		if( !$result || ( !property_exists($result, 'success') && ( property_exists($result, 'errors') || property_exists($result, 'error' ) ) ) ) {
 			$this->log("=== RESPONSE (Error) ===");
 		} else {
 			$this->log("=== RESPONSE (Success) ===");
@@ -98,32 +102,23 @@ class CloudflareAPIController
 	 *
 	 * @see      https://api.cloudflare.com/#firewall-access-rule-for-a-zone-create-access-rule
 	 *
-	 * @param $ip
+	 * @param $zone_id, $ip
 	 * @return array|mixed|object
 	 */
-	public function blacklistIP( $ip )
+	public function blacklistIP( $zone_id, $ip )
 	{
-		$zone_ids = $this->getZoneIDs();
-		$results = array();
-		foreach( $zone_ids as $zone_id ){
-			if( !$zone_id )
-				continue;
+        $url = $this->url . "zones/$zone_id/firewall/access_rules/rules";
+        $body = json_encode(array(
+            'mode' => 'block',
+            'configuration' => array(
+                'target' => 'ip',
+                'value' => $ip
+            ),
+            'notes' => 'Blocked for attempting to login using a banned username.'
+        ));
 
-			$url = $this->url . "zones/$zone_id/firewall/access_rules/rules/";
-			$body = json_encode(array(
-				'mode' => 'block',
-				'configuration' => array(
-					'target' => 'ip',
-					'value' => $ip
-				),
-				'notes' => 'Blocked for attempting to login using a banned username.'
-			));
-
-			$result = $this->request("POST", $url, $body);
-			$results[$zone_id] = $result;
-		}
-
-		return $results;
+        $result = $this->request("POST", $url, $body);
+        return $result;
 	}
 
 	/**
@@ -240,58 +235,58 @@ class CloudflareAPIController
 		return $result;
 	}
 
+    /**
+     * Get zone ID for current site.
+     *
+     * @return mixed
+     */
+    public function getZoneId( $domain )
+    {
+        $domain = is_multisite() ? $this->getCurrentSiteDomain( $domain ) : get_site_url();
+
+        // Check for saved zone ID and return, if exists. Saves an API call.
+        $zone_id = null;
+        if( isset( $this->settings['zone_ids'] ) && isset( $this->settings['zone_ids'][$domain] ) ){
+            $zone_id = $this->settings['zone_ids'][$domain];
+        }
+
+        if( $zone_id )
+            return $zone_id;
+
+        // Build URL and make request.
+        // @todo Remove:
+        $domain='millermedia.io';
+        $url = $this->url . "zones?name=$domain";
+        $result = $this->request("GET", $url);
+        if( !$result || $result->errors || !$result->result ){
+            return false;
+        }
+
+        // Get zone ID and update settings for future use.
+        $zone_id = $result->result[0]->id;
+        $settings = get_site_option('cfip_settings');
+        $settings['zone_ids'][$domain] = $zone_id;
+        update_site_option('cfip_settings', $settings);
+
+        return $zone_id;
+    }
+
 	/**
-	 * Get Cloudflare domain zone IDs.
-	 *
-	 * @see     https://api.cloudflare.com/#zone-list-zones
+	 * MULTISITE: Get multiple Cloudflare domain zone IDs.
 	 *
 	 * @return array|mixed|object
 	 */
 	public function getZoneIDs()
 	{
-		$domains = $this->getDomains();
+        $domains = $this->getDomains();
 		$zone_ids = array();
+
 		foreach( $domains as $domain ){
-			$url = $this->url . "zones?name=$domain";
-			$result = $this->request("GET", $url);
-			if( !$result->errors && $result->result )
-				$zone_ids[] = $result->result[0]->id;
+		    if($zone_id = $this->getZoneID($domain))
+		        $zone_ids[] = $zone_id;
 		}
+
 		return $zone_ids;
-	}
-
-	/**
-	 * Get zone ID for current site.
-	 *
-	 * @return mixed
-	 */
-	public function getZoneId()
-	{
-		$domain = $this->getCurrentSiteDomain( get_current_blog_id() );
-
-		// Check for saved zone ID and return, if exists. Saves an API call.
-		$zone_id = null;
-		if( isset( $this->settings['zone_ids'] ) && isset( $this->settings['zone_ids'][$domain] ) ){
-			$zone_id = $this->settings['zone_ids'][$domain];
-		}
-
-		if( $zone_id )
-			return $zone_id;
-
-		// Build URL and make request.
-		$url = $this->url . "zones?name=$domain";
-		$result = $this->request("GET", $url);
-		if( $result->errors || !$result->result ){
-			return false;
-		}
-
-		// Get zone ID and update settings for future use.
-		$zone_id = $result->result[0]->id;
-		$settings = get_site_option('cfip_settings');
-		$settings['zone_ids'][$domain] = $zone_id;
-		update_site_option('cfip_settings', $settings);
-
-		return $zone_id;
 	}
 
 	/**
@@ -317,7 +312,7 @@ class CloudflareAPIController
         $settings = get_site_option('cfip_settings');
 
         // Only log if logging is enabled
-        if ($settings('enable_logging') == 'on') {
+        if ($settings['enable_logging'] == 'on') {
             $log = get_site_option('cfip_log') ?: array();
             $log[] = $message;
             update_site_option('cfip_log', $log);
@@ -371,6 +366,7 @@ class CloudflareAPIController
 	public function getCurrentSiteDomain($blog_id)
 	{
 		$sites = get_sites( array( 'site__in' => array($blog_id) ) );
+
 		$domain = $sites[0]->domain;
 		$base_domain = '';
 		$applicable_domains = $this->getDomains();

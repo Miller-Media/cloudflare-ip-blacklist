@@ -134,6 +134,41 @@ class CFIPBlacklist
     }
 
     /**
+     * Blacklist IP in CloudFlare via API call.
+     *
+     *
+     * @param $ip
+     * @return array|mixed|object
+     */
+    public function singleSiteBlacklistIP( $ip ){
+        $zone_id = $this->API->getZoneId( get_site_url() );
+
+        if(!$zone_id)
+            return false;
+
+        return $this->API->blacklistIP( $zone_id, $ip );
+    }
+
+    /**
+     * MULTISITE: Blacklist multiple IPs in CloudFlare via API call.
+     *
+     *
+     * @param $ip
+     * @return array|mixed|object
+     */
+    public function multisiteBlacklistIP( $ip ){
+        $zone_ids = $this->API->getZoneIDs();
+        $results = array();
+
+        foreach( $zone_ids as $zone_id ){
+            $result = $this->API->blacklistIP( $zone_id, $ip );
+            $results[$zone_id] = $result;
+        }
+
+        return $results;
+    }
+
+    /**
      * Add user's IP address to site option and blacklist it in Cloudflare.
      *
      * @return void
@@ -145,16 +180,19 @@ class CFIPBlacklist
 
         // If an IP address was retrieved, add to site option along with zone/request data and blacklist in Cloudflare.
         if ($ip) {
-            $results = $this->API->blacklistIP($ip);
-            $ip_data = array (
-                $ip => array (
-                    'zones' => array ()
+            $results = is_multisite() ? $this->multisiteBlacklistIP( $ip ) : (array)$this->singleSiteBlacklistIP( $ip );
+
+            $ip_data = array(
+                $ip => array(
+                    'zones' => array()
                 )
             );
+
             foreach ($results as $zone_id => $result) {
                 $ip_data[$ip]['zones'][$zone_id]['request_id'] = $result->result->id;
             }
-            $this->updatedBannedIPs($ip_data);
+
+            $this->updateBannedIPs($ip_data);
         }
     }
 
@@ -195,7 +233,7 @@ class CFIPBlacklist
      *
      * @param $ip_data array
      */
-    public function updatedBannedIPs ($ip_data)
+    public function updateBannedIPs ($ip_data)
     {
         $banned_IPs = $this->getBannedIPs();
         foreach ($ip_data as $ip => $data) {
