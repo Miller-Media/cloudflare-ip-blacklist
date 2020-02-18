@@ -109,7 +109,10 @@ class CloudflareAPIController
 			if( !$zone_id )
 				continue;
 
-			$url = $this->url . "zones/$zone_id/firewall/access_rules/rules/";
+			/**
+			* Important: This URL will fail on POST requests if there is a trailing slash 
+			*/
+			$url = $this->url . "zones/$zone_id/firewall/access_rules/rules";
 			$body = json_encode(array(
 				'mode' => 'block',
 				'configuration' => array(
