@@ -164,66 +164,6 @@ class CloudflareAPIController
 	}
 
 	/**
-	 * Clear product and category caches.
-	 *
-	 * @param $files array URLs to clear cache for
-	 * @return array|bool
-	 */
-	public function clearCacheByFiles($files)
-	{
-		// Get zone ID for this site.
-		$zone_id = $this->getZoneId();
-
-		if( !$zone_id )
-			return false;
-
-		// Configure endpoint url with zone id.
-		$url = $this->url . "zones/$zone_id/purge_cache/";
-
-		// Results array
-		$results = array();
-
-		$count = 0;
-		$urls = array();
-
-		foreach( $files as $file ){
-
-			if( count($files) == $count+1 ){
-				// If this is the last file, add it and make the request.
-				$urls[] = $file;
-
-				// Add $urls array to body argument.
-				$body = json_encode(array(
-					"files" => $urls
-				));
-
-				// Make request.
-				$result = $this->request("DELETE", $url, $body);
-				$results[] = $result;
-			} else if( $count == 0 || $count%30 != 0 ) {
-				// Limit body to 30 URLs per request.
-				$urls[] = $file;
-				$count++;
-			} else {
-				// Maximum payload, add $urls array to body argument and make request.
-				$body = json_encode(array(
-					"files" => $urls
-				));
-
-				// Make request.
-				$result = $this->request("DELETE", $url, $body);
-				$results[] = $result;
-
-				// Empty $urls array.
-				$urls = array();
-				$count++;
-			}
-		}
-
-		return $results;
-	}
-
-	/**
 	 * Get all Cloudflare zones.
 	 *
 	 * @return array|mixed|object
@@ -244,18 +184,27 @@ class CloudflareAPIController
     {
         $domain = get_site_url();
 
+        /**
+         * @todo make this more robust
+         * This was taken from https://stackoverflow.com/a/16027164/975592
+         * This is not reliable for subdomains of first-level ccTLDs (i.e. blah.blah.de)
+         */
+        $pieces = parse_url($domain);
+        $domain = isset($pieces['host']) ? $pieces['host'] : $pieces['path'];
+        if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
+            $domain = $regs['domain'];
+        }
+
         // Check for saved zone ID and return, if exists. Saves an API call.
         $zone_id = null;
-        if( isset( $this->settings['zone_ids'] ) && isset( $this->settings['zone_ids'][$domain] ) ){
-            $zone_id = $this->settings['zone_ids'][$domain];
+        if( isset( $this->settings['zone_id'] ) && isset( $this->settings['zone_id'][$domain] ) ){
+            $zone_id = $this->settings['zone_id'];
         }
 
         if( $zone_id )
             return $zone_id;
 
         // Build URL and make request.
-        // @todo Remove:
-        $domain='millermedia.io';
         $url = $this->url . "zones?name=$domain";
         $result = $this->request("GET", $url);
         if( !$result || $result->errors || !$result->result ){
@@ -265,7 +214,7 @@ class CloudflareAPIController
         // Get zone ID and update settings for future use.
         $zone_id = $result->result[0]->id;
         $settings = get_site_option('cfip_settings');
-        $settings['zone_ids'][$domain] = $zone_id;
+        $settings['zone_id'] = $zone_id;
         update_site_option('cfip_settings', $settings);
 
         return $zone_id;
@@ -310,29 +259,5 @@ class CloudflareAPIController
 	public function getSetting($setting)
 	{
 		return $this->settings[$setting];
-	}
-
-	/**
-	 * Get domain for current site.
-	 *
-	 * @param $blog_id
-	 * @return string
-	 */
-	public function getCurrentSiteDomain($blog_id)
-	{
-		$sites = get_sites( array( 'site__in' => array($blog_id) ) );
-
-		$domain = $sites[0]->domain;
-		$base_domain = '';
-		$applicable_domains = $this->getDomains();
-
-		// Extract base domain (sans any subdomain) according to applicable_domains setting.
-		foreach($applicable_domains as $ad){
-			if( strpos($domain, $ad) ){
-				$base_domain = $ad;
-				break;
-			}
-		}
-		return $base_domain;
 	}
 }

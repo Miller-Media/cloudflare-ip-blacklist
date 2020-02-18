@@ -101,7 +101,7 @@ class CFIPSiteSettings
 	 */
 	public function updateSettings() {
 		// Load current options if available
-	    $settings = get_option('cfip_settings');
+	    $settings = is_array(get_option('cfip_settings')) ? get_option('cfip_settings') : array();
 
 		if (isset($_POST['cfip_settings_nonce'])) {
 
@@ -111,10 +111,10 @@ class CFIPSiteSettings
              * Second, check if there are already values set in the DB and that the
              * Third, set to nothing if both fail
              **/
-			$settings['cf_email'] = isset($_POST['cf_email']) ? sanitize_text_field($_POST['cf_email']) : (array_key_exists('cf_email', $settings) ? $settings['cf_email'] : '');
+            $settings['cf_email'] = isset($_POST['cf_email']) ?sanitize_text_field($_POST['cf_email']) : (array_key_exists('cf_email', $settings) ? $settings['cf_email'] : '');
 			$settings['cf_key'] = isset($_POST['cf_key']) ?sanitize_text_field($_POST['cf_key']) : (array_key_exists('cf_key', $settings) ? $settings['cf_key'] : '');
 			$settings['banned_usernames'] = isset($_POST['banned_usernames']) ? sanitize_text_field($_POST['banned_usernames']) : (array_key_exists('banned_usernames', $settings) ? $settings['banned_usernames'] : '');
-			$settings['zone_ids'] = isset($_POST['zone_ids']) ? sanitize_text_field($_POST['zone_ids']) : (array_key_exists('zone_ids', $settings) ? $settings['zone_ids'] : '');
+			$settings['zone_id'] = isset($_POST['zone_id']) ? sanitize_text_field($_POST['zone_id']) : (array_key_exists('zone_id', $settings) ? $settings['zone_id'] : '');
 
 			/**
              * Handle checkboxes differently since they don't send POST values
