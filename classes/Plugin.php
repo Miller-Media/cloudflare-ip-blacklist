@@ -276,7 +276,7 @@ class CFIPBlacklist
         if (!($this->getSetting('enable_ip_blacklist') == 'on'))
             return;
 
-        $banned_usernames = explode(', ', $this->getSetting('banned_usernames'));
+        $banned_usernames = array_map('trim', explode(',', $this->getSetting('banned_usernames')));
         if (in_array($username, $banned_usernames)) {
             $this->blacklistIPAddress();
         }
