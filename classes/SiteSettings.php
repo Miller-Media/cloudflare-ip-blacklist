@@ -28,7 +28,11 @@ class CFIPSiteSettings
 		add_action('admin_menu', array($this, 'verifyNonce'));
 
         $helperFunctions = new CFIPHelpers();
-		$this->siteBaseDomain = $helperFunctions->parseBaseDomainFromURL(get_site_url())['domain'];;
+		$this->siteBaseDomain = $helperFunctions->parseBaseDomainFromURL(get_site_url())['domain'];
+
+		$cfip_settings = get_option('cfip_settings');
+		$this->settings = is_array($cfip_settings) ? $cfip_settings : array();
+
 	}
 
     /**
@@ -62,22 +66,24 @@ class CFIPSiteSettings
      * @return array|bool
      */
     public function areCredentialsSet(){
-        $cfip_settings = get_option('cfip_settings');
-
         // First, get API email and key from CloudFlare plugin settings, if available.
         if($use_cloudflare_plugin_credentials = $this->areCloudflarePluginCredentialsSet()){
             $cf_key = $use_cloudflare_plugin_credentials['cf_key'];
             $cf_email = $use_cloudflare_plugin_credentials['cf_email'];
             $cf_source = 'cf_plugin';
-        } else if($use_cloudflare_ip_plugin_credentials = (!empty($cfip_settings['cf_key']) && !empty($cfip_settings['cf_email']))){
-            $cf_key = $cfip_settings['cf_key'];
-            $cf_email = $cfip_settings['cf_email'];
+        } else if($use_cloudflare_ip_plugin_credentials = (!empty($this->settings['cf_key']) && !empty($this->settings['cf_email']))){
+            $cf_key = $this->settings['cf_key'];
+            $cf_email = $this->settings['cf_email'];
             $cf_source = 'manual';
         } else {
             return false;
         }
 
         return array('cf key' => $cf_key, 'cf_email' => $cf_email, 'source' => $cf_source);
+    }
+
+    public function isLoggingEnabled(){
+        return $this->settings['enable_logging']!=='on';
     }
 
 	/**
@@ -142,7 +148,7 @@ class CFIPSiteSettings
 	 */
 	public function updateSettings() {
 		// Load current options if available
-	    $settings = is_array(get_option('cfip_settings')) ? get_option('cfip_settings') : array();
+	    $settings = $this->settings;
 
 		if (isset($_POST['cfip_settings_nonce'])) {
 
