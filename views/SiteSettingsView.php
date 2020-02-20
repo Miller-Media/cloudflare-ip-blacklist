@@ -15,14 +15,14 @@ $settings = array(
                 'type' => 'text',
                 'title' => 'Email Address',
                 'description' => '',
-                'value' => (array_key_exists('cf_email', $credentials) && $credentials)? $credentials['cf_email'] : ''
+                'value' => ($credentials && array_key_exists('cf_email', $credentials))? $credentials['cf_email'] : ''
             ),
             array(
                 'name' => 'cf_key',
                 'type' => 'text',
                 'title' => 'API Key',
                 'description' => '',
-                'value' => (array_key_exists('cf_key', $credentials) && $credentials) ? $credentials['cf_key'] : ''
+                'value' => ($credentials && array_key_exists('cf_key', $credentials)) ? $credentials['cf_key'] : ''
             )
         )
 	),
