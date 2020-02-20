@@ -96,8 +96,6 @@ jQuery(document).ready(function(){
 
     // View log AJAX request.
     jQuery(".log_tab").on('click', function(e){
-        console.log('apple');
-
         e.preventDefault();
 
         var $response = jQuery("#log_screen").find("pre");

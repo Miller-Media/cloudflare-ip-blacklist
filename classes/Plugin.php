@@ -172,11 +172,30 @@ class CFIPBlacklist
                 )
             );
 
+            $updateBannedIPs = false;
             foreach ($results as $zone_id => $result) {
+                if(!empty($result->errors)){
+                    /**
+                     * A delay exists (~5-10 seconds) after an IP has been added to the blacklist on Cloudflare
+                     * and before it takes effect to the user trying to access the site.
+                     *
+                     * In these cases we handle API requests that are considered 'duplicates'/ error code: 10009
+                     */
+                    if($result->errors[0]->code==10009){
+                        if ($this->siteSettings->isLoggingEnabled()) {
+                            $this->log("IP already blocked. Skipping...");
+                        }
+                    }
+
+                    continue;
+                }
+
                 $ip_data[$ip]['zones'][$zone_id]['request_id'] = $result->result->id;
+                $updateBannedIPs = true;
             }
 
-            $this->updateBannedIPs($ip_data);
+            if($updateBannedIPs)
+                $this->updateBannedIPs($ip_data);
         }
     }
 
@@ -338,7 +357,7 @@ class CFIPBlacklist
      */
     public function log ($message)
     {
-        if ($this->getSetting('enable_logging') == 'on'){
+        if ($this->siteSettings->isLoggingEnabled()){
             $log = get_site_option('cfip_log') ?: array();
             $log[] = $message;
             update_site_option('cfip_log', $log);

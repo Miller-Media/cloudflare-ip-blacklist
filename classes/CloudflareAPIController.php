@@ -156,31 +156,6 @@ class CloudflareAPIController
 	}
 
 	/**
-	 * Purge all caches.
-	 *
-	 * @return array|bool
-	 */
-	public function purgeCache()
-	{
-		// Get zone ID for this site.
-		$zone_id = $this->getZoneId();
-
-		if( !$zone_id )
-			return false;
-
-		// Configure endpoint url with zone id.
-		$url = $this->url . "zones/$zone_id/purge_cache/";
-
-		// Make request
-		$body = json_encode(array(
-			"purge_everything" => true
-		));
-		$result = $this->request("DELETE", $url, $body);
-
-		return $result;
-	}
-
-	/**
 	 * Get all Cloudflare zones.
 	 *
 	 * @return array|mixed|object
@@ -203,17 +178,22 @@ class CloudflareAPIController
 
         // Check for saved zone ID and return, if exists. Saves an API call.
         $zone_id = null;
-        if( isset( $this->settings['zone_id'] ) && isset( $this->settings['zone_id'][$domain] ) ){
+
+        if( !empty( $this->settings['zone_id'] ) )
             $zone_id = $this->settings['zone_id'];
-        }
 
         if( $zone_id )
             return $zone_id;
 
+        // Only log if logging is enabled
+        if ($this->siteSettings->isLoggingEnabled()) {
+            $this->log('Zone ID not set in database. Retrieving via API.');
+        }
+
         // Build URL and make request.
         $url = $this->url . "zones?name=$domain";
         $result = $this->request("GET", $url);
-        if( !$result || $result->errors || !$result->result ){
+        if( !$result || !empty($result->errors) || !$result->result ){
             return false;
         }
 
