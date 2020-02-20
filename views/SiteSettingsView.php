@@ -1,4 +1,7 @@
 <?php
+// Initiate Helper Class
+$helperFunctions = new CFIPHelpers();
+
 // Get the existing settings.
 $cfip_settings = get_option('cfip_settings') ?: array();
 $use_cloudflare_plugin_credentials = false;
@@ -96,7 +99,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
 </ul>
 <section id="first-tab-group" class="tabgroup">
     <div class="tab-panel" id="tab1">
-        <h1 class="cf-heading cf-heading--1"><span>Settings</span></h1>
+        <h1 class="cf-heading cf-heading--1"><span>Settings</span> (<?php echo $helperFunctions->parseBaseDomainFromURL(get_site_url())['domain']; ?>)</h1>
         <form name="cfip_settings" method="post" action="">
             <table>
                 <tbody>
