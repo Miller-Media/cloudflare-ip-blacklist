@@ -27,10 +27,6 @@ class CloudflareAPIController
         $this->siteSettings = new CFIPSiteSettings();
         $this->settings = $this->siteSettings->settings;
         $this->helperFunctions = new CFIPHelpers();
-
-		// Inherit API and Key from Cloudflare plugin if non-existent
-        if(empty($this->settings['cf_email'])){$this->settings['cf_email'] = get_site_option('cloudflare_api_email');}
-        if(empty($this->settings['cf_key'])){$this->settings['cf_key'] = get_site_option('cloudflare_api_key');}
 	}
 
 	private function validate(){
@@ -42,7 +38,7 @@ class CloudflareAPIController
             return false;
         }
 
-	    return;
+	    return true;
     }
 
 	/**
@@ -59,7 +55,7 @@ class CloudflareAPIController
             return false;
 
         // Log request
-        if (!$this->siteSettings->isLoggingEnabled()){
+        if ($this->siteSettings->isLoggingEnabled()){
             $this->log("=== REQUEST ===");
             $this->log("Timestamp: " . current_time('mysql'));
             $this->log("Method: " . $method);
@@ -106,7 +102,7 @@ class CloudflareAPIController
 		$result = json_decode($result['body']);
 
 		// Handle errors
-		if (!$this->siteSettings->isLoggingEnabled()) {
+		if ($this->siteSettings->isLoggingEnabled()) {
             if (!$result || (!property_exists($result, 'success') && (property_exists($result, 'errors') || property_exists($result, 'error')))) {
                 $this->log("=== RESPONSE (Error) ===");
             } else {
@@ -203,8 +199,7 @@ class CloudflareAPIController
      */
     public function getZoneId($domain)
     {
-        $domain = get_site_url();
-        $domain = $this->helperFunctions->parseBaseDomainFromURL($domain);
+        $domain = $this->helperFunctions->parseBaseDomainFromURL($domain)['domain'];
 
         // Check for saved zone ID and return, if exists. Saves an API call.
         $zone_id = null;

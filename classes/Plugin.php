@@ -15,7 +15,7 @@ class CFIPBlacklist
      *
      * @var CFIPSettings
      */
-    public $settingsPage;
+    public $siteSettings;
 
     /**
      * The plugin settings.
@@ -51,8 +51,7 @@ class CFIPBlacklist
      */
     public function __construct ()
     {
-        $this->settingsPage = new CFIPSiteSettings();
-        
+        $this->siteSettings = new CFIPSiteSettings();
         $this->API = new CloudflareAPIController();
         $this->settings = get_site_option('cfip_settings');
 
@@ -70,6 +69,10 @@ class CFIPBlacklist
         add_action('wp_ajax_cfip_clearlog', array ($this, 'ajaxClearLog'));
 	    add_action('wp_ajax_cfip_loadlog', array ($this, 'ajaxLoadLog'));
 
+        // Single Site Settings Screen
+        add_action('admin_menu', array($this->siteSettings, 'addSiteMenu'));
+        add_action('admin_menu', array($this->siteSettings, 'verifyNonce'));
+
         // Add 'Settings' link to plugin page
         //add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), array ($this, 'cfip_add_action_links'), 10, 5);
     }
@@ -85,8 +88,8 @@ class CFIPBlacklist
         if ($hook !== 'toplevel_page_cfip-menu')
             return;
 
-        wp_enqueue_style('cfip_admin_style', $this->adminStyle);
-        wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'));
+        wp_enqueue_style('cfip_admin_style', $this->adminStyle, array(),CFIP_PLUGIN_VERSION);
+        wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'),CFIP_PLUGIN_VERSION);
 
         // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
         if($this->isCloudflarePluginActive()) {

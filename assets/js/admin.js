@@ -26,15 +26,25 @@ jQuery(document).ready(function(){
 
                 // If the request was successful but the API returned an error.
                 if( data.errors && data.errors.length > 0 ) {
-                    $response.text("There was an error.");
+                    $response.removeClass().addClass('notice notice-error').text("There was an error.");
                     console.log(data);
                     return;
+                } else if( data.result == 'success' ) {
+                    // Remove IP Address from select dropdown.
+                    jQuery('select[name="blacklisted_ips"] option[value="'+ip_address+'"]').remove();
+
+                    // Check if this was the last item removed from the list
+                    if(jQuery('select[name="blacklisted_ips"] option').length == 0){
+                        that = jQuery('select[name="blacklisted_ips"]').closest('td');
+                        jQuery('select[name="blacklisted_ips"]').remove();
+                        jQuery('button#cfip_ajax_btn').remove();
+                        that.prepend('<span id="blacklisted_ips">No IPs currently blacklisted.</span>');
+                        $response.removeClass().addClass('notice notice-success').text("IP address successfully removed from blacklist.");
+                    }
+                } else {
+                    $response.removeClass().addClass('notice notice-warning').text("Response from Cloudflare API unclear. Please refresh page.");
                 }
 
-                // Remove IP Address from select dropdown.
-                jQuery('select[name="blacklisted_ips"] option[value="'+ip_address+'"]').remove();
-
-                $response.text("IP address successfully removed from blacklist.");
                 console.log(data);
             },
             error: function(errorThrown){

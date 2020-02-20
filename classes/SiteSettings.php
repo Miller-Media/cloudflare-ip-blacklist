@@ -22,26 +22,46 @@ class CFIPSiteSettings
 	 */
 	public function __construct()
 	{
-		// Hooks
-		// Single Site Settings Screen
-		add_action('admin_menu', array($this, 'addSiteMenu'));
-		add_action('admin_menu', array($this, 'verifyNonce'));
-
         $helperFunctions = new CFIPHelpers();
 		$this->siteBaseDomain = $helperFunctions->parseBaseDomainFromURL(get_site_url())['domain'];
 
 		$cfip_settings = get_option('cfip_settings');
 		$this->settings = is_array($cfip_settings) ? $cfip_settings : array();
 
+        /**
+         * Overwrite API authentication with credentials from official Cloudflare plugin
+         * if they exist and the plugin is active
+         */
+        if($this->isCloudflarePluginActive()) {
+            $cf_plugin_email = get_option('cloudflare_api_email');
+            $cf_plugin_key = get_option('cloudflare_api_key');
+
+            // Only use if both are present
+            if ($cf_plugin_key && $cf_plugin_email) {
+                $this->settings['cf_email'] = $cf_plugin_email;
+                $this->settings['cf_key'] = $cf_plugin_key;
+            }
+        }
+
 	}
 
     /**
      * Checks to see if the official Cloudflare plugin is active.
      *
+     * Method below is used in place of is_plugin_active because this can happen at any
+     * time during site load whereas is_plugin_active only happens after admin_init
+     *
      * @return bool
      */
     public function isCloudflarePluginActive(){
-		return is_plugin_active( 'cloudflare/cloudflare.php' );
+        $active_plugins_basenames = get_option( 'active_plugins' );
+        foreach ( $active_plugins_basenames as $plugin_basename ) {
+            if ( false !== strpos( $plugin_basename, '/cloudflare.php' ) ) {
+                return true;
+            }
+        }
+
+        return false;
 	}
 
     /**
@@ -83,7 +103,7 @@ class CFIPSiteSettings
     }
 
     public function isLoggingEnabled(){
-        return $this->settings['enable_logging']!=='on';
+        return $this->settings['enable_logging']=='on';
     }
 
 	/**

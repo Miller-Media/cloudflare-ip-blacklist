@@ -232,7 +232,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
     <div class="tab-panel" id="tab2">
         <h1 class="cf-heading cf-heading--1"><span>Log</span></h1>
         <?php
-        if($siteSettings->isLoggingEnabled()) {
+        if(!$siteSettings->isLoggingEnabled()) {
             ?>
         <span class="cf-card__footer_message">Logging is currently disabled. To start logging, enable checkbox on settings tab.</span>
             <?php
