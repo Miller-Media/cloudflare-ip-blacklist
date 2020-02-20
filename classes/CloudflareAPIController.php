@@ -25,6 +25,7 @@ class CloudflareAPIController
 	public function __construct()
 	{
 		$this->settings = get_site_option('cfip_settings');
+        $this->helperFunctions = new CFIPHelpers();
 
 		// Inherit API and Key from Cloudflare plugin if non-existent
         if(empty($this->settings['cf_email'])){$this->settings['cf_email'] = get_site_option('cloudflare_api_email');}
@@ -180,20 +181,10 @@ class CloudflareAPIController
      *
      * @return mixed
      */
-    public function getZoneId( $domain )
+    public function getZoneId($domain)
     {
         $domain = get_site_url();
-
-        /**
-         * @todo make this more robust
-         * This was taken from https://stackoverflow.com/a/16027164/975592
-         * This is not reliable for subdomains of first-level ccTLDs (i.e. blah.blah.de)
-         */
-        $pieces = parse_url($domain);
-        $domain = isset($pieces['host']) ? $pieces['host'] : $pieces['path'];
-        if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
-            $domain = $regs['domain'];
-        }
+        $domain = $this->helperFunctions->parseBaseDomainFromURL($domain);
 
         // Check for saved zone ID and return, if exists. Saves an API call.
         $zone_id = null;

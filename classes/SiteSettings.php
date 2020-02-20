@@ -71,7 +71,7 @@ class CFIPSiteSettings
 	 */
 	public function displaySiteSettingsMenu()
 	{
-		include_once(plugin_dir_path(plugin_dir_path(__FILE__)).'views/site-settings-view.php');
+		include_once(plugin_dir_path(plugin_dir_path(__FILE__)).'views/SiteSettingsView.php');
 	}
 
 	/**
