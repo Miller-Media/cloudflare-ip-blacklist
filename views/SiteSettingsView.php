@@ -1,9 +1,6 @@
 <?php
-//include_once('../classes/SiteSettings.php');
 $siteSettings = new CFIPSiteSettings();
-
-// Get the existing settings.
-$cfip_settings = get_option('cfip_settings') ?: array();
+$cfip_settings = $siteSettings->settings;
 $credentials = $siteSettings->areCredentialsSet();
 
 // The plugin settings. Add new sections/fields accordingly.
@@ -235,7 +232,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
     <div class="tab-panel" id="tab2">
         <h1 class="cf-heading cf-heading--1"><span>Log</span></h1>
         <?php
-        if($cfip_settings['enable_logging']!=='on') {
+        if($siteSettings->isLoggingEnabled()) {
             ?>
         <span class="cf-card__footer_message">Logging is currently disabled. To start logging, enable checkbox on settings tab.</span>
             <?php

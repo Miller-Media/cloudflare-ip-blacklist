@@ -24,13 +24,26 @@ class CloudflareAPIController
 	 */
 	public function __construct()
 	{
-		$this->settings = get_site_option('cfip_settings');
+        $this->siteSettings = new CFIPSiteSettings();
+        $this->settings = $this->siteSettings->settings;
         $this->helperFunctions = new CFIPHelpers();
 
 		// Inherit API and Key from Cloudflare plugin if non-existent
         if(empty($this->settings['cf_email'])){$this->settings['cf_email'] = get_site_option('cloudflare_api_email');}
         if(empty($this->settings['cf_key'])){$this->settings['cf_key'] = get_site_option('cloudflare_api_key');}
 	}
+
+	private function validate(){
+	    if(!$this->siteSettings->areCredentialsSet()) {
+            if ($this->siteSettings->isLoggingEnabled()) {
+                $this->log("No credentials present. Cancelling API call.");
+            }
+
+            return false;
+        }
+
+	    return;
+    }
 
 	/**
 	 * Master function to perform a request on the Cloudflare API.
@@ -41,15 +54,20 @@ class CloudflareAPIController
 	 * @return array|mixed|object
 	 */
 	public function request( $method, $url, $body=null )
-	{
-		// Log request
-		$this->log("=== REQUEST ===");
-		$this->log("Timestamp: ".current_time('mysql'));
-		$this->log("Method: ".$method);
-		$this->log("URL: ".$url);
-		if( $body ){
-			$this->log(json_decode($body));
-		}
+    {
+        if(!$this->validate())
+            return false;
+
+        // Log request
+        if (!$this->siteSettings->isLoggingEnabled()){
+            $this->log("=== REQUEST ===");
+            $this->log("Timestamp: " . current_time('mysql'));
+            $this->log("Method: " . $method);
+            $this->log("URL: " . $url);
+            if ($body) {
+                $this->log(json_decode($body));
+            }
+        }
 
 		// Get credentials from plugin settings.
 		$key = $this->getSetting('cf_key');
@@ -88,12 +106,14 @@ class CloudflareAPIController
 		$result = json_decode($result['body']);
 
 		// Handle errors
-		if( !$result || ( !property_exists($result, 'success') && ( property_exists($result, 'errors') || property_exists($result, 'error' ) ) ) ) {
-			$this->log("=== RESPONSE (Error) ===");
-		} else {
-			$this->log("=== RESPONSE (Success) ===");
-		}
-		$this->log($result);
+		if (!$this->siteSettings->isLoggingEnabled()) {
+            if (!$result || (!property_exists($result, 'success') && (property_exists($result, 'errors') || property_exists($result, 'error')))) {
+                $this->log("=== RESPONSE (Error) ===");
+            } else {
+                $this->log("=== RESPONSE (Success) ===");
+            }
+            $this->log($result);
+        }
 
 		return $result;
 	}
@@ -231,10 +251,8 @@ class CloudflareAPIController
 	 */
 	public function log( $message )
 	{
-        $settings = get_site_option('cfip_settings');
-
         // Only log if logging is enabled
-        if ($settings['enable_logging'] == 'on') {
+        if ($this->siteSettings->isLoggingEnabled()) {
             $log = get_site_option('cfip_log') ?: array();
             $log[] = $message;
             update_site_option('cfip_log', $log);
