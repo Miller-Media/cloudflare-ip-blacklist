@@ -26,18 +26,59 @@ class CFIPSiteSettings
 		// Single Site Settings Screen
 		add_action('admin_menu', array($this, 'addSiteMenu'));
 		add_action('admin_menu', array($this, 'verifyNonce'));
+
+        $helperFunctions = new CFIPHelpers();
+		$this->siteBaseDomain = $helperFunctions->parseBaseDomainFromURL(get_site_url())['domain'];;
 	}
 
-	public function isCloudflarePluginActive(){
+    /**
+     * Checks to see if the official Cloudflare plugin is active.
+     *
+     * @return bool
+     */
+    public function isCloudflarePluginActive(){
 		return is_plugin_active( 'cloudflare/cloudflare.php' );
 	}
-	
-	public function areCloudflarePluginCredentialsSet(){
+
+    /**
+     * Checks to see if the official Cloudflare plugin is active and credentials are set.
+     * @return array|bool
+     */
+    public function areCloudflarePluginCredentialsSet(){
+	    // Only use credentials if Cloudflare plugin is active, even if the values are in the DB
+        if(!$this->isCloudflarePluginActive())
+            return false;
+
 		if(!empty(get_option('cloudflare_api_key', null)) && !empty(get_option('cloudflare_api_email', null)))
 			return array('cf_key'=>get_option('cloudflare_api_key', null),'cf_email'=>get_option('cloudflare_api_email', null));
 
 		return false;
 	}
+
+    /**
+     * Checks to see if Cloudflare credentials are set either through the official
+     * Cloudflare plugin or through this plugin manually.
+     *
+     * @return array|bool
+     */
+    public function areCredentialsSet(){
+        $cfip_settings = get_option('cfip_settings');
+
+        // First, get API email and key from CloudFlare plugin settings, if available.
+        if($use_cloudflare_plugin_credentials = $this->areCloudflarePluginCredentialsSet()){
+            $cf_key = $use_cloudflare_plugin_credentials['cf_key'];
+            $cf_email = $use_cloudflare_plugin_credentials['cf_email'];
+            $cf_source = 'cf_plugin';
+        } else if($use_cloudflare_ip_plugin_credentials = (!empty($cfip_settings['cf_key']) && !empty($cfip_settings['cf_email']))){
+            $cf_key = $cfip_settings['cf_key'];
+            $cf_email = $cfip_settings['cf_email'];
+            $cf_source = 'manual';
+        } else {
+            return false;
+        }
+
+        return array('cf key' => $cf_key, 'cf_email' => $cf_email, 'source' => $cf_source);
+    }
 
 	/**
 	 * Registers the network admin menu page.
