@@ -1,25 +1,10 @@
 <?php
-// Initiate Helper Class
-$helperFunctions = new CFIPHelpers();
+//include_once('../classes/SiteSettings.php');
+$siteSettings = new CFIPSiteSettings();
 
 // Get the existing settings.
 $cfip_settings = get_option('cfip_settings') ?: array();
-$use_cloudflare_plugin_credentials = false;
-$use_cloudflare_ip_plugin_credentials = false;
-
-// First, get API email and key from CloudFlare plugin settings, if available.
-if($use_cloudflare_plugin_credentials = $this->areCloudflarePluginCredentialsSet()){
-    $cf_key = $use_cloudflare_plugin_credentials['cf_key'];
-    $cf_email = $use_cloudflare_plugin_credentials['cf_email'];
-} else if($use_cloudflare_ip_plugin_credentials = (!empty($cfip_settings['cf_key']) && !empty($cfip_settings['cf_email']))){
-    $cf_key = $cfip_settings['cf_key'];
-    $cf_email = $cfip_settings['cf_email'];
-} else {
-    $cf_key = '';
-    $cf_email = '';
-}
-
-$credentials_set = ($use_cloudflare_plugin_credentials || $use_cloudflare_ip_plugin_credentials);
+$credentials = $siteSettings->areCredentialsSet();
 
 // The plugin settings. Add new sections/fields accordingly.
 $settings = array(
@@ -30,14 +15,14 @@ $settings = array(
                 'type' => 'text',
                 'title' => 'Email Address',
                 'description' => '',
-                'value' => $cf_email
+                'value' => (array_key_exists('cf_email', $credentials) && $credentials)? $credentials['cf_email'] : ''
             ),
             array(
                 'name' => 'cf_key',
                 'type' => 'text',
                 'title' => 'API Key',
                 'description' => '',
-                'value' => $cf_key
+                'value' => (array_key_exists('cf_key', $credentials) && $credentials) ? $credentials['cf_key'] : ''
             )
         )
 	),
@@ -99,7 +84,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
 </ul>
 <section id="first-tab-group" class="tabgroup">
     <div class="tab-panel" id="tab1">
-        <h1 class="cf-heading cf-heading--1"><span>Settings</span> (<?php echo $helperFunctions->parseBaseDomainFromURL(get_site_url())['domain']; ?>)</h1>
+        <h1 class="cf-heading cf-heading--1"><span>Settings</span> (<?php echo $siteSettings->siteBaseDomain; ?>)</h1>
         <form name="cfip_settings" method="post" action="">
             <table>
                 <tbody>
@@ -108,12 +93,12 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                         /**
                         * Only display full form if credentials are set
                         */
-                        if($section=='Cloudflare Credentials' || ($section!=='Cloudflare Credentials' && $credentials_set)) {
+                        if($section=='Cloudflare Credentials' || ($section!=='Cloudflare Credentials' && $credentials)) {
                             ?>
                             <tr class="tr-section-title">
                                 <td><h2 class="cf-heading cf-heading--2"><?php echo $section; ?></h2></td>
                                 <?php
-                                if($section=='Cloudflare Credentials' && !$credentials_set){
+                                if($section=='Cloudflare Credentials' && !$credentials){
                                     echo '<span class="cf-card__footer_message">Please manually set credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.</span>';
                                 }
                                 ?>
@@ -121,7 +106,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
 
                             <?php
                             // If Cloudflare credentials are filled out from Cloudflare plugin
-                            if($section=='Cloudflare Credentials' && $this->isCloudflarePluginActive() && $use_cloudflare_plugin_credentials) {
+                            if($section=='Cloudflare Credentials' && $this->isCloudflarePluginActive() && ($credentials && $credentials['source']=='cf_plugin')) {
                                 $cloudflare_admin_url = admin_url()."options-general.php?page=cloudflare";
                                 ?>
                                 <tr>
@@ -135,8 +120,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                 if ($data['type'] == 'select') {
                                     ?>
                                     <tr>
-                                        <td><label for="<?php echo $data['name']; ?>"><h3
-                                                    class="cf-card__title"><?php echo $data['title']; ?></h3></label>
+                                        <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></label></h3>
                                         </td>
                                         <td>
                                             <select id="<?php echo $data['name']; ?>"
@@ -160,7 +144,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     <tr>
                                         <td><h3 class="cf-card__title"><label
                                                     for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
-                                            </h3></label>
+                                                </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
                                                 ?>
@@ -181,7 +165,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     <tr>
                                         <td><h3 class="cf-card__title"><label
                                                     for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
-                                            </h3></label>
+                                                </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
                                                 ?>
@@ -201,7 +185,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     <tr>
                                         <td><h3 class="cf-card__title"><label
                                                     for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
-                                            </h3></label>
+                                                </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
                                                 ?>
@@ -221,7 +205,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     <tr>
                                         <td><h3 class="cf-card__title"><label
                                                     for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
-                                            </h3></label>
+                                                </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
                                                 ?>
