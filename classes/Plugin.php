@@ -93,9 +93,9 @@ class CFIP_Blacklist
 
         // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
         if($this->isCloudflarePluginActive()) {
-            wp_enqueue_style('cf-corecss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/cf.core.css');
-            wp_enqueue_style('cf-componentscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/components.css');
-            wp_enqueue_style('cf-hackscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/hacks.css');
+            wp_enqueue_style('cf-corecss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/cf.core.css');
+            wp_enqueue_style('cf-componentscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/components.css');
+            wp_enqueue_style('cf-hackscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/hacks.css');
         }
     }
 

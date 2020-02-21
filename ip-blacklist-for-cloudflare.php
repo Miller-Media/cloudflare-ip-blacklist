@@ -10,7 +10,7 @@
  */
 
 define('CFIP_PLUGIN_VERSION', '1.0.0');
-define('CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR', plugins_url().'/cloudflare/');
+define('CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR', plugins_url('cloudflare'));
 
 include_once('classes/Helpers.php');
 include_once('classes/Plugin.php');
