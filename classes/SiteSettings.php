@@ -5,24 +5,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class CFIPSiteSettings
+ * Class CFIP_SiteSettings
  *
  * Handles setting up the admin settings menus
  * and screens.
  *
  */
-class CFIPSiteSettings
+class CFIP_SiteSettings
 {
 
 	/**
-	 * CFIPSiteSettings constructor.
+	 * CFIP_SiteSettings constructor.
 	 *
 	 * Runs on instantiation.
 	 *
 	 */
 	public function __construct()
 	{
-        $helperFunctions = new CFIPHelpers();
+        $helperFunctions = new CFIP_Helpers();
 		$this->siteBaseDomain = $helperFunctions->parseBaseDomainFromURL(get_site_url())['domain'];
 
 		$cfip_settings = get_option('cfip_settings');
@@ -178,8 +178,8 @@ class CFIPSiteSettings
              * Second, check if there are already values set in the DB and that the
              * Third, set to nothing if both fail
              **/
-            $settings['cf_email'] = isset($_POST['cf_email']) ?sanitize_text_field($_POST['cf_email']) : (array_key_exists('cf_email', $settings) ? $settings['cf_email'] : '');
-			$settings['cf_key'] = isset($_POST['cf_key']) ?sanitize_text_field($_POST['cf_key']) : (array_key_exists('cf_key', $settings) ? $settings['cf_key'] : '');
+            $settings['cf_email'] = isset($_POST['cf_email']) ? sanitize_text_field($_POST['cf_email']) : (array_key_exists('cf_email', $settings) ? $settings['cf_email'] : '');
+			$settings['cf_key'] = isset($_POST['cf_key']) ? sanitize_text_field($_POST['cf_key']) : (array_key_exists('cf_key', $settings) ? $settings['cf_key'] : '');
 			$settings['banned_usernames'] = isset($_POST['banned_usernames']) ? sanitize_text_field($_POST['banned_usernames']) : (array_key_exists('banned_usernames', $settings) ? $settings['banned_usernames'] : '');
 			$settings['zone_id'] = isset($_POST['zone_id']) ? sanitize_text_field($_POST['zone_id']) : (array_key_exists('zone_id', $settings) ? $settings['zone_id'] : '');
 
@@ -188,8 +188,8 @@ class CFIPSiteSettings
              * This is ok though because it is proper to ask people to re-enable blacklist and logging settings
              * if they refresh their credentials
              **/
-            $settings['enable_ip_blacklist'] = isset($_POST['enable_ip_blacklist']) ? $_POST['enable_ip_blacklist'] : '';
-            $settings['enable_logging'] = isset($_POST['enable_logging']) ? $_POST['enable_logging'] : '';
+            $settings['enable_ip_blacklist'] = isset($_POST['enable_ip_blacklist']) ? sanitize_text_field($_POST['enable_ip_blacklist']) : '';
+            $settings['enable_logging'] = isset($_POST['enable_logging']) ? sanitize_text_field($_POST['enable_logging']) : '';
 
 			if( update_option('cfip_settings', $settings) )
 				return true;
@@ -199,5 +199,5 @@ class CFIPSiteSettings
 		return false;
 
 	}
-		
+
 }

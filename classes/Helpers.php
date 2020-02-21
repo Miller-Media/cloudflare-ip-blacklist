@@ -5,12 +5,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class CFIPHelpers
+ * Class CFIP_Helpers
  *
  * Helper functions for Cloudflare IP Blacklist plugin
  *
  */
-class CFIPHelpers
+class CFIP_Helpers
 {
     /**
      * Function to parse domain from a URL.

@@ -7,13 +7,13 @@ if (!defined('ABSPATH')) {
 /**
  * Plugin Class
  */
-class CFIPBlacklist
+class CFIP_Blacklist
 {
 
     /**
      * The settings class.
      *
-     * @var CFIPSettings
+     * @var CFIP_Settings
      */
     public $siteSettings;
 
@@ -27,7 +27,7 @@ class CFIPBlacklist
     /**
      * The API class.
      *
-     * @var CloudflareAPIController
+     * @var CFIP_CloudflareAPIController
      */
     public $API;
 
@@ -44,15 +44,15 @@ class CFIPBlacklist
     public $adminScript;
 
     /**
-     * CFIPBlacklist constructor.
+     * CFIP_Blacklist constructor.
      *
      * Initialize plugin properties/hooks.
      *
      */
     public function __construct ()
     {
-        $this->siteSettings = new CFIPSiteSettings();
-        $this->API = new CloudflareAPIController();
+        $this->siteSettings = new CFIP_SiteSettings();
+        $this->API = new CFIP_CloudflareAPIController();
         $this->settings = get_site_option('cfip_settings');
 
         $this->adminStyle = plugins_url('ip-blacklist-for-cloudflare/assets/css/admin.css', 'ip-blacklist-for-cloudflare.php');
@@ -93,9 +93,9 @@ class CFIPBlacklist
 
         // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
         if($this->isCloudflarePluginActive()) {
-            wp_enqueue_style('cf-corecss', MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/cf.core.css');
-            wp_enqueue_style('cf-componentscss', MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/components.css');
-            wp_enqueue_style('cf-hackscss', MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/hacks.css');
+            wp_enqueue_style('cf-corecss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/cf.core.css');
+            wp_enqueue_style('cf-componentscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/components.css');
+            wp_enqueue_style('cf-hackscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'stylesheets/hacks.css');
         }
     }
 
@@ -276,7 +276,7 @@ class CFIPBlacklist
             wp_die(json_encode($response));
         }
 
-        $ip_address = preg_replace(array ('/\s{2,}/', '/[\t\n]/'), '', $_POST['ip_address']);
+        $ip_address = preg_replace(array ('/\s{2,}/', '/[\t\n]/'), '', sanitize_text_field($_POST['ip_address']));
         $response['ip'] = $ip_address;
 
         $banned_IPs = $this->getBannedIPs();

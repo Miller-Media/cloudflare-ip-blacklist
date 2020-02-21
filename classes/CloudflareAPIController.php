@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * CloudflareAPIController Class
+ * CFIP_CloudflareAPIController Class
  */
-class CloudflareAPIController
+class CFIP_CloudflareAPIController
 {
 
 	public $settings;
@@ -24,9 +24,9 @@ class CloudflareAPIController
 	 */
 	public function __construct()
 	{
-        $this->siteSettings = new CFIPSiteSettings();
+        $this->siteSettings = new CFIP_SiteSettings();
         $this->settings = $this->siteSettings->settings;
-        $this->helperFunctions = new CFIPHelpers();
+        $this->helperFunctions = new CFIP_Helpers();
 	}
 
 	private function validate(){

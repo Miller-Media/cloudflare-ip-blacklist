@@ -15,6 +15,8 @@ Cloudflare provides security and optimization services for websites all around t
 
 Cloudflare IP Blacklist allows WordPress admins to add a list of prohibited usernames and if someone attempts to log in with one of these usernames, this users IP address is automatically added to the Cloudflare blacklist. By doing this, the next time this user attempts to load the site, they will be blocked by Cloudflare before their requests get to your site's server. Add an extra layer of security today to your site!
 
+** This plugin relies on the use of Cloudflare, a third-party service that increases security and performance for web sites and services across the internet. For more information, visit the [Cloudflare website](https://www.cloudflare.com/) and their [privacy policy](https://www.cloudflare.com/privacypolicy/). This plugin is not officially endorsed, built or maintained by the Cloudflare team; rather, we are a development company that uses their services every day! **
+
 == Installation ==
 
 1. Upload `IP Blacklist for Cloudflare` to the `/wp-content/plugins/` directory

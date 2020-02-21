@@ -1,5 +1,5 @@
 <?php
-$siteSettings = new CFIPSiteSettings();
+$siteSettings = new CFIP_SiteSettings();
 $cfip_settings = $siteSettings->settings;
 $credentials = $siteSettings->areCredentialsSet();
 
