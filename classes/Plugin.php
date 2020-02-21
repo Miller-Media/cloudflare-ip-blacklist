@@ -55,8 +55,8 @@ class CFIPBlacklist
         $this->API = new CloudflareAPIController();
         $this->settings = get_site_option('cfip_settings');
 
-        $this->adminStyle = plugins_url('cloudflare-ip-blacklist/assets/css/admin.css', 'cloudflare-ip-blacklist.php');
-        $this->adminScript = plugins_url('cloudflare-ip-blacklist/assets/js/admin.js', 'cloudflare-ip-blacklist.php');
+        $this->adminStyle = plugins_url('ip-blacklist-for-cloudflare/assets/css/admin.css', 'ip-blacklist-for-cloudflare.php');
+        $this->adminScript = plugins_url('ip-blacklist-for-cloudflare/assets/js/admin.js', 'ip-blacklist-for-cloudflare.php');
 
         // Hooks
         add_action('admin_enqueue_scripts', array ($this, 'adminEnqueueScripts'), 40, 1);

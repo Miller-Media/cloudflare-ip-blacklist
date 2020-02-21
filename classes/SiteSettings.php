@@ -113,8 +113,8 @@ class CFIPSiteSettings
 	public function addSiteMenu()
 	{
 		add_menu_page(
-			'Cloudflare IP Blacklist',
-			'Cloudflare IP Blacklist',
+			'IP Blacklist for Cloudflare',
+			'IP Blacklist for Cloudflare',
 			'manage_options',
 			'cfip-menu',
 			array($this, 'addSiteMenuCB'),

@@ -1,13 +1,13 @@
-=== Cloudflare IP Blacklist ===
+=== IP Blacklist for Cloudflare ===
 Contributors: MillerMediaNow, mikemm01
-Tags: security, login, passwords, password, profile, users, brute force, username, banned usernames
+Tags: security, login, passwords, password, profile, users, brute force, username, banned usernames, cloudflare
 Requires PHP: 5.6
 Requires at least: 3.0
 Tested up to: 5.3.2
 Stable tag: 1.0.0
 License: GPLv2
 
-Automatically block IP addresses on Cloudflare for users attempting to use certain prohibited usernames when attempting to login.
+Blacklist IP addresses that attempt to login with a banned username through Cloudflare.
 
 == Description ==
 
@@ -17,9 +17,9 @@ Cloudflare IP Blacklist allows WordPress admins to add a list of prohibited user
 
 == Installation ==
 
-1. Upload `Cloudflare IP Blacklist` to the `/wp-content/plugins/` directory
+1. Upload `IP Blacklist for Cloudflare` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the _Plugins_ menu in WordPress
-1. Configure plugin through admin menu _Cloudflare IP Blacklist_
+1. Configure plugin through admin menu _IP Blacklist for Cloudflare_
 
 == Request ==
 

@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Cloudflare IP Blacklist
+ * Plugin Name: IP Blacklist for Cloudflare
  * Plugin URI:
- * Description: Blacklist IP addresses that attempt to login with a banned username.
+ * Description: Blacklist IP addresses that attempt to login with a banned username through Cloudflare.
  * Author: Miller Media
  * Author URI:
  * Depends:
