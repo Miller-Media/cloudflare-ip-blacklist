@@ -4,7 +4,7 @@
  * Plugin URI:
  * Description: Blacklist IP addresses that attempt to login with a banned username through Cloudflare.
  * Author: Miller Media
- * Author URI:
+ * Author URI: www.millermedia.io
  * Depends:
  * Version: 1.0.0
  */
