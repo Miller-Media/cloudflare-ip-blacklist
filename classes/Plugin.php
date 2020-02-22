@@ -70,8 +70,26 @@ class CFIPBlacklist
         // Cache Clear on product out-of-stock.
         add_action('woocommerce_no_stock_notification', array ($this, 'clearCacheProductOutOfStock'), 40, 1);
 
-        // Cache Clear on store notice update.
-        add_action('pre_update_option_woocommerce_demo_store_notice', array ($this, 'clearCacheSitewideStoreNoticeUpdated'), 40, 1);
+        /**
+         * Store Notice
+         *
+         * IMPORTANT: The order of these actions is very important to the clearCacheStoreNoticeUpdated function.
+         *
+         * Potential race condition for these:
+         * In the event of the checkbox value changing (enable/disable) AND the text changing, the cache
+         * clear happens on the woocommerce_demo_store update but is prevented on the demo_store_notice update
+         * because we don't want it to be sent twice. Technically, if the cache is cleared on the Cloudflare end
+         * and propagates BEFORE the text has changed on the site, the text changes may not be reflected. This
+         * most likely will not happen as an API call will generally be slower than the update of a value on the
+         * DB and a site load.
+         */
+        // Cache Clear on store notice being toggled on or off
+        add_action('add_option_woocommerce_demo_store', array ($this, 'clearCacheStoreNoticeAdded'), 40, 2);
+        add_action('update_option_woocommerce_demo_store', array ($this, 'clearCacheStoreNoticeUpdated'), 40, 3);
+
+        // Cache Clear on store notice text update.
+        add_action('add_option_woocommerce_demo_store_notice', array ($this, 'clearCacheStoreNoticeAdded'), 40, 2);
+        add_action('update_option_woocommerce_demo_store_notice', array ($this, 'clearCacheStoreNoticeUpdated'), 40, 3);
 
         // AJAX requests
         add_action('wp_ajax_cfip_unblacklist_ip', array ($this, 'ajaxUnblacklistIP'));
@@ -127,32 +145,90 @@ class CFIPBlacklist
     }
 
     /**
-     * Function that triggers a cache-clear for all product and
-     * category endpoints when the sitewide store notice is updated.
+     * Purge cache every time when the option is added for the first time.
+     *
+     * In cases where the first time this option is saved, the checkbox is toggled on
+     * AND the text is changed, it fires two API calls. Need to fix. @todo
      *
      * @param $option | string
      * @return string
      */
-    public function clearCacheSitewideStoreNoticeUpdated ($option)
+    public function clearCacheStoreNoticeAdded ($new_option, $option)
     {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('when_sitewide_notice_updated') == 'on'))
-            return $option;
+        /**
+         * If the option in WooFlare is disabled, bail.
+         */
+        if (!($this->getSetting('when_store_notice_updated') == 'on'))
+            return $new_option;
 
-        // Get old value of store notice.
-        $previous_notice = get_option('cfip_previous_store_notice', '');
+        $this->API->purgeCache();
+        return $new_option;
+    }
 
-        // If the store notice has not changed, bail.
-        if ($option == $previous_notice)
-            return $option;
+    /**
+     * Function that triggers a cache-clear for all product and
+     * category endpoints when the sitewide store notice is updated (text or enabled/disabled).
+     *
+     * @param $option | string
+     * @return string
+     */
+    public function clearCacheStoreNoticeUpdated ($old_option, $new_option, $option)
+    {
+        /**
+         * If the option in WooFlare is disabled, bail.
+         */
+        if (!($this->getSetting('when_store_notice_updated') == 'on'))
+            return $new_option;
 
-        // Store new notice as previous notice.
-        update_option('cfip_previous_store_notice', $option);
+        /**
+         * Purge cache every time when the option is added for the first time
+         */
+        if(strpos(current_filter(),'add_option_')!==false){
+            $this->API->purgeCache();
+            return $new_option;
+        }
 
-        // Clear cache.
-	    $this->API->purgeCache();
+        /**
+         * In all cases where the option is enabled and disabled and old option doesn't
+         * equal new option, we want to clear cache.
+         *
+         * We check the values, choose to purge cache or not and bail.
+         */
+        $option_changed = ($old_option != $new_option);
+        $notice_toggled = get_option('woocf_notice_toggled');
 
-        return $option;
+        if($option=='woocommerce_demo_store') {
+            // Clean option in case text changed hasn't run since the last time (two toggles back to back)
+            update_option('woocf_notice_toggled', 'no');
+
+            if($option_changed) {
+                $this->API->purgeCache();
+                update_option('woocf_notice_toggled', 'yes');
+            }
+
+            return $new_option;
+        }
+
+        /**
+         * In the event of a text change.
+         */
+        if($option=='woocommerce_demo_store_notice') {
+            // Get the current disabled/enabled value
+            $enabled = (get_option('woocommerce_demo_store') == 'yes');
+
+            /**
+             * If enabled and text has changed, in all cases we purge cache.
+             *
+             * We also check to make sure that the cache wasn't just cleared if the
+             * checkbox just recently changed its value. If it did, we don't want
+             * to clear the cache twice.
+             */
+            if($enabled && $option_changed && !$notice_toggled)
+                $this->API->purgeCache();
+        }
+
+        update_option('woocf_notice_toggled', 'no');
+        return $new_option;
     }
 
 	/**
