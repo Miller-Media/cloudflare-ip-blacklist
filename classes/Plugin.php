@@ -65,10 +65,22 @@ class CFIPBlacklist
         add_action('wp_authenticate', array ($this, 'checkUserLoginName'), 10, 1);
 
         // Cache Clear on scheduled sale end.
-        add_action('wc_after_products_ending_sales', array ($this, 'clearCacheScheduledSaleEnd'), 90, 1);
+        // If the option is disabled, bail.
+        if ($this->getSetting('after_scheduled_sale') == 'on') {
+            add_action('wc_after_products_ending_sales', array($this, 'clearCacheScheduledSaleEnd'), 90, 1);
+        }
 
-        // Cache Clear on product out-of-stock.
-        add_action('woocommerce_no_stock_notification', array ($this, 'clearCacheProductOutOfStock'), 40, 1);
+        /**
+         * Cache Clear on product out-of-stock. Both when the product goes out of stock through
+         * product sales or when someone changes the stock status to 'Out of Stock' and saves
+         * the product.
+         */
+        // If the option is disabled, bail.
+        if ($this->getSetting('when_product_out_of_stock') == 'on') {
+            add_action('woocommerce_no_stock_notification', array($this, 'clearCacheProduct'), 40, 1);
+            add_action('woocommerce_variation_set_stock_status', array($this, 'checkOutOfStock'), 10, 3);
+            add_action('woocommerce_product_set_stock_status', array($this, 'checkOutOfStock'), 10, 3);
+        }
 
         /**
          * Store Notice
@@ -113,18 +125,41 @@ class CFIPBlacklist
     }
 
     /**
+     * Checks if product is out of stock after being updated from the admin dashboard
+     * If so, clears cache of the product page
+     *
+     * @param $product_id
+     * @param $product_stock_status
+     * @param $product
+     */
+    public function checkOutOfStock($product_id, $product_stock_status, $product)
+    {
+        if ($product_stock_status == 'outofstock') {
+            $this->clearCacheProduct($product);
+        }
+    }
+
+    /**
      * Function that triggers a cache-clear for all product and
-     * category endpoints when a scheduled sale ends.
+     * category endpoints for products that were on sale, when a scheduled sale ends.
      *
      * @param $product_ids
      */
-    public function clearCacheScheduledSaleEnd ($product_ids)
+    public function clearCacheScheduledSaleEnd($product_ids)
     {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('after_scheduled_sale') == 'on'))
-            return;
+        $files = array();
 
-        $this->API->purgeCache();
+        foreach ($product_ids as $product_id) {
+            $product = new WC_Product($product_id);
+
+            if($urls = $this->getProductAndCategoryURLs($product)){
+                foreach($urls as $url){
+                    $files[] = $url;
+                }
+            }
+        }
+
+        $this->API->clearCacheByFiles($files);
     }
 
     /**
@@ -134,12 +169,8 @@ class CFIPBlacklist
      *
      * @param $product WC_Product
      */
-    public function clearCacheProductOutOfStock ($product)
+    public function clearCacheProduct ($product)
     {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('when_product_out_of_stock') == 'on'))
-            return;
-
         $files = $this->getProductAndCategoryURLs($product);
         $this->API->clearCacheByFiles($files);
     }
