@@ -158,7 +158,7 @@ class CFIPBlacklist
         /**
          * If the option in WooFlare is disabled, bail.
          */
-        if (!($this->getSetting('when_store_notice_updated') == 'on'))
+        if (!($this->getSetting('when_sitewide_notice_updated') == 'on'))
             return $new_option;
 
         $this->API->purgeCache();
@@ -177,7 +177,7 @@ class CFIPBlacklist
         /**
          * If the option in WooFlare is disabled, bail.
          */
-        if (!($this->getSetting('when_store_notice_updated') == 'on'))
+        if (!($this->getSetting('when_sitewide_notice_updated') == 'on'))
             return $new_option;
 
         /**
