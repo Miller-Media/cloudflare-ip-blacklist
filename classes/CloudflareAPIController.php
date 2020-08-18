@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * CloudflareAPIController Class
+ * CFIP_CloudflareAPIController Class
  */
-class CloudflareAPIController
+class CFIP_CloudflareAPIController
 {
 
 	public $settings;
@@ -24,8 +24,22 @@ class CloudflareAPIController
 	 */
 	public function __construct()
 	{
-		$this->settings = get_site_option('cfip_settings');
+        $this->siteSettings = new CFIP_SiteSettings();
+        $this->settings = $this->siteSettings->settings;
+        $this->helperFunctions = new CFIP_Helpers();
 	}
+
+	private function validate(){
+	    if(!$this->siteSettings->areCredentialsSet()) {
+            if ($this->siteSettings->isLoggingEnabled()) {
+                $this->log("No credentials present. Cancelling API call.");
+            }
+
+            return false;
+        }
+
+	    return true;
+    }
 
 	/**
 	 * Master function to perform a request on the Cloudflare API.
@@ -36,15 +50,20 @@ class CloudflareAPIController
 	 * @return array|mixed|object
 	 */
 	public function request( $method, $url, $body=null )
-	{
-		// Log request
-		$this->log("=== REQUEST ===");
-		$this->log("Timestamp: ".current_time('mysql'));
-		$this->log("Method: ".$method);
-		$this->log("URL: ".$url);
-		if( $body ){
-			$this->log(json_decode($body));
-		}
+    {
+        if(!$this->validate())
+            return false;
+
+        // Log request
+        if ($this->siteSettings->isLoggingEnabled()){
+            $this->log("=== REQUEST ===");
+            $this->log("Timestamp: " . current_time('mysql'));
+            $this->log("Method: " . $method);
+            $this->log("URL: " . $url);
+            if ($body) {
+                $this->log(json_decode($body));
+            }
+        }
 
 		// Get credentials from plugin settings.
 		$key = $this->getSetting('cf_key');
@@ -83,12 +102,14 @@ class CloudflareAPIController
 		$result = json_decode($result['body']);
 
 		// Handle errors
-		if( !$result->success && $result->errors ) {
-			$this->log("=== RESPONSE (Error) ===");
-		} else {
-			$this->log("=== RESPONSE (Success) ===");
-		}
-		$this->log($result);
+		if ($this->siteSettings->isLoggingEnabled()) {
+            if (!$result || (!property_exists($result, 'success') && (property_exists($result, 'errors') || property_exists($result, 'error')))) {
+                $this->log("=== RESPONSE (Error) ===");
+            } else {
+                $this->log("=== RESPONSE (Success) ===");
+            }
+            $this->log($result);
+        }
 
 		return $result;
 	}
@@ -98,35 +119,23 @@ class CloudflareAPIController
 	 *
 	 * @see      https://api.cloudflare.com/#firewall-access-rule-for-a-zone-create-access-rule
 	 *
-	 * @param $ip
+	 * @param $zone_id, $ip
 	 * @return array|mixed|object
 	 */
-	public function blacklistIP( $ip )
+	public function blacklistIP( $zone_id, $ip )
 	{
-		$zone_ids = $this->getZoneIDs();
-		$results = array();
-		foreach( $zone_ids as $zone_id ){
-			if( !$zone_id )
-				continue;
+        $url = $this->url . "zones/$zone_id/firewall/access_rules/rules";
+        $body = json_encode(array(
+            'mode' => 'block',
+            'configuration' => array(
+                'target' => 'ip',
+                'value' => $ip
+            ),
+            'notes' => 'Blocked for attempting to login using a banned username.'
+        ));
 
-			/**
-			* Important: This URL will fail on POST requests if there is a trailing slash 
-			*/
-			$url = $this->url . "zones/$zone_id/firewall/access_rules/rules";
-			$body = json_encode(array(
-				'mode' => 'block',
-				'configuration' => array(
-					'target' => 'ip',
-					'value' => $ip
-				),
-				'notes' => 'Blocked for attempting to login using a banned username.'
-			));
-
-			$result = $this->request("POST", $url, $body);
-			$results[$zone_id] = $result;
-		}
-
-		return $results;
+        $result = $this->request("POST", $url, $body);
+        return $result;
 	}
 
 	/**
@@ -147,91 +156,6 @@ class CloudflareAPIController
 	}
 
 	/**
-	 * Purge all caches.
-	 *
-	 * @return array|bool
-	 */
-	public function purgeCache()
-	{
-		// Get zone ID for this site.
-		$zone_id = $this->getZoneId();
-
-		if( !$zone_id )
-			return false;
-
-		// Configure endpoint url with zone id.
-		$url = $this->url . "zones/$zone_id/purge_cache/";
-
-		// Make request
-		$body = json_encode(array(
-			"purge_everything" => true
-		));
-		$result = $this->request("DELETE", $url, $body);
-
-		return $result;
-	}
-
-	/**
-	 * Clear product and category caches.
-	 *
-	 * @param $files array URLs to clear cache for
-	 * @return array|bool
-	 */
-	public function clearCacheByFiles($files)
-	{
-		// Get zone ID for this site.
-		$zone_id = $this->getZoneId();
-
-		if( !$zone_id )
-			return false;
-
-		// Configure endpoint url with zone id.
-		$url = $this->url . "zones/$zone_id/purge_cache/";
-
-		// Results array
-		$results = array();
-
-		$count = 0;
-		$urls = array();
-
-		foreach( $files as $file ){
-
-			if( count($files) == $count+1 ){
-				// If this is the last file, add it and make the request.
-				$urls[] = $file;
-
-				// Add $urls array to body argument.
-				$body = json_encode(array(
-					"files" => $urls
-				));
-
-				// Make request.
-				$result = $this->request("DELETE", $url, $body);
-				$results[] = $result;
-			} else if( $count == 0 || $count%30 != 0 ) {
-				// Limit body to 30 URLs per request.
-				$urls[] = $file;
-				$count++;
-			} else {
-				// Maximum payload, add $urls array to body argument and make request.
-				$body = json_encode(array(
-					"files" => $urls
-				));
-
-				// Make request.
-				$result = $this->request("DELETE", $url, $body);
-				$results[] = $result;
-
-				// Empty $urls array.
-				$urls = array();
-				$count++;
-			}
-		}
-
-		return $results;
-	}
-
-	/**
 	 * Get all Cloudflare zones.
 	 *
 	 * @return array|mixed|object
@@ -243,59 +167,44 @@ class CloudflareAPIController
 		return $result;
 	}
 
-	/**
-	 * Get Cloudflare domain zone IDs.
-	 *
-	 * @see     https://api.cloudflare.com/#zone-list-zones
-	 *
-	 * @return array|mixed|object
-	 */
-	public function getZoneIDs()
-	{
-		$domains = $this->getDomains();
-		$zone_ids = array();
-		foreach( $domains as $domain ){
-			$url = $this->url . "zones?name=$domain";
-			$result = $this->request("GET", $url);
-			if( !$result->errors && $result->result )
-				$zone_ids[] = $result->result[0]->id;
-		}
-		return $zone_ids;
-	}
+    /**
+     * Get zone ID for current site.
+     *
+     * @return mixed
+     */
+    public function getZoneId($domain)
+    {
+        $domain = $this->helperFunctions->parseBaseDomainFromURL($domain)['domain'];
 
-	/**
-	 * Get zone ID for current site.
-	 *
-	 * @return mixed
-	 */
-	public function getZoneId()
-	{
-		$domain = $this->getCurrentSiteDomain( get_current_blog_id() );
+        // Check for saved zone ID and return, if exists. Saves an API call.
+        $zone_id = null;
 
-		// Check for saved zone ID and return, if exists. Saves an API call.
-		$zone_id = null;
-		if( isset( $this->settings['zone_ids'] ) && isset( $this->settings['zone_ids'][$domain] ) ){
-			$zone_id = $this->settings['zone_ids'][$domain];
-		}
+        if( !empty( $this->settings['zone_id'] ) )
+            $zone_id = $this->settings['zone_id'];
 
-		if( $zone_id )
-			return $zone_id;
+        if( $zone_id )
+            return $zone_id;
 
-		// Build URL and make request.
-		$url = $this->url . "zones?name=$domain";
-		$result = $this->request("GET", $url);
-		if( $result->errors || !$result->result ){
-			return false;
-		}
+        // Only log if logging is enabled
+        if ($this->siteSettings->isLoggingEnabled()) {
+            $this->log('Zone ID not set in database. Retrieving via API.');
+        }
 
-		// Get zone ID and update settings for future use.
-		$zone_id = $result->result[0]->id;
-		$settings = get_site_option('cfip_settings');
-		$settings['zone_ids'][$domain] = $zone_id;
-		update_site_option('cfip_settings', $settings);
+        // Build URL and make request.
+        $url = $this->url . "zones?name=$domain";
+        $result = $this->request("GET", $url);
+        if( !$result || !empty($result->errors) || !$result->result ){
+            return false;
+        }
 
-		return $zone_id;
-	}
+        // Get zone ID and update settings for future use.
+        $zone_id = $result->result[0]->id;
+        $settings = get_site_option('cfip_settings');
+        $settings['zone_id'] = $zone_id;
+        update_site_option('cfip_settings', $settings);
+
+        return $zone_id;
+    }
 
 	/**
 	 * Get access rules for a given zone_id.
@@ -317,13 +226,12 @@ class CloudflareAPIController
 	 */
 	public function log( $message )
 	{
-        $settings = get_site_option('cfip_settings');
-        if( $settings['enable_logging'] !== 'on' )
-            return;
-
-		$log = get_site_option('cfip_log') ?: array();
-		$log[] = $message;
-		update_site_option('cfip_log', $log);
+        // Only log if logging is enabled
+        if ($this->siteSettings->isLoggingEnabled()) {
+            $log = get_site_option('cfip_log') ?: array();
+            $log[] = $message;
+            update_site_option('cfip_log', $log);
+        }
 	}
 
 	/**
@@ -335,55 +243,5 @@ class CloudflareAPIController
 	public function getSetting($setting)
 	{
 		return $this->settings[$setting];
-	}
-
-	/**
-	 * Get domains defined in plugin settings.
-	 * Domains should not include subdomains or 'www', etc.
-	 *
-	 * @return array
-	 */
-	public function getDomains()
-	{
-		return explode(', ', $this->getSetting('applicable_domains'));
-	}
-
-	/**
-	 * Get domains for each site on the multisite network.
-	 *
-	 * @return array|int
-	 */
-	public function getMultisiteDomains()
-	{
-		$sites = get_sites();
-		$domains = array();
-		// Loop through and get all domains; we'll use each of these in API call to blacklist IP.
-		foreach( $sites as $site ){
-			$domains[] = $site->domain;
-		}
-		return $domains;
-	}
-
-	/**
-	 * Get domain for current site.
-	 *
-	 * @param $blog_id
-	 * @return string
-	 */
-	public function getCurrentSiteDomain($blog_id)
-	{
-		$sites = get_sites( array( 'site__in' => array($blog_id) ) );
-		$domain = $sites[0]->domain;
-		$base_domain = '';
-		$applicable_domains = $this->getDomains();
-
-		// Extract base domain (sans any subdomain) according to applicable_domains setting.
-		foreach($applicable_domains as $ad){
-			if( strpos($domain, $ad) ){
-				$base_domain = $ad;
-				break;
-			}
-		}
-		return $base_domain;
 	}
 }

@@ -7,15 +7,15 @@ if (!defined('ABSPATH')) {
 /**
  * Plugin Class
  */
-class CFIPBlacklist
+class CFIP_Blacklist
 {
 
     /**
      * The settings class.
      *
-     * @var CFIPSettings
+     * @var CFIP_Settings
      */
-    public $settingsPage;
+    public $siteSettings;
 
     /**
      * The plugin settings.
@@ -27,7 +27,7 @@ class CFIPBlacklist
     /**
      * The API class.
      *
-     * @var CloudflareAPIController
+     * @var CFIP_CloudflareAPIController
      */
     public $API;
 
@@ -44,19 +44,19 @@ class CFIPBlacklist
     public $adminScript;
 
     /**
-     * CFIPBlacklist constructor.
+     * CFIP_Blacklist constructor.
      *
      * Initialize plugin properties/hooks.
      *
      */
     public function __construct ()
     {
-        $this->settingsPage = new CFIPSettings();
-        $this->API = new CloudflareAPIController();
+        $this->siteSettings = new CFIP_SiteSettings();
+        $this->API = new CFIP_CloudflareAPIController();
         $this->settings = get_site_option('cfip_settings');
 
-        $this->adminStyle = plugins_url('cloudflare-ip-blacklist/assets/css/admin.css', 'cloudflare-ip-blacklist.php');
-        $this->adminScript = plugins_url('cloudflare-ip-blacklist/assets/js/admin.js', 'cloudflare-ip-blacklist.php');
+        $this->adminStyle = plugins_url('ip-blacklist-for-cloudflare/assets/css/admin.css', 'ip-blacklist-for-cloudflare.php');
+        $this->adminScript = plugins_url('ip-blacklist-for-cloudflare/assets/js/admin.js', 'ip-blacklist-for-cloudflare.php');
 
         // Hooks
         add_action('admin_enqueue_scripts', array ($this, 'adminEnqueueScripts'), 40, 1);
@@ -64,37 +64,17 @@ class CFIPBlacklist
         // IP Blacklist
         add_action('wp_authenticate', array ($this, 'checkUserLoginName'), 10, 1);
 
-        // Cache Clear on scheduled sale end.
-        add_action('wc_after_products_ending_sales', array ($this, 'clearCacheScheduledSaleEnd'), 90, 1);
-
-        // Cache Clear on product out-of-stock.
-        add_action('woocommerce_no_stock_notification', array ($this, 'clearCacheProductOutOfStock'), 40, 1);
-
-        /**
-         * Store Notice
-         *
-         * IMPORTANT: The order of these actions is very important to the clearCacheStoreNoticeUpdated function.
-         *
-         * Potential race condition for these:
-         * In the event of the checkbox value changing (enable/disable) AND the text changing, the cache
-         * clear happens on the woocommerce_demo_store update but is prevented on the demo_store_notice update
-         * because we don't want it to be sent twice. Technically, if the cache is cleared on the Cloudflare end
-         * and propagates BEFORE the text has changed on the site, the text changes may not be reflected. This
-         * most likely will not happen as an API call will generally be slower than the update of a value on the
-         * DB and a site load.
-         */
-        // Cache Clear on store notice being toggled on or off
-        add_action('add_option_woocommerce_demo_store', array ($this, 'clearCacheStoreNoticeAdded'), 40, 2);
-        add_action('update_option_woocommerce_demo_store', array ($this, 'clearCacheStoreNoticeUpdated'), 40, 3);
-
-        // Cache Clear on store notice text update.
-        add_action('add_option_woocommerce_demo_store_notice', array ($this, 'clearCacheStoreNoticeAdded'), 40, 2);
-        add_action('update_option_woocommerce_demo_store_notice', array ($this, 'clearCacheStoreNoticeUpdated'), 40, 3);
-
         // AJAX requests
         add_action('wp_ajax_cfip_unblacklist_ip', array ($this, 'ajaxUnblacklistIP'));
         add_action('wp_ajax_cfip_clearlog', array ($this, 'ajaxClearLog'));
 	    add_action('wp_ajax_cfip_loadlog', array ($this, 'ajaxLoadLog'));
+
+        // Single Site Settings Screen
+        add_action('admin_menu', array($this->siteSettings, 'addSiteMenu'));
+        add_action('admin_menu', array($this->siteSettings, 'verifyNonce'));
+
+        // Add 'Settings' link to plugin page
+        //add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), array ($this, 'cfip_add_action_links'), 10, 5);
     }
 
     /**
@@ -108,238 +88,36 @@ class CFIPBlacklist
         if ($hook !== 'toplevel_page_cfip-menu')
             return;
 
-        wp_enqueue_style('cfip_admin_style', $this->adminStyle);
-        wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'));
+        wp_enqueue_style('cfip_admin_style', $this->adminStyle, array(),CFIP_PLUGIN_VERSION);
+        wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'),CFIP_PLUGIN_VERSION);
+
+        // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
+        if($this->isCloudflarePluginActive()) {
+            wp_enqueue_style('cf-corecss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/cf.core.css');
+            wp_enqueue_style('cf-componentscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/components.css');
+            wp_enqueue_style('cf-hackscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/hacks.css');
+        }
     }
 
     /**
-     * Function that triggers a cache-clear for all product and
-     * category endpoints when a scheduled sale ends.
-     *
-     * @param $product_ids
+     * Add Links to main WP plugin page
      */
-    public function clearCacheScheduledSaleEnd ($product_ids)
-    {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('after_scheduled_sale') == 'on'))
-            return;
-
-        $this->API->purgeCache();
-    }
-
-    /**
-     * Function that triggers a cache-clear for a product and
-     * its category endpoints when it crosses the Out-of-Stock
-     * threshold.
-     *
-     * @param $product WC_Product
-     */
-    public function clearCacheProductOutOfStock ($product)
-    {
-        // If the option is disabled, bail.
-        if (!($this->getSetting('when_product_out_of_stock') == 'on'))
-            return;
-
-        $files = $this->getProductAndCategoryURLs($product);
-        $this->API->clearCacheByFiles($files);
-    }
-
-    /**
-     * Purge cache every time when the option is added for the first time.
-     *
-     * In cases where the first time this option is saved, the checkbox is toggled on
-     * AND the text is changed, it fires two API calls. Need to fix. @todo
-     *
-     * @param $option | string
-     * @return string
-     */
-    public function clearCacheStoreNoticeAdded ($new_option, $option)
-    {
-        /**
-         * If the option in WooFlare is disabled, bail.
-         */
-        if (!($this->getSetting('when_sitewide_notice_updated') == 'on'))
-            return $new_option;
-
-        $this->API->purgeCache();
-        return $new_option;
-    }
-
-    /**
-     * Function that triggers a cache-clear for all product and
-     * category endpoints when the sitewide store notice is updated (text or enabled/disabled).
-     *
-     * @param $option | string
-     * @return string
-     */
-    public function clearCacheStoreNoticeUpdated ($old_option, $new_option, $option)
-    {
-        /**
-         * If the option in WooFlare is disabled, bail.
-         */
-        if (!($this->getSetting('when_sitewide_notice_updated') == 'on'))
-            return $new_option;
-
-        /**
-         * Purge cache every time when the option is added for the first time
-         */
-        if(strpos(current_filter(),'add_option_')!==false){
-            $this->API->purgeCache();
-            return $new_option;
-        }
-
-        /**
-         * In all cases where the option is enabled and disabled and old option doesn't
-         * equal new option, we want to clear cache.
-         *
-         * We check the values, choose to purge cache or not and bail.
-         */
-        $option_changed = ($old_option != $new_option);
-        $notice_toggled = get_option('woocf_notice_toggled');
-
-        if($option=='woocommerce_demo_store') {
-            // Clean option in case text changed hasn't run since the last time (two toggles back to back)
-            update_option('woocf_notice_toggled', 'no');
-
-            if($option_changed) {
-                $this->API->purgeCache();
-                update_option('woocf_notice_toggled', 'yes');
-            }
-
-            return $new_option;
-        }
-
-        /**
-         * In the event of a text change.
-         */
-        if($option=='woocommerce_demo_store_notice') {
-            // Get the current disabled/enabled value
-            $enabled = (get_option('woocommerce_demo_store') == 'yes');
-
-            /**
-             * If enabled and text has changed, in all cases we purge cache.
-             *
-             * We also check to make sure that the cache wasn't just cleared if the
-             * checkbox just recently changed its value. If it did, we don't want
-             * to clear the cache twice.
-             */
-            if($enabled && $option_changed && !$notice_toggled)
-                $this->API->purgeCache();
-        }
-
-        update_option('woocf_notice_toggled', 'no');
-        return $new_option;
-    }
-
-	/**
-	 * Get product and category URLs for given product.
-	 *
-	 * @param $product WC_Product
-	 * @return array
-	 */
-    public function getProductAndCategoryURLs ($product)
-    {
-        // Array to hold all product and category URLs
-        $files = array ();
-
-        // Add product and category permalinks to $files array, skipping dupes.
-        $prod_id = $product->get_id();
-        $terms = get_the_terms($prod_id, 'product_cat');
-        if ($terms) {
-            foreach ($terms as $term) {
-                $product_cat_id = $term->term_id;
-                $cat_url = get_term_link((int)$product_cat_id, 'product_cat');
-                if ($cat_url && !in_array($cat_url, $files))
-                    $files[] = $cat_url;
-            }
-        }
-
-        $product_url = get_permalink($prod_id);
-        if ($product_url && !in_array($product_url, $files))
-            $files[] = $product_url;
-
-        return $files;
-    }
-
-	/**
-	 * Get all product and category URLs
-	 *
-	 * @return array
-	 */
-    public function getAllProductAndCategoryURLs ()
-    {
-        // Array to hold all product and category URLs
-        $files = array ();
-
-        // Get all published products.
-        $args = array (
-            "status" => "publish",
-            "limit" => -1
+    /*public function cfip_add_action_links( $actions ) {
+        $custom_actions = array(
+            'settings' => sprintf( '<a href="%s">%s</a>', admin_url( 'admin.php?page=cfip-menu' ), 'Settings' )
         );
-        $products = wc_get_products($args);
 
-        // Add product and category permalinks to $files array, skipping dupes.
-        foreach ($products as $product) {
-	        /**
-	         * @var $product WC_Product
-	         */
-            $prod_id = $product->get_id();
-            $terms = get_the_terms($prod_id, 'product_cat');
-            if ($terms) {
-                foreach ($terms as $term) {
-                    $product_cat_id = $term->term_id;
-                    $cat_url = get_term_link((int)$product_cat_id, 'product_cat');
-                    if ($cat_url && !in_array($cat_url, $files))
-                        $files[] = $cat_url;
-                }
-            }
+        // add the links to the front of the actions list
+        return array_merge( $custom_actions, $actions );
+    }*/
 
-            $product_url = get_permalink($prod_id);
-            if ($product_url && !in_array($product_url, $files))
-                $files[] = $product_url;
-        }
-
-        return $files;
+    /**
+     * Check if official Cloudflare Plugin is installed and active
+     */
+    public function isCloudflarePluginActive(){
+        return is_plugin_active( 'cloudflare/cloudflare.php' );
     }
-
-	/**
-	 * Get all URLs for a site, including product and category URLs.
-	 *
-	 * @return array
-	 */
-    public function getAllURLs ()
-    {
-        $urls = $this->getAllProductAndCategoryURLs();
-
-        $posts = new WP_Query('post_type=any&posts_per_page=-1&post_status=publish');
-        $posts = $posts->posts;
-
-        foreach ($posts as $post) {
-            $permalink = null;
-            switch ($post->post_type) {
-                case 'revision':
-                case 'nav_menu_item':
-                case 'attachment':
-                case 'product':
-                    break;
-                case 'page':
-                    $permalink = get_page_link($post->ID);
-                    break;
-                case 'post':
-                    $permalink = get_permalink($post->ID);
-                    break;
-                default:
-                    $permalink = get_post_permalink($post->ID);
-                    break;
-            }
-            if ($permalink && !in_array($permalink, $urls)) {
-                $urls[] = $permalink;
-            }
-        }
-
-        return $urls;
-    }
-
+    
     /**
      * Check if login name has been blacklisted.
      *
@@ -359,6 +137,22 @@ class CFIPBlacklist
     }
 
     /**
+     * Blacklist IP in CloudFlare via API call.
+     *
+     *
+     * @param $ip
+     * @return array|mixed|object
+     */
+    public function singleSiteBlacklistIP( $ip ){
+        $zone_id = $this->API->getZoneId( get_site_url() );
+
+        if(!$zone_id)
+            return false;
+
+        return array($zone_id => $this->API->blacklistIP( $zone_id, $ip ));
+    }
+
+    /**
      * Add user's IP address to site option and blacklist it in Cloudflare.
      *
      * @return void
@@ -370,16 +164,38 @@ class CFIPBlacklist
 
         // If an IP address was retrieved, add to site option along with zone/request data and blacklist in Cloudflare.
         if ($ip) {
-            $results = $this->API->blacklistIP($ip);
-            $ip_data = array (
-                $ip => array (
-                    'zones' => array ()
+            $results = $this->singleSiteBlacklistIP( $ip );
+
+            $ip_data = array(
+                $ip => array(
+                    'zones' => array()
                 )
             );
+
+            $updateBannedIPs = false;
             foreach ($results as $zone_id => $result) {
+                if(!empty($result->errors)){
+                    /**
+                     * A delay exists (~5-10 seconds) after an IP has been added to the blacklist on Cloudflare
+                     * and before it takes effect to the user trying to access the site.
+                     *
+                     * In these cases we handle API requests that are considered 'duplicates'/ error code: 10009
+                     */
+                    if($result->errors[0]->code==10009){
+                        if ($this->siteSettings->isLoggingEnabled()) {
+                            $this->log("IP already blocked. Skipping...");
+                        }
+                    }
+
+                    continue;
+                }
+
                 $ip_data[$ip]['zones'][$zone_id]['request_id'] = $result->result->id;
+                $updateBannedIPs = true;
             }
-            $this->updatedBannedIPs($ip_data);
+
+            if($updateBannedIPs)
+                $this->updateBannedIPs($ip_data);
         }
     }
 
@@ -420,7 +236,7 @@ class CFIPBlacklist
      *
      * @param $ip_data array
      */
-    public function updatedBannedIPs ($ip_data)
+    public function updateBannedIPs ($ip_data)
     {
         $banned_IPs = $this->getBannedIPs();
         foreach ($ip_data as $ip => $data) {
@@ -445,24 +261,6 @@ class CFIPBlacklist
     }
 
     /**
-     * Get domains for each site on the multisite network.
-     *
-     * @return array|int
-     */
-    public function getMultisiteDomains ()
-    {
-        $sites = get_sites();
-        $domains = array ();
-
-        // Loop through and get all domains; we'll use each of these in API call to blacklist IP.
-        foreach ($sites as $site) {
-            $domains[] = $site->domain;
-        }
-
-        return $domains;
-    }
-
-    /**
      * Remove an IP address from Cloudflare firewall rules.
      *
      */
@@ -478,7 +276,7 @@ class CFIPBlacklist
             wp_die(json_encode($response));
         }
 
-        $ip_address = preg_replace(array ('/\s{2,}/', '/[\t\n]/'), '', $_POST['ip_address']);
+        $ip_address = preg_replace(array ('/\s{2,}/', '/[\t\n]/'), '', sanitize_text_field($_POST['ip_address']));
         $response['ip'] = $ip_address;
 
         $banned_IPs = $this->getBannedIPs();
@@ -559,12 +357,11 @@ class CFIPBlacklist
      */
     public function log ($message)
     {
-        if( $this->getSetting('enable_logging') !== 'on' )
-            return;
-
-        $log = get_site_option('cfip_log') ?: array ();
-        $log[] = $message;
-        update_site_option('cfip_log', $log);
+        if ($this->siteSettings->isLoggingEnabled()){
+            $log = get_site_option('cfip_log') ?: array();
+            $log[] = $message;
+            update_site_option('cfip_log', $log);
+        }
     }
 
     /**

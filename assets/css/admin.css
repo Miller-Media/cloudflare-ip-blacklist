@@ -7,6 +7,10 @@ input[type="text"]{
 .cfip_ajax_btn {
     margin-left: 10px;
 }
+#cfip_ajax_res_unblacklist{
+    position: relative;
+    top: 20px;
+}
 #log_screen {
     padding: 20px;
     background: #dedede;
