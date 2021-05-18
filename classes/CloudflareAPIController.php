@@ -99,6 +99,10 @@ class CFIP_CloudflareAPIController
 				break;
 		}
 
+		if(is_wp_error($result)){
+			return false;
+		}
+
 		$result = json_decode($result['body']);
 
 		// Handle errors
