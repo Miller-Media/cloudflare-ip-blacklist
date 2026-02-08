@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CFIP_SiteSettings
 {
+	public $siteBaseDomain;
+	public $settings;
 
 	/**
 	 * CFIP_SiteSettings constructor.

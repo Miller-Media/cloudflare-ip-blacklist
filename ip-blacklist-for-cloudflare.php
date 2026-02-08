@@ -7,6 +7,8 @@
  * Author URI: www.millermedia.io
  * Depends:
  * Version: 1.0.1
+ * Requires PHP: 8.1
+ * Tested up to: 6.9
  */
 
 define('CFIP_PLUGIN_VERSION', '1.0.1');
