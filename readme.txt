@@ -1,9 +1,9 @@
 === IP Blacklist for Cloudflare ===
 Contributors: MillerMedia,mikemm01
 Tags: login, password, passwords, security, profile
-Tested up to: 5.8
+Tested up to: 6.9
 Stable tag: 1.0.1
-Requires PHP: 5.6
+Requires PHP: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
