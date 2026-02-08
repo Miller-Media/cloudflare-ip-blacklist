@@ -372,6 +372,6 @@ class CFIP_Blacklist
      */
     public function getSetting ($setting)
     {
-        return $this->settings[$setting];
+        return $this->settings[$setting] ?? null;
     }
 }
