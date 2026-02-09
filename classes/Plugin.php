@@ -102,6 +102,8 @@ class CFIP_Blacklist
             'remove_from_blacklist' => __('Remove From Blacklist', 'ip-blacklist-cloudflare'),
             'change_credentials'   => __('Change Credentials', 'ip-blacklist-cloudflare'),
             'cancel'               => __('Cancel', 'ip-blacklist-cloudflare'),
+            'disconnect'           => __('Disconnect', 'ip-blacklist-cloudflare'),
+            'disconnect_confirm'   => __('Are you sure you want to disconnect? Your Cloudflare credentials will be removed.', 'ip-blacklist-cloudflare'),
         ));
 
         // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles

@@ -25,6 +25,16 @@ jQuery(document).ready(function(){
         }
     });
 
+    // Disconnect — clear credential fields and submit
+    jQuery('.cfip-disconnect').on('click', function(e) {
+        e.preventDefault();
+        if (!confirm(cfip_i18n.disconnect_confirm)) return;
+        jQuery('#cf_email').val('');
+        jQuery('#cf_key').val('');
+        jQuery('#cf_token').val('');
+        jQuery('form[name="cfip_settings"]').find('#submit').click();
+    });
+
     var $ubSelect = jQuery('select[name="blacklisted_ips"]');
     $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn cf-btn cf-btn--primary' name='cfip_ajax_btn'>" + cfip_i18n.remove_from_blacklist + "</button><div id='cfip_ajax_res_unblacklist'></div>");
 

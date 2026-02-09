@@ -13,7 +13,7 @@ $settings = array(
                 'title' => __('Authentication Method', 'ip-blacklist-cloudflare'),
                 'description' => '',
                 'options' => array(
-                    'global_key' => __('Global API Key', 'ip-blacklist-cloudflare'),
+                    'global_key' => __('Global API Key (Legacy)', 'ip-blacklist-cloudflare'),
                     'api_token'  => __('API Token (Recommended)', 'ip-blacklist-cloudflare'),
                 ),
                 'value' => isset($cfip_settings['cf_auth_type']) ? $cfip_settings['cf_auth_type'] : 'global_key'
@@ -273,7 +273,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                     $email = isset($cfip_settings['cf_email']) ? $cfip_settings['cf_email'] : '';
                                     $key = isset($cfip_settings['cf_key']) ? $cfip_settings['cf_key'] : '';
                                     $masked_key = substr($key, 0, 3) . '...' . substr($key, -4);
-                                    $auth_label = __('Global API Key', 'ip-blacklist-cloudflare');
+                                    $auth_label = __('Global API Key (Legacy)', 'ip-blacklist-cloudflare');
                                     $masked_display = esc_html($email) . ' / <code>' . esc_html($masked_key) . '</code>';
                                 }
                                 ?>
@@ -289,6 +289,8 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                                 &mdash; <?php echo $masked_display; ?>
                                             </span>
                                             <a href="#" class="cfip-toggle-credentials"><?php esc_html_e('Change Credentials', 'ip-blacklist-cloudflare'); ?></a>
+                                            <span class="cfip-status-separator">|</span>
+                                            <a href="#" class="cfip-disconnect"><?php esc_html_e('Disconnect', 'ip-blacklist-cloudflare'); ?></a>
                                         </div>
                                         <div class="cfip-credentials-form" style="display: none;">
                                             <table><tbody>

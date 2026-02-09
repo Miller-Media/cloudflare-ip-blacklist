@@ -118,6 +118,18 @@ input[type="text"]{
     white-space: nowrap;
     text-decoration: none;
 }
+.cfip-status-separator {
+    margin: 0 8px;
+    color: #999;
+}
+.cfip-disconnect {
+    white-space: nowrap;
+    text-decoration: none;
+    color: #a00;
+}
+.cfip-disconnect:hover {
+    color: #dc3232;
+}
 .cfip-credentials-form {
     border-top: 1px solid #ddd;
     padding-top: 16px;
