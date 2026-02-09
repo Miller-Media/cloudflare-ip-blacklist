@@ -1,5 +1,5 @@
 === IP Blacklist for Cloudflare ===
-Contributors: MillerMedia,mikemm01
+Contributors: MillerMediaNow, mikemm01
 Tags: login, password, passwords, security, profile
 Tested up to: 6.9
 Stable tag: 1.0.5
