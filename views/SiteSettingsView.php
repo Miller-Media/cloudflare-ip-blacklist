@@ -95,6 +95,134 @@ if(count($banned_IPs_list)==0){
 
 $settings[__('Blacklist IPs', 'ip-blacklist-cloudflare')]['fields'][] = $blacklist_ip_settings_array;
 
+/**
+ * Render a single field row.
+ */
+function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list) {
+    if ($data['type'] == 'select') {
+        ?>
+        <tr>
+            <td><h3 class="cf-card__title"><label for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?></label></h3>
+            </td>
+            <td>
+                <select id="<?php echo esc_attr($data['name']); ?>"
+                        name="<?php echo esc_attr($data['name']); ?>">
+                    <?php
+                    if ($banned_IPs) {
+                        foreach ($banned_IPs_list as $name => $val) {
+                            ?>
+                            <option name="<?php echo esc_attr($name); ?>"
+                                    value="<?php echo esc_attr($val); ?>"><?php echo esc_html($val); ?></option>
+                            <?php
+                        }
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <?php
+    } else if ($data['type'] == 'textarea') {
+        ?>
+        <tr>
+            <td><h3 class="cf-card__title"><label
+                        for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
+                    </label></h3>
+                <?php
+                if (isset($data['description']) && $data['description']) {
+                    ?>
+                    <span
+                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                    <?php
+                }
+                ?>
+            </td>
+            <td><textarea id="<?php echo esc_attr($data['name']); ?>"
+                          name="<?php echo esc_attr($data['name']); ?>" rows="4"
+                          cols="50"><?php echo esc_textarea(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
+            </td>
+        </tr>
+        <?php
+    } else if ($data['type'] == 'checkbox') {
+        ?>
+        <tr>
+            <td><h3 class="cf-card__title"><label
+                        for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
+                    </label></h3>
+                <?php
+                if (isset($data['description']) && $data['description']) {
+                    ?>
+                    <span
+                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                    <?php
+                }
+                ?>
+            </td>
+            <td><input id="<?php echo esc_attr($data['name']); ?>" type="<?php echo esc_attr($data['type']); ?>"
+                       name="<?php echo esc_attr($data['name']); ?>" <?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked' : ''); ?>>
+            </td>
+        </tr>
+        <?php
+    } else if ($data['type'] == 'span') {
+        ?>
+        <tr>
+            <td><h3 class="cf-card__title"><label
+                        for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
+                    </label></h3>
+                <?php
+                if (isset($data['description']) && $data['description']) {
+                    ?>
+                    <span
+                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                    <?php
+                }
+                ?>
+            </td>
+            <td><span
+                    id="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?></span>
+            </td>
+        </tr>
+        <?php
+    } else if ($data['type'] == 'radio') {
+        ?>
+        <tr>
+            <td colspan="2"><h3 class="cf-card__title"><?php echo esc_html($data['title']); ?></h3>
+                <?php foreach ($data['options'] as $val => $label) { ?>
+                    <label style="margin-right: 20px;">
+                        <input type="radio"
+                               name="<?php echo esc_attr($data['name']); ?>"
+                               value="<?php echo esc_attr($val); ?>"
+                               <?php checked($data['value'], $val); ?>>
+                        <?php echo esc_html($label); ?>
+                    </label>
+                <?php } ?>
+            </td>
+        </tr>
+        <?php
+    } else {
+        ?>
+        <tr<?php if (isset($data['auth_group'])) echo ' class="auth-group-' . esc_attr($data['auth_group']) . '"'; ?>>
+            <td colspan="2"><h3 class="cf-card__title"><label
+                        for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
+                    </label></h3>
+                <?php
+                if (isset($data['description']) && $data['description']) {
+                    ?>
+                    <span
+                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                    <?php
+                }
+                ?>
+                <br />
+                <input id="<?php echo esc_attr($data['name']); ?>" type="<?php echo esc_attr($data['type']); ?>"
+                       name="<?php echo esc_attr($data['name']); ?>"
+                       value="<?php echo esc_attr(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?>"
+                       style="width: 100%; max-width: 400px;">
+            </td>
+        </tr>
+        <?php
+    }
+}
+
 ?>
 <ul class="tabs clearfix" data-tabgroup="first-tab-group">
     <li><a href="#tab1" class="active"><?php esc_html_e('Settings', 'ip-blacklist-cloudflare'); ?></a></li>
@@ -108,156 +236,107 @@ $settings[__('Blacklist IPs', 'ip-blacklist-cloudflare')]['fields'][] = $blackli
                     <?php
                     $cf_credentials_label = __('Cloudflare Credentials', 'ip-blacklist-cloudflare');
                     foreach( $settings as $section=>$fields ){
-                        /**
-                        * Only display full form if credentials are set
-                        */
-                        if($section==$cf_credentials_label || ($section!==$cf_credentials_label && $credentials)) {
-                            ?>
-                            <tr class="tr-section-title">
-                                <td><h2 class="cf-heading cf-heading--2"><?php echo esc_html($section); ?></h2></td>
-                                <?php
-                                if($section==$cf_credentials_label && !$credentials){
-                                    echo '<span class="cf-card__footer_message">' . __('Please manually set credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-cloudflare') . '</span>';
-                                }
-                                ?>
-                            </tr>
 
-                            <?php
-                            // If Cloudflare credentials are filled out from Cloudflare plugin
-                            if($section==$cf_credentials_label && $this->isCloudflarePluginActive() && ($credentials && $credentials['source']=='cf_plugin')) {
-                                $cloudflare_admin_url = admin_url()."options-general.php?page=cloudflare";
+                        if ($section === $cf_credentials_label) {
+                            // Determine which connection state we're in
+                            $is_cf_plugin_source = ($credentials && isset($credentials['source']) && $credentials['source'] === 'cf_plugin');
+                            $is_manual_connected = ($credentials && isset($credentials['source']) && $credentials['source'] === 'manual');
+
+                            if ($is_cf_plugin_source) {
+                                // State A: Credentials from official Cloudflare plugin
+                                $cloudflare_admin_url = admin_url('options-general.php?page=cloudflare');
                                 ?>
                                 <tr>
-                                    <td><?php printf(__('Credentials imported from %sCloudflare%s plugin.', 'ip-blacklist-cloudflare'), '<a href="' . esc_url($cloudflare_admin_url) . '">', '</a>'); ?></td>
+                                    <td colspan="2">
+                                        <div class="cfip-connection-status cfip-connection-status--cf-plugin">
+                                            <span class="dashicons dashicons-yes-alt cfip-status-icon"></span>
+                                            <span class="cfip-status-text">
+                                                <?php printf(
+                                                    __('Connected via %sCloudflare plugin%s.', 'ip-blacklist-cloudflare'),
+                                                    '<a href="' . esc_url($cloudflare_admin_url) . '">',
+                                                    '</a>'
+                                                ); ?>
+                                            </span>
+                                        </div>
+                                    </td>
                                 </tr>
-                                <?php continue;
-                            }
-
-
-                            foreach ($fields['fields'] as $field => $data) {
-                                if ($data['type'] == 'select') {
-                                    ?>
-                                    <tr>
-                                        <td><h3 class="cf-card__title"><label for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?></label></h3>
-                                        </td>
-                                        <td>
-                                            <select id="<?php echo esc_attr($data['name']); ?>"
-                                                    name="<?php echo esc_attr($data['name']); ?>">
+                                <?php
+                            } elseif ($is_manual_connected) {
+                                // State B: Manual credentials connected — build masked preview
+                                $auth_type = isset($cfip_settings['cf_auth_type']) ? $cfip_settings['cf_auth_type'] : 'global_key';
+                                if ($auth_type === 'api_token') {
+                                    $token = isset($cfip_settings['cf_token']) ? $cfip_settings['cf_token'] : '';
+                                    $masked = substr($token, 0, 3) . '...' . substr($token, -4);
+                                    $auth_label = __('API Token', 'ip-blacklist-cloudflare');
+                                    $masked_display = '<code>' . esc_html($masked) . '</code>';
+                                } else {
+                                    $email = isset($cfip_settings['cf_email']) ? $cfip_settings['cf_email'] : '';
+                                    $key = isset($cfip_settings['cf_key']) ? $cfip_settings['cf_key'] : '';
+                                    $masked_key = substr($key, 0, 3) . '...' . substr($key, -4);
+                                    $auth_label = __('Global API Key', 'ip-blacklist-cloudflare');
+                                    $masked_display = esc_html($email) . ' / <code>' . esc_html($masked_key) . '</code>';
+                                }
+                                ?>
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="cfip-connection-status cfip-connection-status--connected">
+                                            <span class="dashicons dashicons-yes-alt cfip-status-icon"></span>
+                                            <span class="cfip-status-text">
+                                                <?php printf(
+                                                    __('Connected via %s', 'ip-blacklist-cloudflare'),
+                                                    '<strong>' . esc_html($auth_label) . '</strong>'
+                                                ); ?>
+                                                &mdash; <?php echo $masked_display; ?>
+                                            </span>
+                                            <a href="#" class="cfip-toggle-credentials"><?php esc_html_e('Change Credentials', 'ip-blacklist-cloudflare'); ?></a>
+                                        </div>
+                                        <div class="cfip-credentials-form" style="display: none;">
+                                            <table><tbody>
                                                 <?php
-                                                if ($banned_IPs) {
-                                                    foreach ($banned_IPs_list as $name => $val) {
-                                                        ?>
-                                                        <option name="<?php echo esc_attr($name); ?>"
-                                                                value="<?php echo esc_attr($val); ?>"><?php echo esc_html($val); ?></option>
-                                                        <?php
-                                                    }
+                                                foreach ($fields['fields'] as $data) {
+                                                    cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list);
                                                 }
                                                 ?>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <?php
-                                } else if ($data['type'] == 'textarea') {
-                                    ?>
-                                    <tr>
-                                        <td><h3 class="cf-card__title"><label
-                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
-                                                </label></h3>
+                                            </tbody></table>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php
+                            } else {
+                                // State C: Not connected — show prompt + credential form
+                                ?>
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="cfip-connect-prompt">
+                                            <?php echo __('Please set your Cloudflare credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-cloudflare'); ?>
+                                        </div>
+                                        <table><tbody>
                                             <?php
-                                            if (isset($data['description']) && $data['description']) {
-                                                ?>
-                                                <span
-                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
-                                                <?php
+                                            foreach ($fields['fields'] as $data) {
+                                                cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list);
                                             }
                                             ?>
-                                        </td>
-                                        <td><textarea id="<?php echo esc_attr($data['name']); ?>"
-                                                      name="<?php echo esc_attr($data['name']); ?>" rows="4"
-                                                      cols="50"><?php echo esc_textarea(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
-                                        </td>
-                                    </tr>
-                                    <?php
-                                } else if ($data['type'] == 'checkbox') {
-                                    ?>
-                                    <tr>
-                                        <td><h3 class="cf-card__title"><label
-                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
-                                                </label></h3>
-                                            <?php
-                                            if (isset($data['description']) && $data['description']) {
-                                                ?>
-                                                <span
-                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
-                                                <?php
-                                            }
-                                            ?>
-                                        </td>
-                                        <td><input id="<?php echo esc_attr($data['name']); ?>" type="<?php echo esc_attr($data['type']); ?>"
-                                                   name="<?php echo esc_attr($data['name']); ?>" <?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked' : ''); ?>>
-                                        </td>
-                                    </tr>
-                                    <?php
-                                } else if ($data['type'] == 'span') {
-                                    ?>
-                                    <tr>
-                                        <td><h3 class="cf-card__title"><label
-                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
-                                                </label></h3>
-                                            <?php
-                                            if (isset($data['description']) && $data['description']) {
-                                                ?>
-                                                <span
-                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
-                                                <?php
-                                            }
-                                            ?>
-                                        </td>
-                                        <td><span
-                                                id="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?></span>
-                                        </td>
-                                    </tr>
-                                    <?php
-                                } else if ($data['type'] == 'radio') {
-                                    ?>
-                                    <tr>
-                                        <td colspan="2"><h3 class="cf-card__title"><?php echo esc_html($data['title']); ?></h3>
-                                            <?php foreach ($data['options'] as $val => $label) { ?>
-                                                <label style="margin-right: 20px;">
-                                                    <input type="radio"
-                                                           name="<?php echo esc_attr($data['name']); ?>"
-                                                           value="<?php echo esc_attr($val); ?>"
-                                                           <?php checked($data['value'], $val); ?>>
-                                                    <?php echo esc_html($label); ?>
-                                                </label>
-                                            <?php } ?>
-                                        </td>
-                                    </tr>
-                                    <?php
-                                } else {
-                                    ?>
-                                    <tr<?php if (isset($data['auth_group'])) echo ' class="auth-group-' . esc_attr($data['auth_group']) . '"'; ?>>
-                                        <td colspan="2"><h3 class="cf-card__title"><label
-                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
-                                                </label></h3>
-                                            <?php
-                                            if (isset($data['description']) && $data['description']) {
-                                                ?>
-                                                <span
-                                                    class="cf-card__footer_message"><?php echo $data['description']; ?></span>
-                                                <?php
-                                            }
-                                            ?>
-                                            <br />
-                                            <input id="<?php echo esc_attr($data['name']); ?>" type="<?php echo esc_attr($data['type']); ?>"
-                                                   name="<?php echo esc_attr($data['name']); ?>"
-                                                   value="<?php echo esc_attr(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?>"
-                                                   style="width: 100%; max-width: 400px;">
-                                        </td>
-                                    </tr>
-                                    <?php
-                                }
+                                        </tbody></table>
+                                    </td>
+                                </tr>
+                                <?php
                             }
+                            continue;
+                        }
+
+                        // Plugin-specific sections — only render if credentials are set
+                        if (!$credentials) {
+                            continue;
+                        }
+
+                        ?>
+                        <tr class="tr-section-title">
+                            <td><h2 class="cf-heading cf-heading--2"><?php echo esc_html($section); ?></h2></td>
+                        </tr>
+                        <?php
+
+                        foreach ($fields['fields'] as $data) {
+                            cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list);
                         }
                     }
                     ?>

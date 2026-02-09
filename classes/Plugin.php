@@ -100,6 +100,8 @@ class CFIP_Blacklist
             'log_cleared'         => __('Log cleared.', 'ip-blacklist-cloudflare'),
             'loading_log'         => __('Loading log...', 'ip-blacklist-cloudflare'),
             'remove_from_blacklist' => __('Remove From Blacklist', 'ip-blacklist-cloudflare'),
+            'change_credentials'   => __('Change Credentials', 'ip-blacklist-cloudflare'),
+            'cancel'               => __('Cancel', 'ip-blacklist-cloudflare'),
         ));
 
         // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles

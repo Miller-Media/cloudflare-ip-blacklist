@@ -9,6 +9,22 @@ jQuery(document).ready(function(){
     jQuery('input[name="cf_auth_type"]').on('change', toggleAuthFields);
     toggleAuthFields();
 
+    // Change Credentials toggle
+    jQuery('.cfip-toggle-credentials').on('click', function(e) {
+        e.preventDefault();
+        var $form = jQuery('.cfip-credentials-form');
+        var $link = jQuery(this);
+        if ($form.is(':visible')) {
+            $form.slideUp(200);
+            $link.text(cfip_i18n.change_credentials);
+        } else {
+            $form.slideDown(200, function() {
+                toggleAuthFields();
+            });
+            $link.text(cfip_i18n.cancel);
+        }
+    });
+
     var $ubSelect = jQuery('select[name="blacklisted_ips"]');
     $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn cf-btn cf-btn--primary' name='cfip_ajax_btn'>" + cfip_i18n.remove_from_blacklist + "</button><div id='cfip_ajax_res_unblacklist'></div>");
 
