@@ -2,7 +2,7 @@
 Contributors: MillerMedia,mikemm01
 Tags: login, password, passwords, security, profile
 Tested up to: 6.9
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -18,6 +18,14 @@ Cloudflare IP Blacklist allows WordPress admins to add a list of prohibited user
 ** This plugin relies on the use of Cloudflare, a third-party service that increases security and performance for web sites and services across the internet. For more information, visit the Cloudflare website and their privacy policy. This plugin is not officially endorsed, built or maintained by the Cloudflare team; rather, we are a development company that uses their services every day! **
 
 == Changelog ==
+
+= 1.0.5 =
+* Added support for scoped API tokens as an alternative to Global API Key
+* Added connected state UI with credential status bar and masked credential preview
+* Added Disconnect action to easily switch authentication methods
+* Added internationalization (i18n) support for all user-facing strings
+* Labeled Global API Key as Legacy, recommending API Token for new installs
+* Added required Cloudflare token permissions in API Token field description
 
 = 1.0.4 =
 * Added output escaping to settings page

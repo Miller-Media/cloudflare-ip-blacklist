@@ -1,7 +1,42 @@
 jQuery(document).ready(function(){
 
+    // Auth method toggle
+    function toggleAuthFields() {
+        var authType = jQuery('input[name="cf_auth_type"]:checked').val() || 'global_key';
+        jQuery('.auth-group-global_key').toggle(authType === 'global_key');
+        jQuery('.auth-group-api_token').toggle(authType === 'api_token');
+    }
+    jQuery('input[name="cf_auth_type"]').on('change', toggleAuthFields);
+    toggleAuthFields();
+
+    // Change Credentials toggle
+    jQuery('.cfip-toggle-credentials').on('click', function(e) {
+        e.preventDefault();
+        var $form = jQuery('.cfip-credentials-form');
+        var $link = jQuery(this);
+        if ($form.is(':visible')) {
+            $form.slideUp(200);
+            $link.text(cfip_i18n.change_credentials);
+        } else {
+            $form.slideDown(200, function() {
+                toggleAuthFields();
+            });
+            $link.text(cfip_i18n.cancel);
+        }
+    });
+
+    // Disconnect — clear credential fields and submit
+    jQuery('.cfip-disconnect').on('click', function(e) {
+        e.preventDefault();
+        if (!confirm(cfip_i18n.disconnect_confirm)) return;
+        jQuery('#cf_email').val('');
+        jQuery('#cf_key').val('');
+        jQuery('#cf_token').val('');
+        jQuery('form[name="cfip_settings"]').find('#submit').click();
+    });
+
     var $ubSelect = jQuery('select[name="blacklisted_ips"]');
-    $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn cf-btn cf-btn--primary' name='cfip_ajax_btn'>Remove From Blacklist</button><div id='cfip_ajax_res_unblacklist'></div>");
+    $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn cf-btn cf-btn--primary' name='cfip_ajax_btn'>" + cfip_i18n.remove_from_blacklist + "</button><div id='cfip_ajax_res_unblacklist'></div>");
 
     // Clear blacklisted IP AJAX request.
     jQuery("#cfip_ajax_btn").on('click', function(e){
@@ -11,7 +46,7 @@ jQuery(document).ready(function(){
         var ip_address = $ubSelect.val();
         var $response = jQuery("#cfip_ajax_res_unblacklist");
 
-        $response.text('Removing IP from blacklist...');
+        $response.text(cfip_i18n.removing_ip);
 
         var data = {
             action: 'cfip_unblacklist_ip',
@@ -26,7 +61,7 @@ jQuery(document).ready(function(){
 
                 // If the request was successful but the API returned an error.
                 if( data.errors && data.errors.length > 0 ) {
-                    $response.removeClass().addClass('notice notice-error').text("There was an error.");
+                    $response.removeClass().addClass('notice notice-error').text(cfip_i18n.error);
                     console.log(data);
                     return;
                 } else if( data.result == 'success' ) {
@@ -38,11 +73,11 @@ jQuery(document).ready(function(){
                         that = jQuery('select[name="blacklisted_ips"]').closest('td');
                         jQuery('select[name="blacklisted_ips"]').remove();
                         jQuery('button#cfip_ajax_btn').remove();
-                        that.prepend('<span id="blacklisted_ips">No IPs currently blacklisted.</span>');
-                        $response.removeClass().addClass('notice notice-success').text("IP address successfully removed from blacklist.");
+                        that.prepend('<span id="blacklisted_ips">' + cfip_i18n.no_ips_blacklisted + '</span>');
+                        $response.removeClass().addClass('notice notice-success').text(cfip_i18n.ip_removed);
                     }
                 } else {
-                    $response.removeClass().addClass('notice notice-warning').text("Response from Cloudflare API unclear. Please refresh page.");
+                    $response.removeClass().addClass('notice notice-warning').text(cfip_i18n.response_unclear);
                 }
 
                 console.log(data);
@@ -60,7 +95,7 @@ jQuery(document).ready(function(){
         e.preventDefault();
 
         var $response = jQuery("#log_screen").find("pre");
-        $response.text('Clearing log...');
+        $response.text(cfip_i18n.clearing_log);
 
         var data = {
             action: 'cfip_clearlog',
@@ -75,14 +110,14 @@ jQuery(document).ready(function(){
 
                 // If the request was successful but the API returned an error.
                 if( data.errors && data.errors.length > 0 ) {
-                    $response.text("There was an error.");
+                    $response.text(cfip_i18n.error);
                     return;
                 }
 
                 // Clear log on front end.
                 $response.text("");
 
-                $response.text("Log cleared.");
+                $response.text(cfip_i18n.log_cleared);
                 setTimeout(function(){
                     $response.text("");
                 }, 1500);
@@ -99,7 +134,7 @@ jQuery(document).ready(function(){
         e.preventDefault();
 
         var $response = jQuery("#log_screen").find("pre");
-        $response.text('Loading log...');
+        $response.text(cfip_i18n.loading_log);
 
         var data = {
             action: 'cfip_loadlog',
@@ -114,7 +149,7 @@ jQuery(document).ready(function(){
 
                 // If the request was successful but the API returned an error.
                 if( data.errors && data.errors.length > 0 ) {
-                    $response.text("There was an error.");
+                    $response.text(cfip_i18n.error);
                     return;
                 }
 
