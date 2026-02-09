@@ -6,12 +6,12 @@
  * Author: Miller Media
  * Author URI: www.millermedia.io
  * Depends:
- * Version: 1.0.4
+ * Version: 1.0.5
  * Requires PHP: 8.1
  * Tested up to: 6.9
  */
 
-define('CFIP_PLUGIN_VERSION', '1.0.4');
+define('CFIP_PLUGIN_VERSION', '1.0.5');
 define('CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR', plugins_url('cloudflare'));
 
 include_once('classes/Helpers.php');

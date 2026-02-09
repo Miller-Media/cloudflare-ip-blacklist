@@ -1,5 +1,14 @@
 jQuery(document).ready(function(){
 
+    // Auth method toggle
+    function toggleAuthFields() {
+        var authType = jQuery('input[name="cf_auth_type"]:checked').val() || 'global_key';
+        jQuery('.auth-group-global_key').toggle(authType === 'global_key');
+        jQuery('.auth-group-api_token').toggle(authType === 'api_token');
+    }
+    jQuery('input[name="cf_auth_type"]').on('change', toggleAuthFields);
+    toggleAuthFields();
+
     var $ubSelect = jQuery('select[name="blacklisted_ips"]');
     $ubSelect.after("<button id='cfip_ajax_btn' class='cfip_ajax_btn cf-btn cf-btn--primary' name='cfip_ajax_btn'>Remove From Blacklist</button><div id='cfip_ajax_res_unblacklist'></div>");
 
