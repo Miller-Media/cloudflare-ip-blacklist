@@ -92,7 +92,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                         if($section=='Cloudflare Credentials' || ($section!=='Cloudflare Credentials' && $credentials)) {
                             ?>
                             <tr class="tr-section-title">
-                                <td><h2 class="cf-heading cf-heading--2"><?php echo $section; ?></h2></td>
+                                <td><h2 class="cf-heading cf-heading--2"><?php echo esc_html($section); ?></h2></td>
                                 <?php
                                 if($section=='Cloudflare Credentials' && !$credentials){
                                     echo '<span class="cf-card__footer_message">Please manually set credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.</span>';
@@ -106,7 +106,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                 $cloudflare_admin_url = admin_url()."options-general.php?page=cloudflare";
                                 ?>
                                 <tr>
-                                    <td>Credentials imported from <a href="<?php echo $cloudflare_admin_url; ?>">Cloudflare</a> plugin.</td>
+                                    <td>Credentials imported from <a href="<?php echo esc_url($cloudflare_admin_url); ?>">Cloudflare</a> plugin.</td>
                                 </tr>
                                 <?php continue;
                             }
@@ -116,17 +116,17 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                 if ($data['type'] == 'select') {
                                     ?>
                                     <tr>
-                                        <td><h3 class="cf-card__title"><label for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?></label></h3>
+                                        <td><h3 class="cf-card__title"><label for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?></label></h3>
                                         </td>
                                         <td>
-                                            <select id="<?php echo $data['name']; ?>"
-                                                    name="<?php echo $data['name']; ?>">
+                                            <select id="<?php echo esc_attr($data['name']); ?>"
+                                                    name="<?php echo esc_attr($data['name']); ?>">
                                                 <?php
                                                 if ($banned_IPs) {
                                                     foreach ($banned_IPs_list as $name => $val) {
                                                         ?>
-                                                        <option name="<?php echo $name; ?>"
-                                                                value="<?php echo $val; ?>"><?php echo $val; ?></option>
+                                                        <option name="<?php echo esc_attr($name); ?>"
+                                                                value="<?php echo esc_attr($val); ?>"><?php echo esc_html($val); ?></option>
                                                         <?php
                                                     }
                                                 }
@@ -139,7 +139,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     ?>
                                     <tr>
                                         <td><h3 class="cf-card__title"><label
-                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
                                                 </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
@@ -150,9 +150,9 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                             }
                                             ?>
                                         </td>
-                                        <td><textarea id="<?php echo $data['name']; ?>"
-                                                      name="<?php echo $data['name']; ?>" rows="4"
-                                                      cols="50"><?php echo(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
+                                        <td><textarea id="<?php echo esc_attr($data['name']); ?>"
+                                                      name="<?php echo esc_attr($data['name']); ?>" rows="4"
+                                                      cols="50"><?php echo esc_textarea(array_key_exists($data['name'], $cfip_settings) ? $cfip_settings[$data['name']] : ''); ?></textarea>
                                         </td>
                                     </tr>
                                     <?php
@@ -160,7 +160,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     ?>
                                     <tr>
                                         <td><h3 class="cf-card__title"><label
-                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
                                                 </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
@@ -171,8 +171,8 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                             }
                                             ?>
                                         </td>
-                                        <td><input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>"
-                                                   name="<?php echo $data['name']; ?>" <?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked' : ''); ?>>
+                                        <td><input id="<?php echo esc_attr($data['name']); ?>" type="<?php echo esc_attr($data['type']); ?>"
+                                                   name="<?php echo esc_attr($data['name']); ?>" <?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] == 'on' ? 'checked' : ''); ?>>
                                         </td>
                                     </tr>
                                     <?php
@@ -180,7 +180,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     ?>
                                     <tr>
                                         <td><h3 class="cf-card__title"><label
-                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
                                                 </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
@@ -192,7 +192,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                             ?>
                                         </td>
                                         <td><span
-                                                id="<?php echo $data['name']; ?>"><?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?></span>
+                                                id="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?></span>
                                         </td>
                                     </tr>
                                     <?php
@@ -200,7 +200,7 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                     ?>
                                     <tr>
                                         <td colspan="2"><h3 class="cf-card__title"><label
-                                                    for="<?php echo $data['name']; ?>"><?php echo $data['title']; ?>
+                                                    for="<?php echo esc_attr($data['name']); ?>"><?php echo esc_html($data['title']); ?>
                                                 </label></h3>
                                             <?php
                                             if (isset($data['description']) && $data['description']) {
@@ -211,9 +211,9 @@ $settings['Blacklist IPs']['fields'][] = $blacklist_ip_settings_array;
                                             }
                                             ?>
                                             <br />
-                                            <input id="<?php echo $data['name']; ?>" type="<?php echo $data['type']; ?>"
-                                                   name="<?php echo $data['name']; ?>"
-                                                   value="<?php echo(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?>"
+                                            <input id="<?php echo esc_attr($data['name']); ?>" type="<?php echo esc_attr($data['type']); ?>"
+                                                   name="<?php echo esc_attr($data['name']); ?>"
+                                                   value="<?php echo esc_attr(array_key_exists($data['name'], $cfip_settings) && $cfip_settings[$data['name']] ? $cfip_settings[$data['name']] : ($data['value'] ?: '')); ?>"
                                                    style="width: 100%; max-width: 400px;">
                                         </td>
                                     </tr>
