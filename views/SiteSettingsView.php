@@ -38,7 +38,7 @@ $settings = array(
                 'name' => 'cf_token',
                 'type' => 'text',
                 'title' => __('API Token', 'ip-blacklist-cloudflare'),
-                'description' => __('A <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">scoped API token</a>.<br />Create one under My Profile &rarr; API Tokens &rarr; Create Token.', 'ip-blacklist-cloudflare'),
+                'description' => __('A <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">scoped API token</a>.<br />Create one under My Profile &rarr; API Tokens &rarr; Create Token.<br />Required permissions: <strong>Zone &rarr; Zone &rarr; Read</strong>, <strong>Zone &rarr; Firewall Services &rarr; Edit</strong>.', 'ip-blacklist-cloudflare'),
                 'value' => isset($cfip_settings['cf_token']) ? $cfip_settings['cf_token'] : '',
                 'auth_group' => 'api_token'
             ),
