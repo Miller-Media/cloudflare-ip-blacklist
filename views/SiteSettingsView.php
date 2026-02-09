@@ -13,10 +13,10 @@ $settings = array(
                 'title' => __('Authentication Method', 'ip-blacklist-cloudflare'),
                 'description' => '',
                 'options' => array(
-                    'global_key' => __('Global API Key (Legacy)', 'ip-blacklist-cloudflare'),
                     'api_token'  => __('API Token (Recommended)', 'ip-blacklist-cloudflare'),
+                    'global_key' => __('Global API Key (Legacy)', 'ip-blacklist-cloudflare'),
                 ),
-                'value' => isset($cfip_settings['cf_auth_type']) ? $cfip_settings['cf_auth_type'] : 'global_key'
+                'value' => isset($cfip_settings['cf_auth_type']) ? $cfip_settings['cf_auth_type'] : ($credentials ? 'global_key' : 'api_token')
             ),
             array(
                 'name' => 'cf_email',
