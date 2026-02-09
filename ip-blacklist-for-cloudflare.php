@@ -23,5 +23,13 @@ include_once('classes/Helpers.php');
 include_once('classes/Plugin.php');
 include_once('classes/SiteSettings.php');
 include_once('classes/CloudflareAPIController.php');
+include_once('classes/ReviewNotice.php');
+
+register_activation_hook( __FILE__, function() {
+	if ( ! get_option( 'cfip_activated_on' ) ) {
+		update_option( 'cfip_activated_on', time() );
+	}
+});
 
 $CFIP_Blacklist = new CFIP_Blacklist();
+new CFIP_ReviewNotice( 'IP Blacklist for Cloudflare', 'ip-blacklist-cloudflare', 'cfip_activated_on', 'ip-blacklist-cloudflare', plugin_dir_url( __FILE__ ) . 'assets/icon-128x128.jpg' );
