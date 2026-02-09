@@ -6,13 +6,13 @@
  * Author: Miller Media
  * Author URI: www.millermedia.io
  * Depends:
- * Version: 1.0.6
+ * Version: 1.0.7
  * Requires PHP: 8.1
  * Tested up to: 6.9
  * Text Domain: ip-blacklist-cloudflare
  */
 
-define('CFIP_PLUGIN_VERSION', '1.0.6');
+define('CFIP_PLUGIN_VERSION', '1.0.7');
 
 add_action('plugins_loaded', function() {
     load_plugin_textdomain('ip-blacklist-cloudflare', false, dirname(plugin_basename(__FILE__)) . '/languages');
