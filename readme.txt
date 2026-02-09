@@ -2,7 +2,7 @@
 Contributors: MillerMedia,mikemm01
 Tags: login, password, passwords, security, profile
 Tested up to: 6.9
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -18,6 +18,9 @@ Cloudflare IP Blacklist allows WordPress admins to add a list of prohibited user
 ** This plugin relies on the use of Cloudflare, a third-party service that increases security and performance for web sites and services across the internet. For more information, visit the Cloudflare website and their privacy policy. This plugin is not officially endorsed, built or maintained by the Cloudflare team; rather, we are a development company that uses their services every day! **
 
 == Changelog ==
+
+= 1.0.3 =
+* Improved setup instructions for Cloudflare API credentials
 
 = 1.0.2 =
 * Compatibility updates for WordPress 6.9 and PHP 8.1+
