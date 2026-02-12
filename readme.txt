@@ -17,6 +17,23 @@ Cloudflare IP Blacklist allows WordPress admins to add a list of prohibited user
 
 ** This plugin relies on the use of Cloudflare, a third-party service that increases security and performance for web sites and services across the internet. For more information, visit the Cloudflare website and their privacy policy. This plugin is not officially endorsed, built or maintained by the Cloudflare team; rather, we are a development company that uses their services every day! **
 
+== Localizations ==
+This plugin is available in the following languages:
+
+* English
+* Chinese Simplified (简体中文)
+* Dutch (Nederlands)
+* French (Français)
+* German (Deutsch)
+* Italian (Italiano)
+* Japanese (日本語)
+* Polish (Polski)
+* Portuguese - Brazil (Português do Brasil)
+* Russian (Русский)
+* Spanish (Español)
+* Swedish (Svenska)
+* Turkish (Türkçe)
+
 == Changelog ==
 
 = 1.1.0 =
