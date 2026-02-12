@@ -2,7 +2,7 @@
 Contributors: MillerMediaNow, mikemm01
 Tags: login, password, passwords, security, profile
 Tested up to: 6.9.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -35,6 +35,10 @@ This plugin is available in the following languages:
 * Turkish (Türkçe)
 
 == Changelog ==
+
+= 1.1.1 =
+* Added translations for Russian, Polish, Dutch, Turkish, and Swedish
+* Updated localization section in readme
 
 = 1.1.0 =
 * Added Chinese Simplified (zh_CN) translation
