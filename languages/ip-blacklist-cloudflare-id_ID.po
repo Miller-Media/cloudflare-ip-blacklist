@@ -1,0 +1,139 @@
+# Indonesian translation for IP Blacklist for Cloudflare
+# Copyright (C) 2026 Miller Media
+# This file is distributed under the same license as the plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: IP Blacklist for Cloudflare\n"
+"Report-Msgid-Bugs-To: https://github.com/Miller-Media/cloudflare-ip-blacklist/issues\n"
+"POT-Creation-Date: 2026-02-13 13:00+0000\n"
+"PO-Revision-Date: 2026-02-13 13:00+0000\n"
+"Last-Translator: Crash Override (AI)\n"
+"Language-Team: Indonesian\n"
+"Language: id_ID\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "A <a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">scoped API token</a>.<br />Create one under My Profile &rarr; API Tokens &rarr; Create Token.<br />Required permissions: <strong>Zone &rarr; Zone &rarr; Read</strong>, <strong>Zone &rarr; Firewall Services &rarr; Edit</strong>."
+msgstr "<a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">Token API terbatas</a>.<br />Buat di bawah Profil Saya &rarr; Token API &rarr; Buat Token.<br />Izin yang diperlukan: <strong>Zona &rarr; Zona &rarr; Baca</strong>, <strong>Zona &rarr; Layanan Firewall &rarr; Edit</strong>."
+
+msgid "API Token"
+msgstr "Token API"
+
+msgid "API Token (Recommended)"
+msgstr "Token API (Disarankan)"
+
+msgid "Are you sure you want to disconnect? Your Cloudflare credentials will be removed."
+msgstr "Apakah Anda yakin ingin memutuskan koneksi? Kredensial Cloudflare Anda akan dihapus."
+
+msgid "Authentication Method"
+msgstr "Metode Autentikasi"
+
+msgid "Banned Usernames"
+msgstr "Nama Pengguna yang Dilarang"
+
+msgid "Blacklist IPs"
+msgstr "Daftar Hitam IP"
+
+msgid "Blacklisted IPs"
+msgstr "IP yang Masuk Daftar Hitam"
+
+msgid "Cancel"
+msgstr "Batal"
+
+msgid "Change Credentials"
+msgstr "Ubah Kredensial"
+
+msgid "Clear Log"
+msgstr "Hapus Log"
+
+msgid "Clearing log..."
+msgstr "Menghapus log..."
+
+msgid "Cloudflare Credentials"
+msgstr "Kredensial Cloudflare"
+
+msgid "Comma-separated string, e.g. admin, administrator"
+msgstr "String dipisahkan koma, mis. admin, administrator"
+
+msgid "Connected via %s"
+msgstr "Terhubung melalui %s"
+
+msgid "Connected via %sCloudflare plugin%s."
+msgstr "Terhubung melalui %splugin Cloudflare%s."
+
+msgid "Disconnect"
+msgstr "Putuskan Koneksi"
+
+msgid "Email Address"
+msgstr "Alamat Email"
+
+msgid "Enable IP Blacklisting?"
+msgstr "Aktifkan Daftar Hitam IP?"
+
+msgid "Enable Logging?"
+msgstr "Aktifkan Pencatatan Log?"
+
+msgid "Global API Key"
+msgstr "Kunci API Global"
+
+msgid "Global API Key (Legacy)"
+msgstr "Kunci API Global (Lama)"
+
+msgid "Hey! You've been using %1$s for a while now. If you're enjoying it, would you mind %2$sleaving a 5-star review%3$s? It helps us keep improving! 🙏"
+msgstr "Hei! Anda sudah menggunakan %1$s cukup lama. Jika Anda menyukainya, maukah Anda %2$smemberikan ulasan bintang 5%3$s? Ini membantu kami terus berkembang! 🙏"
+
+msgid "IP address successfully removed from blacklist."
+msgstr "Alamat IP berhasil dihapus dari daftar hitam."
+
+msgid "IPs currently blocked from the site"
+msgstr "IP yang saat ini diblokir dari situs"
+
+msgid "Leave a Review"
+msgstr "Berikan Ulasan"
+
+msgid "Loading log..."
+msgstr "Memuat log..."
+
+msgid "Log"
+msgstr "Log"
+
+msgid "Log cleared."
+msgstr "Log telah dihapus."
+
+msgid "Logging is currently disabled. To start logging, enable checkbox on settings tab."
+msgstr "Pencatatan log saat ini dinonaktifkan. Untuk mulai mencatat, aktifkan kotak centang di tab pengaturan."
+
+msgid "Maybe Later"
+msgstr "Mungkin Nanti"
+
+msgid "No IPs currently blacklisted."
+msgstr "Tidak ada IP yang saat ini masuk daftar hitam."
+
+msgid "Please set your Cloudflare credentials below or install and configure the <a href=\"http://wordpress.org/plugins/cloudflare/\" target=\"_blank\">official Cloudflare plugin</a> to continue."
+msgstr "Silakan atur kredensial Cloudflare Anda di bawah ini atau instal dan konfigurasikan <a href=\"http://wordpress.org/plugins/cloudflare/\" target=\"_blank\">plugin resmi Cloudflare</a> untuk melanjutkan."
+
+msgid "Remove From Blacklist"
+msgstr "Hapus dari Daftar Hitam"
+
+msgid "Removing IP from blacklist..."
+msgstr "Menghapus IP dari daftar hitam..."
+
+msgid "Response from Cloudflare API unclear. Please refresh page."
+msgstr "Respons dari API Cloudflare tidak jelas. Silakan muat ulang halaman."
+
+msgid "Save Changes"
+msgstr "Simpan Perubahan"
+
+msgid "Settings"
+msgstr "Pengaturan"
+
+msgid "There was an error."
+msgstr "Terjadi kesalahan."
+
+msgid "Your <a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">Global API Key</a>.<br />Found under My Profile &rarr; API Tokens &rarr; Global API Key &rarr; View."
+msgstr "<a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">Kunci API Global</a> Anda.<br />Ditemukan di bawah Profil Saya &rarr; Token API &rarr; Kunci API Global &rarr; Lihat."
+
+msgid "Your Cloudflare account email address."
+msgstr "Alamat email akun Cloudflare Anda."
