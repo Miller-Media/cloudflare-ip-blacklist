@@ -1,0 +1,139 @@
+# Korean translation for IP Blacklist for Cloudflare
+# Copyright (C) 2026 Miller Media
+# This file is distributed under the same license as the plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: IP Blacklist for Cloudflare\n"
+"Report-Msgid-Bugs-To: https://github.com/Miller-Media/cloudflare-ip-blacklist/issues\n"
+"POT-Creation-Date: 2026-02-13 13:00+0000\n"
+"PO-Revision-Date: 2026-02-13 13:00+0000\n"
+"Last-Translator: Crash Override (AI)\n"
+"Language-Team: Korean\n"
+"Language: ko_KR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "A <a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">scoped API token</a>.<br />Create one under My Profile &rarr; API Tokens &rarr; Create Token.<br />Required permissions: <strong>Zone &rarr; Zone &rarr; Read</strong>, <strong>Zone &rarr; Firewall Services &rarr; Edit</strong>."
+msgstr "<a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">범위가 지정된 API 토큰</a>입니다.<br />내 프로필 &rarr; API 토큰 &rarr; 토큰 생성에서 만드십시오.<br />필요한 권한: <strong>영역 &rarr; 영역 &rarr; 읽기</strong>, <strong>영역 &rarr; 방화벽 서비스 &rarr; 편집</strong>."
+
+msgid "API Token"
+msgstr "API 토큰"
+
+msgid "API Token (Recommended)"
+msgstr "API 토큰 (권장)"
+
+msgid "Are you sure you want to disconnect? Your Cloudflare credentials will be removed."
+msgstr "정말 연결을 끊으시겠습니까? Cloudflare 자격 증명이 제거됩니다."
+
+msgid "Authentication Method"
+msgstr "인증 방법"
+
+msgid "Banned Usernames"
+msgstr "금지된 사용자명"
+
+msgid "Blacklist IPs"
+msgstr "IP 차단 목록"
+
+msgid "Blacklisted IPs"
+msgstr "차단된 IP"
+
+msgid "Cancel"
+msgstr "취소"
+
+msgid "Change Credentials"
+msgstr "자격 증명 변경"
+
+msgid "Clear Log"
+msgstr "로그 지우기"
+
+msgid "Clearing log..."
+msgstr "로그 지우는 중..."
+
+msgid "Cloudflare Credentials"
+msgstr "Cloudflare 자격 증명"
+
+msgid "Comma-separated string, e.g. admin, administrator"
+msgstr "쉼표로 구분된 문자열, 예: admin, administrator"
+
+msgid "Connected via %s"
+msgstr "%s을(를) 통해 연결됨"
+
+msgid "Connected via %sCloudflare plugin%s."
+msgstr "%sCloudflare 플러그인%s을(를) 통해 연결됨."
+
+msgid "Disconnect"
+msgstr "연결 끊기"
+
+msgid "Email Address"
+msgstr "이메일 주소"
+
+msgid "Enable IP Blacklisting?"
+msgstr "IP 차단 목록을 활성화하시겠습니까?"
+
+msgid "Enable Logging?"
+msgstr "로그를 활성화하시겠습니까?"
+
+msgid "Global API Key"
+msgstr "전역 API 키"
+
+msgid "Global API Key (Legacy)"
+msgstr "전역 API 키 (레거시)"
+
+msgid "Hey! You've been using %1$s for a while now. If you're enjoying it, would you mind %2$sleaving a 5-star review%3$s? It helps us keep improving! 🙏"
+msgstr "안녕하세요! %1$s를 한동안 사용하고 계십니다. 만족하신다면 %2$s별점 5개 리뷰를 남겨%3$s주시겠어요? 저희가 계속 개선하는 데 큰 도움이 됩니다! 🙏"
+
+msgid "IP address successfully removed from blacklist."
+msgstr "IP 주소가 차단 목록에서 성공적으로 제거되었습니다."
+
+msgid "IPs currently blocked from the site"
+msgstr "현재 사이트에서 차단된 IP"
+
+msgid "Leave a Review"
+msgstr "리뷰 남기기"
+
+msgid "Loading log..."
+msgstr "로그 로드 중..."
+
+msgid "Log"
+msgstr "로그"
+
+msgid "Log cleared."
+msgstr "로그가 지워졌습니다."
+
+msgid "Logging is currently disabled. To start logging, enable checkbox on settings tab."
+msgstr "로그가 현재 비활성화되어 있습니다. 로그를 시작하려면 설정 탭에서 체크박스를 활성화하십시오."
+
+msgid "Maybe Later"
+msgstr "나중에"
+
+msgid "No IPs currently blacklisted."
+msgstr "현재 차단된 IP가 없습니다."
+
+msgid "Please set your Cloudflare credentials below or install and configure the <a href=\"http://wordpress.org/plugins/cloudflare/\" target=\"_blank\">official Cloudflare plugin</a> to continue."
+msgstr "아래에 Cloudflare 자격 증명을 설정하거나 <a href=\"http://wordpress.org/plugins/cloudflare/\" target=\"_blank\">공식 Cloudflare 플러그인</a>을 설치 및 구성하여 계속하십시오."
+
+msgid "Remove From Blacklist"
+msgstr "차단 목록에서 제거"
+
+msgid "Removing IP from blacklist..."
+msgstr "차단 목록에서 IP 제거 중..."
+
+msgid "Response from Cloudflare API unclear. Please refresh page."
+msgstr "Cloudflare API의 응답이 불명확합니다. 페이지를 새로 고침하십시오."
+
+msgid "Save Changes"
+msgstr "변경사항 저장"
+
+msgid "Settings"
+msgstr "설정"
+
+msgid "There was an error."
+msgstr "오류가 발생했습니다."
+
+msgid "Your <a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">Global API Key</a>.<br />Found under My Profile &rarr; API Tokens &rarr; Global API Key &rarr; View."
+msgstr "<a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">전역 API 키</a>입니다.<br />내 프로필 &rarr; API 토큰 &rarr; 전역 API 키 &rarr; 보기에서 찾을 수 있습니다."
+
+msgid "Your Cloudflare account email address."
+msgstr "Cloudflare 계정 이메일 주소입니다."
