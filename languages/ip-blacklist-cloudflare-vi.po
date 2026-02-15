@@ -1,0 +1,139 @@
+# Vietnamese translation for IP Blacklist for Cloudflare
+# Copyright (C) 2026 Miller Media
+# This file is distributed under the same license as the plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: IP Blacklist for Cloudflare\n"
+"Report-Msgid-Bugs-To: https://github.com/Miller-Media/cloudflare-ip-blacklist/issues\n"
+"POT-Creation-Date: 2026-02-14 13:00+0000\n"
+"PO-Revision-Date: 2026-02-14 13:00+0000\n"
+"Last-Translator: Crash Override (AI)\n"
+"Language-Team: Vietnamese\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Settings"
+msgstr "Cài đặt"
+
+msgid "Save Changes"
+msgstr "Lưu thay đổi"
+
+msgid "API Token"
+msgstr "Mã API"
+
+msgid "API Token (Recommended)"
+msgstr "Mã API (Khuyến nghị)"
+
+msgid "Global API Key"
+msgstr "Khóa API toàn cục"
+
+msgid "Global API Key (Legacy)"
+msgstr "Khóa API toàn cục (Cũ)"
+
+msgid "Authentication Method"
+msgstr "Phương thức xác thực"
+
+msgid "Email Address"
+msgstr "Địa chỉ email"
+
+msgid "Your Cloudflare account email address."
+msgstr "Địa chỉ email tài khoản Cloudflare của bạn."
+
+msgid "Cloudflare Credentials"
+msgstr "Thông tin đăng nhập Cloudflare"
+
+msgid "Connected via %s"
+msgstr "Đã kết nối qua %s"
+
+msgid "Connected via %sCloudflare plugin%s."
+msgstr "Đã kết nối qua %splugin Cloudflare%s."
+
+msgid "Disconnect"
+msgstr "Ngắt kết nối"
+
+msgid "Change Credentials"
+msgstr "Thay đổi thông tin đăng nhập"
+
+msgid "Cancel"
+msgstr "Hủy"
+
+msgid "Are you sure you want to disconnect? Your Cloudflare credentials will be removed."
+msgstr "Bạn có chắc chắn muốn ngắt kết nối không? Thông tin đăng nhập Cloudflare của bạn sẽ bị xóa."
+
+msgid "Enable IP Blacklisting?"
+msgstr "Bật chặn IP?"
+
+msgid "Enable Logging?"
+msgstr "Bật ghi nhật ký?"
+
+msgid "Banned Usernames"
+msgstr "Tên người dùng bị cấm"
+
+msgid "Comma-separated string, e.g. admin, administrator"
+msgstr "Chuỗi phân cách bằng dấu phẩy, ví dụ: admin, administrator"
+
+msgid "Blacklist IPs"
+msgstr "Chặn IP"
+
+msgid "Blacklisted IPs"
+msgstr "Các IP đã bị chặn"
+
+msgid "IPs currently blocked from the site"
+msgstr "Các IP hiện đang bị chặn trên trang web"
+
+msgid "No IPs currently blacklisted."
+msgstr "Hiện không có IP nào bị chặn."
+
+msgid "Remove From Blacklist"
+msgstr "Xóa khỏi danh sách chặn"
+
+msgid "Removing IP from blacklist..."
+msgstr "Đang xóa IP khỏi danh sách chặn..."
+
+msgid "IP address successfully removed from blacklist."
+msgstr "Đã xóa địa chỉ IP khỏi danh sách chặn thành công."
+
+msgid "Response from Cloudflare API unclear. Please refresh page."
+msgstr "Phản hồi từ API Cloudflare không rõ ràng. Vui lòng tải lại trang."
+
+msgid "There was an error."
+msgstr "Đã xảy ra lỗi."
+
+msgid "Log"
+msgstr "Nhật ký"
+
+msgid "Clear Log"
+msgstr "Xóa nhật ký"
+
+msgid "Clearing log..."
+msgstr "Đang xóa nhật ký..."
+
+msgid "Log cleared."
+msgstr "Đã xóa nhật ký."
+
+msgid "Loading log..."
+msgstr "Đang tải nhật ký..."
+
+msgid "Logging is currently disabled. To start logging, enable checkbox on settings tab."
+msgstr "Ghi nhật ký hiện đang tắt. Để bắt đầu ghi nhật ký, hãy bật hộp kiểm trên tab cài đặt."
+
+msgid "Please set your Cloudflare credentials below or install and configure the <a href=\"http://wordpress.org/plugins/cloudflare/\" target=\"_blank\">official Cloudflare plugin</a> to continue."
+msgstr "Vui lòng nhập thông tin đăng nhập Cloudflare bên dưới hoặc cài đặt và cấu hình <a href=\"http://wordpress.org/plugins/cloudflare/\" target=\"_blank\">plugin Cloudflare chính thức</a> để tiếp tục."
+
+msgid "A <a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">scoped API token</a>.<br />Create one under My Profile &rarr; API Tokens &rarr; Create Token.<br />Required permissions: <strong>Zone &rarr; Zone &rarr; Read</strong>, <strong>Zone &rarr; Firewall Services &rarr; Edit</strong>."
+msgstr "Một <a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">mã API có phạm vi</a>.<br />Tạo mã tại Hồ sơ của tôi &rarr; Mã API &rarr; Tạo mã.<br />Quyền cần thiết: <strong>Zone &rarr; Zone &rarr; Read</strong>, <strong>Zone &rarr; Firewall Services &rarr; Edit</strong>."
+
+msgid "Your <a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">Global API Key</a>.<br />Found under My Profile &rarr; API Tokens &rarr; Global API Key &rarr; View."
+msgstr "<a href=\"https://dash.cloudflare.com/profile/api-tokens\" target=\"_blank\">Khóa API toàn cục</a> của bạn.<br />Tìm tại Hồ sơ của tôi &rarr; Mã API &rarr; Khóa API toàn cục &rarr; Xem."
+
+msgid "Hey! You\\'ve been using %1$s for a while now. If you\\'re enjoying it, would you mind %2$sleaving a 5-star review%3$s? It helps us keep improving! 🙏"
+msgstr "Xin chào! Bạn đã sử dụng %1$s được một thời gian rồi. Nếu bạn thấy hài lòng, bạn có thể %2$sđể lại đánh giá 5 sao%3$s được không? Điều đó giúp chúng tôi cải thiện hơn! 🙏"
+
+msgid "Leave a Review"
+msgstr "Để lại đánh giá"
+
+msgid "Maybe Later"
+msgstr "Để sau"
