@@ -51,6 +51,28 @@ This plugin is available in the following languages:
 * Turkish (Türkçe)
 * Vietnamese (Tiếng Việt)
 
+== Frequently Asked Questions ==
+
+= How do I set up my Cloudflare API credentials? =
+
+Go to Settings > Cloudflare IP Blacklist in your WordPress admin. You can authenticate using either a scoped API Token (recommended) or your Global API Key (legacy). For API Tokens, create one in your Cloudflare dashboard with the "Account > Account Firewall Access Rules > Edit" permission.
+
+= What happens when someone tries to log in with a banned username? =
+
+Their IP address is automatically added to your Cloudflare firewall block list. On their next visit, Cloudflare blocks them before the request ever reaches your server, saving your server resources.
+
+= Can I use an API Token instead of the Global API Key? =
+
+Yes! As of version 1.0.5, scoped API Tokens are fully supported and recommended over the Global API Key. Create a token in your Cloudflare dashboard with the required firewall permissions.
+
+= What PHP and WordPress versions are supported? =
+
+The plugin requires PHP 8.1 or higher and has been tested up to WordPress 6.9.1.
+
+= What languages are supported? =
+
+The plugin is available in 30 languages with more being added regularly. We are working toward supporting 50 languages total!
+
 == Changelog ==
 
 = 1.1.1 =
