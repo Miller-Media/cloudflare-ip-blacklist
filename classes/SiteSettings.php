@@ -205,6 +205,7 @@ class CFIP_SiteSettings
              **/
             $settings['enable_ip_blacklist'] = isset($_POST['enable_ip_blacklist']) ? sanitize_text_field($_POST['enable_ip_blacklist']) : '';
             $settings['enable_logging'] = isset($_POST['enable_logging']) ? sanitize_text_field($_POST['enable_logging']) : '';
+            $settings['delete_data_on_uninstall'] = isset($_POST['delete_data_on_uninstall']) ? sanitize_text_field($_POST['delete_data_on_uninstall']) : '';
 
 			if( update_option('cfip_settings', $settings) )
 				return true;
