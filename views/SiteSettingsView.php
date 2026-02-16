@@ -95,6 +95,17 @@ if(count($banned_IPs_list)==0){
 
 $settings[__('Blacklist IPs', 'ip-blacklist-cloudflare')]['fields'][] = $blacklist_ip_settings_array;
 
+$settings[__('Data Management', 'ip-blacklist-cloudflare')] = array(
+	'fields' => array(
+		array(
+			'name' => 'delete_data_on_uninstall',
+			'type' => 'checkbox',
+			'title' => __('Remove all plugin data when deleted', 'ip-blacklist-cloudflare'),
+			'description' => __('Check this box if you want all plugin settings and data to be removed when the plugin is deleted.', 'ip-blacklist-cloudflare'),
+		),
+	),
+);
+
 /**
  * Render a single field row.
  */
