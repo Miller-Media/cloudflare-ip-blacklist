@@ -31,5 +31,11 @@ register_activation_hook( __FILE__, function() {
 	}
 });
 
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), function($links) {
+	$settings_link = '<a href="' . admin_url('admin.php?page=cfip-menu') . '">' . __('Settings', 'ip-blacklist-cloudflare') . '</a>';
+	array_unshift($links, $settings_link);
+	return $links;
+});
+
 $CFIP_Blacklist = new CFIP_Blacklist();
 new CFIP_ReviewNotice( 'IP Blacklist for Cloudflare', 'ip-blacklist-cloudflare', 'cfip_activated_on', 'ip-blacklist-cloudflare', plugin_dir_url( __FILE__ ) . 'assets/icon-128x128.jpg' );
