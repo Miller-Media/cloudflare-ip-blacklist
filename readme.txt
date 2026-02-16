@@ -2,7 +2,7 @@
 Contributors: MillerMediaNow, mikemm01
 Tags: login, password, passwords, security, profile
 Tested up to: 6.9.1
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,15 @@ The plugin requires PHP 8.1 or higher and has been tested up to WordPress 6.9.1.
 The plugin is available in 30 languages with more being added regularly. We are working toward supporting 50 languages total!
 
 == Changelog ==
+
+= 1.2.0 =
+* Added translations for 50 languages
+* Added POT translation template file
+* Added opt-in data cleanup on plugin deletion
+* Added Settings link on Plugins page
+* Updated FAQ section
+* Updated readme with complete language list
+
 
 = 1.1.1 =
 * Added translations for Russian, Polish, Dutch, Turkish, and Swedish
