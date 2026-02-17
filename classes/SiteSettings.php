@@ -166,7 +166,7 @@ class CFIP_SiteSettings
 				return false;
 
 			// Verify nonce.
-			if ( !wp_verify_nonce($_POST['cfip_settings_nonce'], 'cfip_settings_nonce') )
+			if ( !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['cfip_settings_nonce'])), 'cfip_settings_nonce') )
 				return false;
 
 			return $this->updateSettings();

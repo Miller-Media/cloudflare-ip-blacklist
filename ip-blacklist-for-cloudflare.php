@@ -4,15 +4,21 @@
  * Plugin URI:
  * Description: Blacklist IP addresses that attempt to login with a banned username through Cloudflare.
  * Author: Miller Media
- * Author URI: www.millermedia.io
+ * Author URI: https://mattmiller.ai
  * Depends:
- * Version:           1.2.0
+ * Version:           1.2.1
  * Requires PHP: 8.1
  * Tested up to: 6.9.1
  * Text Domain: ip-blacklist-cloudflare
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
-define( 'CFIP_PLUGIN_VERSION', '1.2.0' );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+define( 'CFIP_PLUGIN_VERSION', '1.2.1' );
 
 add_action('plugins_loaded', function() {
     load_plugin_textdomain('ip-blacklist-cloudflare', false, dirname(plugin_basename(__FILE__)) . '/languages');
@@ -38,4 +44,4 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function($links) 
 });
 
 $CFIP_Blacklist = new CFIP_Blacklist();
-new CFIP_ReviewNotice( 'IP Blacklist for Cloudflare', 'ip-blacklist-cloudflare', 'cfip_activated_on', 'ip-blacklist-cloudflare', plugin_dir_url( __FILE__ ) . 'assets/icon-128x128.jpg' );
+new CFIP_ReviewNotice( 'IP Blacklist for Cloudflare', 'ip-blacklist-cloudflare', 'cfip_activated_on', 'ip-blacklist-cloudflare', plugin_dir_url( __FILE__ ) . 'assets/plugin-icon.jpg' );

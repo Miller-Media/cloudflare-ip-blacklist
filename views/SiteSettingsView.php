@@ -142,7 +142,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                 if (isset($data['description']) && $data['description']) {
                     ?>
                     <span
-                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                        class="cf-card__footer_message"><?php echo wp_kses_post($data['description']); ?></span>
                     <?php
                 }
                 ?>
@@ -163,7 +163,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                 if (isset($data['description']) && $data['description']) {
                     ?>
                     <span
-                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                        class="cf-card__footer_message"><?php echo wp_kses_post($data['description']); ?></span>
                     <?php
                 }
                 ?>
@@ -183,7 +183,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                 if (isset($data['description']) && $data['description']) {
                     ?>
                     <span
-                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                        class="cf-card__footer_message"><?php echo wp_kses_post($data['description']); ?></span>
                     <?php
                 }
                 ?>
@@ -219,7 +219,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                 if (isset($data['description']) && $data['description']) {
                     ?>
                     <span
-                        class="cf-card__footer_message"><?php echo $data['description']; ?></span>
+                        class="cf-card__footer_message"><?php echo wp_kses_post($data['description']); ?></span>
                     <?php
                 }
                 ?>
@@ -297,7 +297,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                                     __('Connected via %s', 'ip-blacklist-cloudflare'),
                                                     '<strong>' . esc_html($auth_label) . '</strong>'
                                                 ); ?>
-                                                &mdash; <?php echo $masked_display; ?>
+                                                &mdash; <?php echo esc_html($masked_display); ?>
                                             </span>
                                             <a href="#" class="cfip-toggle-credentials"><?php esc_html_e('Change Credentials', 'ip-blacklist-cloudflare'); ?></a>
                                             <span class="cfip-status-separator">|</span>
@@ -321,7 +321,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                 <tr>
                                     <td colspan="2">
                                         <div class="cfip-connect-prompt">
-                                            <?php echo __('Please set your Cloudflare credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-cloudflare'); ?>
+                                            <?php echo wp_kses_post(__('Please set your Cloudflare credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-cloudflare'); ?>
                                         </div>
                                         <table><tbody>
                                             <?php

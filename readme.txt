@@ -2,10 +2,10 @@
 Contributors: MillerMediaNow, mikemm01
 Tags: login, password, passwords, security, profile
 Tested up to: 6.9.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 Requires PHP: 8.1
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Blacklist IP addresses that attempt to login with a banned username through Cloudflare.
 
@@ -94,6 +94,13 @@ The plugin requires PHP 8.1 or higher and has been tested up to WordPress 6.9.1.
 The plugin is available in 30 languages with more being added regularly. We are working toward supporting 50 languages total!
 
 == Changelog ==
+
+= 1.2.1 =
+* Added GPL license declaration to plugin header
+* Updated Author URI
+* Added direct file access protection to all PHP files
+* Improved output escaping and input sanitization
+* Removed non-production files from plugin directory
 
 = 1.2.0 =
 * Added translations for 50 languages
