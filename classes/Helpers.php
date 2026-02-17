@@ -21,7 +21,7 @@ class CFIP_Helpers
      */
     public function parseBaseDomainFromURL($url){
         $url = substr($url,0,4)=='http'? $url: 'http://'.$url;
-        $d = parse_url($url);
+        $d = wp_parse_url($url);
         $tmp = explode('.',$d['host']);
         $n = count($tmp);
         if ($n>=2){

@@ -1,8 +1,8 @@
 === IP Blacklist for Cloudflare ===
 Contributors: MillerMediaNow, mikemm01
 Tags: login, password, passwords, security, profile
-Tested up to: 6.9.1
-Stable tag: 1.2.1
+Tested up to: 6.9
+Stable tag: 1.2.2
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,15 @@ The plugin requires PHP 8.1 or higher and has been tested up to WordPress 6.9.1.
 The plugin is available in 30 languages with more being added regularly. We are working toward supporting 50 languages total!
 
 == Changelog ==
+
+= 1.2.2 =
+* Fixed text domain mismatch: updated all i18n calls to use correct slug `ip-blacklist-for-cloudflare`
+* Renamed translation files to match correct text domain
+* Added ABSPATH checks to ReviewNotice.php and SiteSettingsView.php
+* Fixed unescaped output in SiteSettingsView.php (printf calls now use wp_kses_post + numbered placeholders)
+* Removed deprecated load_plugin_textdomain() call (WordPress handles this since 4.6)
+* Replaced parse_url() with wp_parse_url() in Helpers.php
+* Updated "Tested up to" to 6.9
 
 = 1.2.1 =
 * Added GPL license declaration to plugin header
