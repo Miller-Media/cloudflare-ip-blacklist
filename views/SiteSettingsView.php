@@ -321,7 +321,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                 <tr>
                                     <td colspan="2">
                                         <div class="cfip-connect-prompt">
-                                            <?php echo wp_kses_post(__('Please set your Cloudflare credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-cloudflare'); ?>
+                                            <?php echo wp_kses_post( __( 'Please set your Cloudflare credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-cloudflare' ) ); ?>
                                         </div>
                                         <table><tbody>
                                             <?php
