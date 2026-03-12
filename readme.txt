@@ -1,6 +1,6 @@
 === IP Blacklist for Cloudflare ===
 Contributors: MillerMediaNow, mikemm01
-Tags: login, password, passwords, security, profile
+Tags: cloudflare, firewall, security, ip-block, blacklist
 Tested up to: 6.9
 Stable tag: 1.2.2
 Requires PHP: 8.1
