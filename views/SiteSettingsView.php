@@ -10,63 +10,63 @@ $credentials = $siteSettings->areCredentialsSet();
 
 // The plugin settings. Add new sections/fields accordingly.
 $settings = array(
-	__('Cloudflare Credentials', 'ip-blacklist-for-cloudflare') => array(
+	__('Cloudflare Credentials', 'ip-blacklist-cloudflare') => array(
         'fields' => array(
             array(
                 'name' => 'cf_auth_type',
                 'type' => 'radio',
-                'title' => __('Authentication Method', 'ip-blacklist-for-cloudflare'),
+                'title' => __('Authentication Method', 'ip-blacklist-cloudflare'),
                 'description' => '',
                 'options' => array(
-                    'api_token'  => __('API Token (Recommended)', 'ip-blacklist-for-cloudflare'),
-                    'global_key' => __('Global API Key (Legacy)', 'ip-blacklist-for-cloudflare'),
+                    'api_token'  => __('API Token (Recommended)', 'ip-blacklist-cloudflare'),
+                    'global_key' => __('Global API Key (Legacy)', 'ip-blacklist-cloudflare'),
                 ),
                 'value' => isset($cfip_settings['cf_auth_type']) ? $cfip_settings['cf_auth_type'] : ($credentials ? 'global_key' : 'api_token')
             ),
             array(
                 'name' => 'cf_email',
                 'type' => 'text',
-                'title' => __('Email Address', 'ip-blacklist-for-cloudflare'),
-                'description' => __('Your Cloudflare account email address.', 'ip-blacklist-for-cloudflare'),
+                'title' => __('Email Address', 'ip-blacklist-cloudflare'),
+                'description' => __('Your Cloudflare account email address.', 'ip-blacklist-cloudflare'),
                 'value' => ($credentials && array_key_exists('cf_email', $credentials))? $credentials['cf_email'] : '',
                 'auth_group' => 'global_key'
             ),
             array(
                 'name' => 'cf_key',
                 'type' => 'text',
-                'title' => __('Global API Key', 'ip-blacklist-for-cloudflare'),
-                'description' => __('Your <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">Global API Key</a>.<br />Found under My Profile &rarr; API Tokens &rarr; Global API Key &rarr; View.', 'ip-blacklist-for-cloudflare'),
+                'title' => __('Global API Key', 'ip-blacklist-cloudflare'),
+                'description' => __('Your Global API Key. Found under My Profile &rarr; API Tokens &rarr; Global API Key &rarr; View in your Cloudflare dashboard. See the plugin readme (FAQ) for details.', 'ip-blacklist-cloudflare'),
                 'value' => ($credentials && array_key_exists('cf_key', $credentials)) ? $credentials['cf_key'] : '',
                 'auth_group' => 'global_key'
             ),
             array(
                 'name' => 'cf_token',
                 'type' => 'text',
-                'title' => __('API Token', 'ip-blacklist-for-cloudflare'),
-                'description' => __('A <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">scoped API token</a>.<br />Create one under My Profile &rarr; API Tokens &rarr; Create Token.<br />Required permissions: <strong>Zone &rarr; Zone &rarr; Read</strong>, <strong>Zone &rarr; Firewall Services &rarr; Edit</strong>.', 'ip-blacklist-for-cloudflare'),
+                'title' => __('API Token', 'ip-blacklist-cloudflare'),
+                'description' => __('A scoped API token. Create one under My Profile &rarr; API Tokens &rarr; Create Token in your Cloudflare dashboard. See the plugin readme (FAQ) for details.<br />Required permissions: <strong>Zone &rarr; Zone &rarr; Read</strong>, <strong>Zone &rarr; Firewall Services &rarr; Edit</strong>.', 'ip-blacklist-cloudflare'),
                 'value' => isset($cfip_settings['cf_token']) ? $cfip_settings['cf_token'] : '',
                 'auth_group' => 'api_token'
             ),
         )
 	),
-	__('Blacklist IPs', 'ip-blacklist-for-cloudflare') => array(
+	__('Blacklist IPs', 'ip-blacklist-cloudflare') => array(
 		'fields' => array(
 			array(
 				'name' => 'enable_ip_blacklist',
 				'type' => 'checkbox',
-				'title' => __('Enable IP Blacklisting?', 'ip-blacklist-for-cloudflare'),
+				'title' => __('Enable IP Blacklisting?', 'ip-blacklist-cloudflare'),
                 'description' => ''
 			),
 			array(
 				'name' => 'banned_usernames',
 				'type' => 'textarea',
-				'title' => __('Banned Usernames', 'ip-blacklist-for-cloudflare'),
-				'description' => __('Comma-separated string, e.g. admin, administrator', 'ip-blacklist-for-cloudflare')
+				'title' => __('Banned Usernames', 'ip-blacklist-cloudflare'),
+				'description' => __('Comma-separated string, e.g. admin, administrator', 'ip-blacklist-cloudflare')
 			),
             array(
                 'name' => 'enable_logging',
                 'type' => 'checkbox',
-                'title' => __('Enable Logging?', 'ip-blacklist-for-cloudflare'),
+                'title' => __('Enable Logging?', 'ip-blacklist-cloudflare'),
                 'description' => ''
             )
 		)
@@ -88,25 +88,25 @@ $blacklist_ip_type = count($banned_IPs_list)==0 ? 'span' : 'select';
 $blacklist_ip_settings_array = array(
     'name' => 'blacklisted_ips',
     'type' => $blacklist_ip_type,
-    'title' => __('Blacklisted IPs', 'ip-blacklist-for-cloudflare'),
-    'description' => __('IPs currently blocked from the site', 'ip-blacklist-for-cloudflare')
+    'title' => __('Blacklisted IPs', 'ip-blacklist-cloudflare'),
+    'description' => __('IPs currently blocked from the site', 'ip-blacklist-cloudflare')
 );
 
 if(count($banned_IPs_list)==0){
-    $blacklist_ip_settings_array['value'] = __('No IPs currently blacklisted.', 'ip-blacklist-for-cloudflare');
+    $blacklist_ip_settings_array['value'] = __('No IPs currently blacklisted.', 'ip-blacklist-cloudflare');
 } else {
     $blacklist_ip_settings_array['options'] = $banned_IPs_list;
 }
 
-$settings[__('Blacklist IPs', 'ip-blacklist-for-cloudflare')]['fields'][] = $blacklist_ip_settings_array;
+$settings[__('Blacklist IPs', 'ip-blacklist-cloudflare')]['fields'][] = $blacklist_ip_settings_array;
 
-$settings[__('Data Management', 'ip-blacklist-for-cloudflare')] = array(
+$settings[__('Data Management', 'ip-blacklist-cloudflare')] = array(
 	'fields' => array(
 		array(
 			'name' => 'delete_data_on_uninstall',
 			'type' => 'checkbox',
-			'title' => __('Remove all plugin data when deleted', 'ip-blacklist-for-cloudflare'),
-			'description' => __('Check this box if you want all plugin settings and data to be removed when the plugin is deleted.', 'ip-blacklist-for-cloudflare'),
+			'title' => __('Remove all plugin data when deleted', 'ip-blacklist-cloudflare'),
+			'description' => __('Check this box if you want all plugin settings and data to be removed when the plugin is deleted.', 'ip-blacklist-cloudflare'),
 		),
 	),
 );
@@ -241,8 +241,8 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
 
 ?>
 <ul class="tabs clearfix" data-tabgroup="first-tab-group">
-    <li><a href="#tab1" class="active"><?php esc_html_e('Settings', 'ip-blacklist-for-cloudflare'); ?></a></li>
-    <li><a href="#tab2" class="log_tab"><?php esc_html_e('Log', 'ip-blacklist-for-cloudflare'); ?></a></li>
+    <li><a href="#tab1" class="active"><?php esc_html_e('Settings', 'ip-blacklist-cloudflare'); ?></a></li>
+    <li><a href="#tab2" class="log_tab"><?php esc_html_e('Log', 'ip-blacklist-cloudflare'); ?></a></li>
 </ul>
 <section id="first-tab-group" class="tabgroup">
     <div class="tab-panel" id="tab1">
@@ -250,7 +250,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
             <table>
                 <tbody>
                     <?php
-                    $cf_credentials_label = __('Cloudflare Credentials', 'ip-blacklist-for-cloudflare');
+                    $cf_credentials_label = __('Cloudflare Credentials', 'ip-blacklist-cloudflare');
                     foreach( $settings as $section=>$fields ){
 
                         if ($section === $cf_credentials_label) {
@@ -270,7 +270,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                                 <?php
                                                 echo wp_kses_post( sprintf(
                                                     /* translators: 1: opening link tag, 2: closing link tag */
-                                                    __('Connected via %1$sCloudflare plugin%2$s.', 'ip-blacklist-for-cloudflare'),
+                                                    __('Connected via %1$sCloudflare plugin%2$s.', 'ip-blacklist-cloudflare'),
                                                     '<a href="' . esc_url($cloudflare_admin_url) . '">',
                                                     '</a>'
                                                 ) );
@@ -286,13 +286,13 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                 if ($auth_type === 'api_token') {
                                     $token = isset($cfip_settings['cf_token']) ? $cfip_settings['cf_token'] : '';
                                     $masked = substr($token, 0, 3) . '...' . substr($token, -4);
-                                    $auth_label = __('API Token', 'ip-blacklist-for-cloudflare');
+                                    $auth_label = __('API Token', 'ip-blacklist-cloudflare');
                                     $masked_display = '<code>' . esc_html($masked) . '</code>';
                                 } else {
                                     $email = isset($cfip_settings['cf_email']) ? $cfip_settings['cf_email'] : '';
                                     $key = isset($cfip_settings['cf_key']) ? $cfip_settings['cf_key'] : '';
                                     $masked_key = substr($key, 0, 3) . '...' . substr($key, -4);
-                                    $auth_label = __('Global API Key (Legacy)', 'ip-blacklist-for-cloudflare');
+                                    $auth_label = __('Global API Key (Legacy)', 'ip-blacklist-cloudflare');
                                     $masked_display = esc_html($email) . ' / <code>' . esc_html($masked_key) . '</code>';
                                 }
                                 ?>
@@ -304,15 +304,15 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                                 <?php
                                                 echo wp_kses_post( sprintf(
                                                     /* translators: %1$s: authentication method name (e.g. "API Token") */
-                                                    __('Connected via %1$s', 'ip-blacklist-for-cloudflare'),
+                                                    __('Connected via %1$s', 'ip-blacklist-cloudflare'),
                                                     '<strong>' . esc_html($auth_label) . '</strong>'
                                                 ) );
                                                 ?>
                                                 &mdash; <?php echo wp_kses_post( $masked_display ); ?>
                                             </span>
-                                            <a href="#" class="cfip-toggle-credentials"><?php esc_html_e('Change Credentials', 'ip-blacklist-for-cloudflare'); ?></a>
+                                            <a href="#" class="cfip-toggle-credentials"><?php esc_html_e('Change Credentials', 'ip-blacklist-cloudflare'); ?></a>
                                             <span class="cfip-status-separator">|</span>
-                                            <a href="#" class="cfip-disconnect"><?php esc_html_e('Disconnect', 'ip-blacklist-for-cloudflare'); ?></a>
+                                            <a href="#" class="cfip-disconnect"><?php esc_html_e('Disconnect', 'ip-blacklist-cloudflare'); ?></a>
                                         </div>
                                         <div class="cfip-credentials-form" style="display: none;">
                                             <table><tbody>
@@ -332,7 +332,7 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                                 <tr>
                                     <td colspan="2">
                                         <div class="cfip-connect-prompt">
-                                            <?php echo wp_kses_post( __( 'Please set your Cloudflare credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-for-cloudflare' ) ); ?>
+                                            <?php echo wp_kses_post( __( 'Please set your Cloudflare credentials below or install and configure the <a href="http://wordpress.org/plugins/cloudflare/" target="_blank">official Cloudflare plugin</a> to continue.', 'ip-blacklist-cloudflare' ) ); ?>
                                         </div>
                                         <table><tbody>
                                             <?php
@@ -367,22 +367,22 @@ function cfip_render_field($data, $cfip_settings, $banned_IPs, $banned_IPs_list)
                 </tbody>
             </table>
             <?php wp_nonce_field('cfip_settings_nonce', 'cfip_settings_nonce'); ?>
-            <?php submit_button(esc_html__('Save Changes', 'ip-blacklist-for-cloudflare'), 'cf-btn cf-btn--primary'); ?>
+            <?php submit_button(esc_html__('Save Changes', 'ip-blacklist-cloudflare'), 'cf-btn cf-btn--primary'); ?>
         </form>
     </div>
     <div class="tab-panel" id="tab2">
-        <h1 class="cf-heading cf-heading--1"><span><?php esc_html_e('Log', 'ip-blacklist-for-cloudflare'); ?></span></h1>
+        <h1 class="cf-heading cf-heading--1"><span><?php esc_html_e('Log', 'ip-blacklist-cloudflare'); ?></span></h1>
         <?php
         if(!$siteSettings->isLoggingEnabled()) {
             ?>
-        <span class="cf-card__footer_message"><?php esc_html_e('Logging is currently disabled. To start logging, enable checkbox on settings tab.', 'ip-blacklist-for-cloudflare'); ?></span>
+        <span class="cf-card__footer_message"><?php esc_html_e('Logging is currently disabled. To start logging, enable checkbox on settings tab.', 'ip-blacklist-cloudflare'); ?></span>
             <?php
         }
             ?>
         <div id="log_screen">
             <pre></pre>
         </div>
-        <button id="clear_log_button" class="button button-primary cf-btn cf-btn--primary"><?php esc_html_e('Clear Log', 'ip-blacklist-for-cloudflare'); ?></button>
+        <button id="clear_log_button" class="button button-primary cf-btn cf-btn--primary"><?php esc_html_e('Clear Log', 'ip-blacklist-cloudflare'); ?></button>
         <div id="cfip_ajax_res_clearlog"></div>
     </div>
 </section>
