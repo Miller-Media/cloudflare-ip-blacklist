@@ -164,7 +164,34 @@ class CFIP_Blacklist
         if(!$zone_id)
             return false;
 
+        /**
+         * Cloudflare's firewall rules can take a few seconds to take effect, so a
+         * user retrying a banned username in that window would otherwise trigger
+         * a duplicate API call (and a 10009 error). If we already have this IP
+         * recorded as blocked for this zone, skip the API call entirely.
+         */
+        if ($this->isIPBannedForZone($ip, $zone_id)) {
+            if ($this->siteSettings->isLoggingEnabled()) {
+                $this->log("IP already blocked. Skipping...");
+            }
+
+            return array($zone_id => true);
+        }
+
         return array($zone_id => $this->API->blacklistIP( $zone_id, $ip ));
+    }
+
+    /**
+     * Check whether an IP address is already recorded as blocked for a given zone.
+     *
+     * @param $ip
+     * @param $zone_id
+     * @return bool
+     */
+    private function isIPBannedForZone ($ip, $zone_id)
+    {
+        $banned_IPs = $this->getBannedIPs();
+        return isset($banned_IPs[$ip]['zones'][$zone_id]);
     }
 
     /**
@@ -189,6 +216,11 @@ class CFIP_Blacklist
 
             $updateBannedIPs = false;
             foreach ($results as $zone_id => $result) {
+                // Already confirmed blocked for this zone; no API call was made.
+                if ($result === true) {
+                    continue;
+                }
+
                 if(!empty($result->errors)){
                     /**
                      * A delay exists (~5-10 seconds) after an IP has been added to the blacklist on Cloudflare
@@ -255,6 +287,15 @@ class CFIP_Blacklist
     {
         $banned_IPs = $this->getBannedIPs();
         foreach ($ip_data as $ip => $data) {
+            // Merge zone data instead of replacing it outright, so a partial
+            // update (e.g. one zone duplicate, another newly blocked) doesn't
+            // lose previously recorded zones for this IP. Use array_replace
+            // (not array_merge) since zone IDs are used as keys and array_merge
+            // would renumber numeric keys.
+            if (!empty($banned_IPs[$ip]['zones']) && !empty($data['zones'])) {
+                $data['zones'] = array_replace($banned_IPs[$ip]['zones'], $data['zones']);
+            }
+
             $banned_IPs[$ip] = $data;
             update_site_option('cfip_banned_addresses', $banned_IPs);
         }
