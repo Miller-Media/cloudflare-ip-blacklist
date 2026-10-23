@@ -71,6 +71,8 @@ This plugin is available in the following languages:
 * Vietnamese (Tiếng Việt)
 * Welsh (Cymraeg)
 
+**Development of this plugin is done [on GitHub](https://github.com/Miller-Media/cloudflare-ip-blacklist). Pull requests welcome. Please see [issues reported](https://github.com/Miller-Media/cloudflare-ip-blacklist/issues) there before going to the plugin forum.**
+
 == Frequently Asked Questions ==
 
 = How do I set up my Cloudflare API credentials? =
