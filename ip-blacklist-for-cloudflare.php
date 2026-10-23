@@ -9,7 +9,7 @@
  * Version:           1.2.3
  * Requires PHP: 8.1
  * Tested up to: 7.1
- * Text Domain: ip-blacklist-for-cloudflare
+ * Text Domain: ip-blacklist-cloudflare
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -35,10 +35,10 @@ register_activation_hook( __FILE__, function() {
 });
 
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), function($links) {
-	$settings_link = '<a href="' . admin_url('admin.php?page=cfip-menu') . '">' . __('Settings', 'ip-blacklist-for-cloudflare') . '</a>';
+	$settings_link = '<a href="' . admin_url('admin.php?page=cfip-menu') . '">' . __('Settings', 'ip-blacklist-cloudflare') . '</a>';
 	array_unshift($links, $settings_link);
 	return $links;
 });
 
 $CFIP_Blacklist = new CFIP_Blacklist();
-new CFIP_ReviewNotice( 'IP Blacklist for Cloudflare', 'ip-blacklist-for-cloudflare', 'cfip_activated_on', 'ip-blacklist-for-cloudflare', plugin_dir_url( __FILE__ ) . 'assets/plugin-icon.jpg' );
+new CFIP_ReviewNotice( 'IP Blacklist for Cloudflare', 'ip-blacklist-for-cloudflare', 'cfip_activated_on', 'ip-blacklist-cloudflare', plugin_dir_url( __FILE__ ) . 'assets/plugin-icon.jpg' );

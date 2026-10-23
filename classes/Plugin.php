@@ -91,19 +91,19 @@ class CFIP_Blacklist
         wp_enqueue_style('cfip_admin_style', $this->adminStyle, array(),CFIP_PLUGIN_VERSION);
         wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'),CFIP_PLUGIN_VERSION);
         wp_localize_script('cfip_admin_script', 'cfip_i18n', array(
-            'removing_ip'         => __('Removing IP from blacklist...', 'ip-blacklist-for-cloudflare'),
-            'error'               => __('There was an error.', 'ip-blacklist-for-cloudflare'),
-            'no_ips_blacklisted'  => __('No IPs currently blacklisted.', 'ip-blacklist-for-cloudflare'),
-            'ip_removed'          => __('IP address successfully removed from blacklist.', 'ip-blacklist-for-cloudflare'),
-            'response_unclear'    => __('Response from Cloudflare API unclear. Please refresh page.', 'ip-blacklist-for-cloudflare'),
-            'clearing_log'        => __('Clearing log...', 'ip-blacklist-for-cloudflare'),
-            'log_cleared'         => __('Log cleared.', 'ip-blacklist-for-cloudflare'),
-            'loading_log'         => __('Loading log...', 'ip-blacklist-for-cloudflare'),
-            'remove_from_blacklist' => __('Remove From Blacklist', 'ip-blacklist-for-cloudflare'),
-            'change_credentials'   => __('Change Credentials', 'ip-blacklist-for-cloudflare'),
-            'cancel'               => __('Cancel', 'ip-blacklist-for-cloudflare'),
-            'disconnect'           => __('Disconnect', 'ip-blacklist-for-cloudflare'),
-            'disconnect_confirm'   => __('Are you sure you want to disconnect? Your Cloudflare credentials will be removed.', 'ip-blacklist-for-cloudflare'),
+            'removing_ip'         => __('Removing IP from blacklist...', 'ip-blacklist-cloudflare'),
+            'error'               => __('There was an error.', 'ip-blacklist-cloudflare'),
+            'no_ips_blacklisted'  => __('No IPs currently blacklisted.', 'ip-blacklist-cloudflare'),
+            'ip_removed'          => __('IP address successfully removed from blacklist.', 'ip-blacklist-cloudflare'),
+            'response_unclear'    => __('Response from Cloudflare API unclear. Please refresh page.', 'ip-blacklist-cloudflare'),
+            'clearing_log'        => __('Clearing log...', 'ip-blacklist-cloudflare'),
+            'log_cleared'         => __('Log cleared.', 'ip-blacklist-cloudflare'),
+            'loading_log'         => __('Loading log...', 'ip-blacklist-cloudflare'),
+            'remove_from_blacklist' => __('Remove From Blacklist', 'ip-blacklist-cloudflare'),
+            'change_credentials'   => __('Change Credentials', 'ip-blacklist-cloudflare'),
+            'cancel'               => __('Cancel', 'ip-blacklist-cloudflare'),
+            'disconnect'           => __('Disconnect', 'ip-blacklist-cloudflare'),
+            'disconnect_confirm'   => __('Are you sure you want to disconnect? Your Cloudflare credentials will be removed.', 'ip-blacklist-cloudflare'),
         ));
 
         // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles

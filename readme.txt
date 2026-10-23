@@ -77,7 +77,7 @@ This plugin is available in the following languages:
 
 = How do I set up my Cloudflare API credentials? =
 
-Go to Settings > Cloudflare IP Blacklist in your WordPress admin. You can authenticate using either a scoped API Token (recommended) or your Global API Key (legacy). For API Tokens, create one in your Cloudflare dashboard with the "Account > Account Firewall Access Rules > Edit" permission.
+Go to Settings > Cloudflare IP Blacklist in your WordPress admin. You can authenticate using either a scoped API Token (recommended) or your Global API Key (legacy). For API Tokens, create one in your Cloudflare dashboard with the "Account > Account Firewall Access Rules > Edit" permission. You can create API Tokens and find your Global API Key at https://dash.cloudflare.com/profile/api-tokens.
 
 = What happens when someone tries to log in with a banned username? =
 
@@ -103,6 +103,8 @@ The plugin is available in 30 languages with more being added regularly. We are 
 * If you delete a rule by hand in Cloudflare, also remove the IP in the plugin to re-block it.
 * Added a link to the GitHub repository in the readme
 * Tested up to WordPress 7.1
+* Fixed: translations load again — the text domain now matches the WordPress.org slug (ip-blacklist-cloudflare)
+* Removed external links from the API credential field descriptions; see the readme FAQ for where to find your API Token or Global API Key
 
 = 1.2.2 =
 * Fixed text domain mismatch: updated all i18n calls to use correct slug `ip-blacklist-for-cloudflare`
