@@ -1,433 +1,425 @@
 <?php
 
-if (!defined('ABSPATH')) {
-    die('Access denied.');
+if ( ! defined( 'ABSPATH' ) ) {
+	die( 'Access denied.' );
 }
 
 /**
  * Plugin Class
  */
-class CFIP_Blacklist
-{
+class CFIP_Blacklist {
 
-    /**
-     * The settings class.
-     *
-     * @var CFIP_Settings
-     */
-    public $siteSettings;
 
-    /**
-     * The plugin settings.
-     *
-     * @var mixed
-     */
-    public $settings;
+	/**
+	 * The settings class.
+	 *
+	 * @var CFIP_Settings
+	 */
+	public $siteSettings;
 
-    /**
-     * The API class.
-     *
-     * @var CFIP_CloudflareAPIController
-     */
-    public $API;
+	/**
+	 * The plugin settings.
+	 *
+	 * @var mixed
+	 */
+	public $settings;
 
-    /**
-     * Admin stylesheet file.
-     *
-     */
-    public $adminStyle;
+	/**
+	 * The API class.
+	 *
+	 * @var CFIP_CloudflareAPIController
+	 */
+	public $API;
 
-    /**
-     * Admin javascript file.
-     *
-     */
-    public $adminScript;
+	/**
+	 * Admin stylesheet file.
+	 */
+	public $adminStyle;
 
-    /**
-     * CFIP_Blacklist constructor.
-     *
-     * Initialize plugin properties/hooks.
-     *
-     */
-    public function __construct ()
-    {
-        $this->siteSettings = new CFIP_SiteSettings();
-        $this->API = new CFIP_CloudflareAPIController();
-        $this->settings = get_site_option('cfip_settings');
+	/**
+	 * Admin javascript file.
+	 */
+	public $adminScript;
 
-        $this->adminStyle = plugins_url('assets/css/admin.css', dirname( __DIR__ ) . '/ip-blacklist-for-cloudflare.php');
-        $this->adminScript = plugins_url('assets/js/admin.js', dirname( __DIR__ ) . '/ip-blacklist-for-cloudflare.php');
+	/**
+	 * CFIP_Blacklist constructor.
+	 *
+	 * Initialize plugin properties/hooks.
+	 */
+	public function __construct() {
+		$this->siteSettings = new CFIP_SiteSettings();
+		$this->API          = new CFIP_CloudflareAPIController();
+		$this->settings     = get_site_option( 'cfip_settings' );
 
-        // Hooks
-        add_action('admin_enqueue_scripts', array ($this, 'adminEnqueueScripts'), 40, 1);
+		$this->adminStyle  = plugins_url( 'assets/css/admin.css', dirname( __DIR__ ) . '/ip-blacklist-for-cloudflare.php' );
+		$this->adminScript = plugins_url( 'assets/js/admin.js', dirname( __DIR__ ) . '/ip-blacklist-for-cloudflare.php' );
 
-        // IP Blacklist
-        add_action('wp_authenticate', array ($this, 'checkUserLoginName'), 10, 1);
+		// Hooks
+		add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueueScripts' ), 40, 1 );
 
-        // AJAX requests
-        add_action('wp_ajax_cfip_unblacklist_ip', array ($this, 'ajaxUnblacklistIP'));
-        add_action('wp_ajax_cfip_clearlog', array ($this, 'ajaxClearLog'));
-	    add_action('wp_ajax_cfip_loadlog', array ($this, 'ajaxLoadLog'));
+		// IP Blacklist
+		add_action( 'wp_authenticate', array( $this, 'checkUserLoginName' ), 10, 1 );
 
-        // Single Site Settings Screen
-        add_action('admin_menu', array($this->siteSettings, 'addSiteMenu'));
-        add_action('admin_menu', array($this->siteSettings, 'verifyNonce'));
+		// AJAX requests
+		add_action( 'wp_ajax_cfip_unblacklist_ip', array( $this, 'ajaxUnblacklistIP' ) );
+		add_action( 'wp_ajax_cfip_clearlog', array( $this, 'ajaxClearLog' ) );
+		add_action( 'wp_ajax_cfip_loadlog', array( $this, 'ajaxLoadLog' ) );
 
-        // Add 'Settings' link to plugin page
-        //add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), array ($this, 'cfip_add_action_links'), 10, 5);
-    }
+		// Single Site Settings Screen
+		add_action( 'admin_menu', array( $this->siteSettings, 'addSiteMenu' ) );
+		add_action( 'admin_menu', array( $this->siteSettings, 'verifyNonce' ) );
 
-    /**
-     * Enqueue admin scripts and stylesheets.
-     *
-     * @param $hook string
-     */
-    public function adminEnqueueScripts ($hook)
-    {
-        // Only enqueue on appropriate admin screen.
-        if ($hook !== 'toplevel_page_cfip-menu')
-            return;
+		// Add 'Settings' link to plugin page
+		// add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), array ($this, 'cfip_add_action_links'), 10, 5);
+	}
 
-        wp_enqueue_style('cfip_admin_style', $this->adminStyle, array(),CFIP_PLUGIN_VERSION);
-        wp_enqueue_script('cfip_admin_script', $this->adminScript, array ('jquery'),CFIP_PLUGIN_VERSION);
-        wp_localize_script('cfip_admin_script', 'cfip_i18n', array(
-            'removing_ip'         => __('Removing IP from blacklist...', 'ip-blacklist-cloudflare'),
-            'error'               => __('There was an error.', 'ip-blacklist-cloudflare'),
-            'no_ips_blacklisted'  => __('No IPs currently blacklisted.', 'ip-blacklist-cloudflare'),
-            'ip_removed'          => __('IP address successfully removed from blacklist.', 'ip-blacklist-cloudflare'),
-            'response_unclear'    => __('Response from Cloudflare API unclear. Please refresh page.', 'ip-blacklist-cloudflare'),
-            'clearing_log'        => __('Clearing log...', 'ip-blacklist-cloudflare'),
-            'log_cleared'         => __('Log cleared.', 'ip-blacklist-cloudflare'),
-            'loading_log'         => __('Loading log...', 'ip-blacklist-cloudflare'),
-            'remove_from_blacklist' => __('Remove From Blacklist', 'ip-blacklist-cloudflare'),
-            'change_credentials'   => __('Change Credentials', 'ip-blacklist-cloudflare'),
-            'cancel'               => __('Cancel', 'ip-blacklist-cloudflare'),
-            'disconnect'           => __('Disconnect', 'ip-blacklist-cloudflare'),
-            'disconnect_confirm'   => __('Are you sure you want to disconnect? Your Cloudflare credentials will be removed.', 'ip-blacklist-cloudflare'),
-        ));
+	/**
+	 * Enqueue admin scripts and stylesheets.
+	 *
+	 * @param $hook string
+	 */
+	public function adminEnqueueScripts( $hook ) {
+		// Only enqueue on appropriate admin screen.
+		if ( $hook !== 'toplevel_page_cfip-menu' ) {
+			return;
+		}
 
-        // If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
-        if($this->isCloudflarePluginActive()) {
-            wp_enqueue_style('cf-corecss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/cf.core.css');
-            wp_enqueue_style('cf-componentscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/components.css');
-            wp_enqueue_style('cf-hackscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR.'/stylesheets/hacks.css');
-        }
-    }
+		wp_enqueue_style( 'cfip_admin_style', $this->adminStyle, array(), CFIP_PLUGIN_VERSION );
+		wp_enqueue_script( 'cfip_admin_script', $this->adminScript, array( 'jquery' ), CFIP_PLUGIN_VERSION );
+		wp_localize_script(
+			'cfip_admin_script',
+			'cfip_i18n',
+			array(
+				'removing_ip'           => __( 'Removing IP from blacklist...', 'ip-blacklist-cloudflare' ),
+				'error'                 => __( 'There was an error.', 'ip-blacklist-cloudflare' ),
+				'no_ips_blacklisted'    => __( 'No IPs currently blacklisted.', 'ip-blacklist-cloudflare' ),
+				'ip_removed'            => __( 'IP address successfully removed from blacklist.', 'ip-blacklist-cloudflare' ),
+				'response_unclear'      => __( 'Response from Cloudflare API unclear. Please refresh page.', 'ip-blacklist-cloudflare' ),
+				'clearing_log'          => __( 'Clearing log...', 'ip-blacklist-cloudflare' ),
+				'log_cleared'           => __( 'Log cleared.', 'ip-blacklist-cloudflare' ),
+				'loading_log'           => __( 'Loading log...', 'ip-blacklist-cloudflare' ),
+				'remove_from_blacklist' => __( 'Remove From Blacklist', 'ip-blacklist-cloudflare' ),
+				'change_credentials'    => __( 'Change Credentials', 'ip-blacklist-cloudflare' ),
+				'cancel'                => __( 'Cancel', 'ip-blacklist-cloudflare' ),
+				'disconnect'            => __( 'Disconnect', 'ip-blacklist-cloudflare' ),
+				'disconnect_confirm'    => __( 'Are you sure you want to disconnect? Your Cloudflare credentials will be removed.', 'ip-blacklist-cloudflare' ),
+			)
+		);
 
-    /**
-     * Add Links to main WP plugin page
-     */
-    /*public function cfip_add_action_links( $actions ) {
-        $custom_actions = array(
-            'settings' => sprintf( '<a href="%s">%s</a>', admin_url( 'admin.php?page=cfip-menu' ), 'Settings' )
-        );
+		// If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
+		if ( $this->isCloudflarePluginActive() ) {
+			wp_enqueue_style( 'cf-corecss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR . '/stylesheets/cf.core.css' );
+			wp_enqueue_style( 'cf-componentscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR . '/stylesheets/components.css' );
+			wp_enqueue_style( 'cf-hackscss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR . '/stylesheets/hacks.css' );
+		}
+	}
 
-        // add the links to the front of the actions list
-        return array_merge( $custom_actions, $actions );
-    }*/
+	/**
+	 * Add Links to main WP plugin page
+	 */
+	/*
+	public function cfip_add_action_links( $actions ) {
+		$custom_actions = array(
+			'settings' => sprintf( '<a href="%s">%s</a>', admin_url( 'admin.php?page=cfip-menu' ), 'Settings' )
+		);
 
-    /**
-     * Check if official Cloudflare Plugin is installed and active
-     */
-    public function isCloudflarePluginActive(){
-        return is_plugin_active( 'cloudflare/cloudflare.php' );
-    }
-    
-    /**
-     * Check if login name has been blacklisted.
-     *
-     * @param $username string
-     * @return void
-     */
-    public function checkUserLoginName ($username)
-    {
-        // If IP Blacklisting is disabled, bail.
-        if (!($this->getSetting('enable_ip_blacklist') == 'on'))
-            return;
+		// add the links to the front of the actions list
+		return array_merge( $custom_actions, $actions );
+	}*/
 
-        $banned_usernames = array_map('trim', explode(',', $this->getSetting('banned_usernames')));
-        if (in_array($username, $banned_usernames)) {
-            $this->blacklistIPAddress();
-        }
-    }
+	/**
+	 * Check if official Cloudflare Plugin is installed and active
+	 */
+	public function isCloudflarePluginActive() {
+		return is_plugin_active( 'cloudflare/cloudflare.php' );
+	}
 
-    /**
-     * Blacklist IP in CloudFlare via API call.
-     *
-     *
-     * @param $ip
-     * @return array|mixed|object
-     */
-    public function singleSiteBlacklistIP( $ip ){
-        $zone_id = $this->API->getZoneId( get_site_url() );
+	/**
+	 * Check if login name has been blacklisted.
+	 *
+	 * @param $username string
+	 * @return void
+	 */
+	public function checkUserLoginName( $username ) {
+		// If IP Blacklisting is disabled, bail.
+		if ( ! ( $this->getSetting( 'enable_ip_blacklist' ) == 'on' ) ) {
+			return;
+		}
 
-        if(!$zone_id)
-            return false;
+		$banned_usernames = array_map( 'trim', explode( ',', $this->getSetting( 'banned_usernames' ) ) );
+		if ( in_array( $username, $banned_usernames ) ) {
+			$this->blacklistIPAddress();
+		}
+	}
 
-        /**
-         * Cloudflare's firewall rules can take a few seconds to take effect, so a
-         * user retrying a banned username in that window would otherwise trigger
-         * a duplicate API call (and a 10009 error). If we already have this IP
-         * recorded as blocked for this zone, skip the API call entirely.
-         */
-        if ($this->isIPBannedForZone($ip, $zone_id)) {
-            if ($this->siteSettings->isLoggingEnabled()) {
-                $this->log("IP already blocked. Skipping...");
-            }
+	/**
+	 * Blacklist IP in CloudFlare via API call.
+	 *
+	 * @param $ip
+	 * @return array|mixed|object
+	 */
+	public function singleSiteBlacklistIP( $ip ) {
+		$zone_id = $this->API->getZoneId( get_site_url() );
 
-            return array($zone_id => true);
-        }
+		if ( ! $zone_id ) {
+			return false;
+		}
 
-        return array($zone_id => $this->API->blacklistIP( $zone_id, $ip ));
-    }
+		/**
+		 * Cloudflare's firewall rules can take a few seconds to take effect, so a
+		 * user retrying a banned username in that window would otherwise trigger
+		 * a duplicate API call (and a 10009 error). If we already have this IP
+		 * recorded as blocked for this zone, skip the API call entirely.
+		 */
+		if ( $this->isIPBannedForZone( $ip, $zone_id ) ) {
+			if ( $this->siteSettings->isLoggingEnabled() ) {
+				$this->log( 'IP already blocked. Skipping...' );
+			}
 
-    /**
-     * Check whether an IP address is already recorded as blocked for a given zone.
-     *
-     * @param $ip
-     * @param $zone_id
-     * @return bool
-     */
-    private function isIPBannedForZone ($ip, $zone_id)
-    {
-        $banned_IPs = $this->getBannedIPs();
-        return isset($banned_IPs[$ip]['zones'][$zone_id]);
-    }
+			return array( $zone_id => true );
+		}
 
-    /**
-     * Add user's IP address to site option and blacklist it in Cloudflare.
-     *
-     * @return void
-     */
-    public function blacklistIPAddress ()
-    {
-        // Get user's IP address.
-        $ip = $this->getUserIPAddress();
+		return array( $zone_id => $this->API->blacklistIP( $zone_id, $ip ) );
+	}
 
-        // If an IP address was retrieved, add to site option along with zone/request data and blacklist in Cloudflare.
-        if ($ip) {
-            $results = $this->singleSiteBlacklistIP( $ip );
+	/**
+	 * Check whether an IP address is already recorded as blocked for a given zone.
+	 *
+	 * @param $ip
+	 * @param $zone_id
+	 * @return bool
+	 */
+	private function isIPBannedForZone( $ip, $zone_id ) {
+		$banned_IPs = $this->getBannedIPs();
+		return isset( $banned_IPs[ $ip ]['zones'][ $zone_id ] );
+	}
 
-            $ip_data = array(
-                $ip => array(
-                    'zones' => array()
-                )
-            );
+	/**
+	 * Add user's IP address to site option and blacklist it in Cloudflare.
+	 *
+	 * @return void
+	 */
+	public function blacklistIPAddress() {
+		// Get user's IP address.
+		$ip = $this->getUserIPAddress();
 
-            $updateBannedIPs = false;
-            foreach ($results as $zone_id => $result) {
-                // Already confirmed blocked for this zone; no API call was made.
-                if ($result === true) {
-                    continue;
-                }
+		// If an IP address was retrieved, add to site option along with zone/request data and blacklist in Cloudflare.
+		if ( $ip ) {
+			$results = $this->singleSiteBlacklistIP( $ip );
 
-                if(!empty($result->errors)){
-                    /**
-                     * A delay exists (~5-10 seconds) after an IP has been added to the blacklist on Cloudflare
-                     * and before it takes effect to the user trying to access the site.
-                     *
-                     * In these cases we handle API requests that are considered 'duplicates'/ error code: 10009
-                     */
-                    if($result->errors[0]->code==10009){
-                        if ($this->siteSettings->isLoggingEnabled()) {
-                            $this->log("IP already blocked. Skipping...");
-                        }
-                    }
+			$ip_data = array(
+				$ip => array(
+					'zones' => array(),
+				),
+			);
 
-                    continue;
-                }
+			$updateBannedIPs = false;
+			foreach ( $results as $zone_id => $result ) {
+				// Already confirmed blocked for this zone; no API call was made.
+				if ( $result === true ) {
+					continue;
+				}
 
-                $ip_data[$ip]['zones'][$zone_id]['request_id'] = $result->result->id;
-                $updateBannedIPs = true;
-            }
+				if ( ! empty( $result->errors ) ) {
+					/**
+					 * A delay exists (~5-10 seconds) after an IP has been added to the blacklist on Cloudflare
+					 * and before it takes effect to the user trying to access the site.
+					 *
+					 * In these cases we handle API requests that are considered 'duplicates'/ error code: 10009
+					 */
+					if ( $result->errors[0]->code == 10009 ) {
+						if ( $this->siteSettings->isLoggingEnabled() ) {
+							$this->log( 'IP already blocked. Skipping...' );
+						}
+					}
 
-            if($updateBannedIPs)
-                $this->updateBannedIPs($ip_data);
-        }
-    }
+					continue;
+				}
 
-    /**
-     * Get a user's IP address.
-     *
-     * @return string | bool
-     */
-    public function getUserIPAddress ()
-    {
-        foreach (array ('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
-            if (array_key_exists($key, $_SERVER) === true) {
-                foreach (explode(',', $_SERVER[$key]) as $IP) {
-                    $IP = trim($IP);
-                    if (filter_var($IP, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-                        return $IP;
-                    }
-                }
-            }
-        }
+				$ip_data[ $ip ]['zones'][ $zone_id ]['request_id'] = $result->result->id;
+				$updateBannedIPs                                   = true;
+			}
 
-        return false;
-    }
+			if ( $updateBannedIPs ) {
+				$this->updateBannedIPs( $ip_data );
+			}
+		}
+	}
 
-    /**
-     * Get banned IP addresses from site option.
-     * (found in wp_sitemeta)
-     *
-     * @return array
-     */
-    public function getBannedIPs ()
-    {
-        return (get_site_option('cfip_banned_addresses') ?: array ());
-    }
+	/**
+	 * Get a user's IP address.
+	 *
+	 * @return string | bool
+	 */
+	public function getUserIPAddress() {
+		foreach ( array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
+			if ( array_key_exists( $key, $_SERVER ) === true ) {
+				foreach ( explode( ',', $_SERVER[ $key ] ) as $IP ) {
+					$IP = trim( $IP );
+					if ( filter_var( $IP, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) !== false ) {
+						return $IP;
+					}
+				}
+			}
+		}
 
-    /**
-     * Update site option with IP Address to ban (if it doesn't already exist).
-     *
-     * @param $ip_data array
-     */
-    public function updateBannedIPs ($ip_data)
-    {
-        $banned_IPs = $this->getBannedIPs();
-        foreach ($ip_data as $ip => $data) {
-            // Merge zone data instead of replacing it outright, so a partial
-            // update (e.g. one zone duplicate, another newly blocked) doesn't
-            // lose previously recorded zones for this IP. Use array_replace
-            // (not array_merge) since zone IDs are used as keys and array_merge
-            // would renumber numeric keys.
-            if (!empty($banned_IPs[$ip]['zones']) && !empty($data['zones'])) {
-                $data['zones'] = array_replace($banned_IPs[$ip]['zones'], $data['zones']);
-            }
+		return false;
+	}
 
-            $banned_IPs[$ip] = $data;
-            update_site_option('cfip_banned_addresses', $banned_IPs);
-        }
-    }
+	/**
+	 * Get banned IP addresses from site option.
+	 * (found in wp_sitemeta)
+	 *
+	 * @return array
+	 */
+	public function getBannedIPs() {
+		return ( get_site_option( 'cfip_banned_addresses' ) ?: array() );
+	}
 
-    /**
-     * Remove $ip from blacklisted IPs in site option after unblocking
-     * in Cloudflare API.
-     *
-     * @param $ip
-     */
-    public function removeBannedIP ($ip)
-    {
-        $banned_IPs = $this->getBannedIPs();
-        if (isset($banned_IPs[$ip]))
-            unset($banned_IPs[$ip]);
+	/**
+	 * Update site option with IP Address to ban (if it doesn't already exist).
+	 *
+	 * @param $ip_data array
+	 */
+	public function updateBannedIPs( $ip_data ) {
+		$banned_IPs = $this->getBannedIPs();
+		foreach ( $ip_data as $ip => $data ) {
+			// Merge zone data instead of replacing it outright, so a partial
+			// update (e.g. one zone duplicate, another newly blocked) doesn't
+			// lose previously recorded zones for this IP. Use array_replace
+			// (not array_merge) since zone IDs are used as keys and array_merge
+			// would renumber numeric keys.
+			if ( ! empty( $banned_IPs[ $ip ]['zones'] ) && ! empty( $data['zones'] ) ) {
+				$data['zones'] = array_replace( $banned_IPs[ $ip ]['zones'], $data['zones'] );
+			}
 
-        update_site_option('cfip_banned_addresses', $banned_IPs);
-    }
+			$banned_IPs[ $ip ] = $data;
+			update_site_option( 'cfip_banned_addresses', $banned_IPs );
+		}
+	}
 
-    /**
-     * Remove an IP address from Cloudflare firewall rules.
-     *
-     */
-    public function ajaxUnblacklistIP ()
-    {
-        $response = array (
-            'result' => '',
-            'errors' => array ()
-        );
+	/**
+	 * Remove $ip from blacklisted IPs in site option after unblocking
+	 * in Cloudflare API.
+	 *
+	 * @param $ip
+	 */
+	public function removeBannedIP( $ip ) {
+		$banned_IPs = $this->getBannedIPs();
+		if ( isset( $banned_IPs[ $ip ] ) ) {
+			unset( $banned_IPs[ $ip ] );
+		}
 
-        if (!isset($_POST['ip_address']) || !$_POST['ip_address']) {
-            $response['errors'][] = array ('error' => 'No IP address provided.');
-            wp_die(json_encode($response));
-        }
+		update_site_option( 'cfip_banned_addresses', $banned_IPs );
+	}
 
-        $ip_address = preg_replace(array ('/\s{2,}/', '/[\t\n]/'), '', sanitize_text_field($_POST['ip_address']));
-        $response['ip'] = $ip_address;
+	/**
+	 * Remove an IP address from Cloudflare firewall rules.
+	 */
+	public function ajaxUnblacklistIP() {
+		$response = array(
+			'result' => '',
+			'errors' => array(),
+		);
 
-        $banned_IPs = $this->getBannedIPs();
-        foreach ($banned_IPs as $ip => $data) {
-            if ($ip == $ip_address) {
-                foreach ($data['zones'] as $zone_id => $zone_data) {
-                	if( !$zone_id )
-                		continue;
+		if ( ! isset( $_POST['ip_address'] ) || ! $_POST['ip_address'] ) {
+			$response['errors'][] = array( 'error' => 'No IP address provided.' );
+			wp_die( json_encode( $response ) );
+		}
 
-                    $request_id = $zone_data['request_id'];
-                    if( !$request_id )
-                    	continue;
-                    
-                    $r = $this->API->deleteBlacklistedIP($zone_id, $request_id);
-                    if (!$r->success && $r->errors) {
-                        foreach ($r->errors as $error){
-                        	if( !in_array($error->code, array(1003, 7000)) )
-	                            $response['errors'][] = array ($error->code => $error->message);
-                        }
-                    }
-                }
-            }
-        }
+		$ip_address     = preg_replace( array( '/\s{2,}/', '/[\t\n]/' ), '', sanitize_text_field( $_POST['ip_address'] ) );
+		$response['ip'] = $ip_address;
 
-        if (!$response['errors']) {
-            $this->removeBannedIP($ip_address);
-            $response['result'] = 'success';
-        }
+		$banned_IPs = $this->getBannedIPs();
+		foreach ( $banned_IPs as $ip => $data ) {
+			if ( $ip == $ip_address ) {
+				foreach ( $data['zones'] as $zone_id => $zone_data ) {
+					if ( ! $zone_id ) {
+						continue;
+					}
 
-        wp_die(json_encode($response));
-    }
+					$request_id = $zone_data['request_id'];
+					if ( ! $request_id ) {
+						continue;
+					}
+
+					$r = $this->API->deleteBlacklistedIP( $zone_id, $request_id );
+					if ( ! $r->success && $r->errors ) {
+						foreach ( $r->errors as $error ) {
+							if ( ! in_array( $error->code, array( 1003, 7000 ) ) ) {
+								$response['errors'][] = array( $error->code => $error->message );
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( ! $response['errors'] ) {
+			$this->removeBannedIP( $ip_address );
+			$response['result'] = 'success';
+		}
+
+		wp_die( json_encode( $response ) );
+	}
 
 	/**
 	 * Load/refresh log via AJAX when log tab is opened.
-	 *
 	 */
-    public function ajaxLoadLog ()
-    {
-    	$response = array('log' => array());
-	    $cfip_log = get_site_option('cfip_log')?:array();
-	    if( $cfip_log ){
-		    foreach( $cfip_log as $entry ){
-		    	ob_start();
-			    print_r(PHP_EOL);
-		    	print_r($entry);
-		    	$response['log'][] = ob_get_clean();
-		    }
-	    }
+	public function ajaxLoadLog() {
+		$response = array( 'log' => array() );
+		$cfip_log = get_site_option( 'cfip_log' ) ?: array();
+		if ( $cfip_log ) {
+			foreach ( $cfip_log as $entry ) {
+				ob_start();
+				print_r( PHP_EOL );
+				print_r( $entry );
+				$response['log'][] = ob_get_clean();
+			}
+		}
 
-	    wp_die(json_encode($response));
-    }
+		wp_die( json_encode( $response ) );
+	}
 
 	/**
 	 * Clear log via AJAX.
-	 *
 	 */
-    public function ajaxClearLog ()
-    {
-        $response = array ();
-        if (!isset($_POST['clear_log']) || !$_POST['clear_log']) {
-            $response['error'] = 'An error occurred.';
-            wp_die(json_encode($response));
-        }
+	public function ajaxClearLog() {
+		$response = array();
+		if ( ! isset( $_POST['clear_log'] ) || ! $_POST['clear_log'] ) {
+			$response['error'] = 'An error occurred.';
+			wp_die( json_encode( $response ) );
+		}
 
-        if (!update_site_option('cfip_log', array ())) {
-            $response['error'] = array ('error' => 'Failed to clear log.');
-            wp_die(json_encode($response));
-        }
+		if ( ! update_site_option( 'cfip_log', array() ) ) {
+			$response['error'] = array( 'error' => 'Failed to clear log.' );
+			wp_die( json_encode( $response ) );
+		}
 
-        $response['result'] = 'success';
-        wp_die(json_encode($response));
-    }
+		$response['result'] = 'success';
+		wp_die( json_encode( $response ) );
+	}
 
-    /**
-     * Function to log events in a site option.
-     *
-     * @param $message
-     */
-    public function log ($message)
-    {
-        if ($this->siteSettings->isLoggingEnabled()){
-            $log = get_site_option('cfip_log') ?: array();
-            $log[] = $message;
-            update_site_option('cfip_log', $log);
-        }
-    }
+	/**
+	 * Function to log events in a site option.
+	 *
+	 * @param $message
+	 */
+	public function log( $message ) {
+		if ( $this->siteSettings->isLoggingEnabled() ) {
+			$log   = get_site_option( 'cfip_log' ) ?: array();
+			$log[] = $message;
+			update_site_option( 'cfip_log', $log );
+		}
+	}
 
-    /**
-     * Helper function to get plugin settings.
-     *
-     * @param $setting
-     * @return string|array|null
-     */
-    public function getSetting ($setting)
-    {
-        return $this->settings[$setting] ?? null;
-    }
+	/**
+	 * Helper function to get plugin settings.
+	 *
+	 * @param $setting
+	 * @return string|array|null
+	 */
+	public function getSetting( $setting ) {
+		return $this->settings[ $setting ] ?? null;
+	}
 }

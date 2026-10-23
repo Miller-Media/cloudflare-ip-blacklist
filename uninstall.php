@@ -10,7 +10,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 $cfip_settings = get_option( 'cfip_settings' );
-$delete_data = is_array( $cfip_settings ) && ! empty( $cfip_settings['delete_data_on_uninstall'] );
+$delete_data   = is_array( $cfip_settings ) && ! empty( $cfip_settings['delete_data_on_uninstall'] );
 
 if ( ! $delete_data ) {
 	return;
