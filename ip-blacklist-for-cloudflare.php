@@ -6,9 +6,9 @@
  * Author: Miller Media
  * Author URI: https://mattmiller.ai
  * Depends:
- * Version:           1.2.2
+ * Version:           1.2.3
  * Requires PHP: 8.1
- * Tested up to: 6.9
+ * Tested up to: 7.1
  * Text Domain: ip-blacklist-for-cloudflare
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CFIP_PLUGIN_VERSION', '1.2.2' );
+define( 'CFIP_PLUGIN_VERSION', '1.2.3' );
 
 define('CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR', plugins_url('cloudflare'));
 

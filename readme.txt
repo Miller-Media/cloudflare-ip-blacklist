@@ -2,7 +2,7 @@
 Contributors: MillerMediaNow, mikemm01
 Tags: cloudflare, firewall, security, ip-block, blacklist
 Tested up to: 7.1
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -89,13 +89,20 @@ Yes! As of version 1.0.5, scoped API Tokens are fully supported and recommended 
 
 = What PHP and WordPress versions are supported? =
 
-The plugin requires PHP 8.1 or higher and has been tested up to WordPress 6.9.1.
+The plugin requires PHP 8.1 or higher and has been tested up to WordPress 7.1.
 
 = What languages are supported? =
 
 The plugin is available in 30 languages with more being added regularly. We are working toward supporting 50 languages total!
 
 == Changelog ==
+
+= 1.2.3 =
+* Fixed: repeated login attempts with a banned username no longer send duplicate block requests to Cloudflare (error 10009) when the IP is already recorded as blocked
+* Fixed: blocking an IP no longer drops zones previously recorded for that IP
+* If you delete a rule by hand in Cloudflare, also remove the IP in the plugin to re-block it.
+* Added a link to the GitHub repository in the readme
+* Tested up to WordPress 7.1
 
 = 1.2.2 =
 * Fixed text domain mismatch: updated all i18n calls to use correct slug `ip-blacklist-for-cloudflare`
