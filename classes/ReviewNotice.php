@@ -81,7 +81,7 @@ class CFIP_ReviewNotice {
 				<a href="<?php echo esc_url( $this->review_url ); ?>" class="button button-primary" target="_blank">
 					<?php esc_html_e( 'Leave a Review', 'ip-blacklist-cloudflare' ); ?>
 				</a>
-				<a href="<?php echo esc_url( add_query_arg( $this->plugin_slug . '_dismiss_review', 'true' ) ); ?>" class="button button-secondary">
+				<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( $this->plugin_slug . '_dismiss_review', 'true' ), $this->plugin_slug . '_dismiss_review' ) ); ?>" class="button button-secondary">
 					<?php esc_html_e( 'Maybe Later', 'ip-blacklist-cloudflare' ); ?>
 				</a>
 			</p>
@@ -91,7 +91,8 @@ class CFIP_ReviewNotice {
 			jQuery(document).ready(function($) {
 				$('#<?php echo esc_js( $this->plugin_slug ); ?>-review-notice').on('click', '.notice-dismiss, .button', function() {
 					$.post(ajaxurl, {
-						action: '<?php echo esc_js( $this->plugin_slug ); ?>_dismiss_review_notice'
+						action: '<?php echo esc_js( $this->plugin_slug ); ?>_dismiss_review_notice',
+						nonce: '<?php echo esc_js( wp_create_nonce( $this->plugin_slug . '_dismiss_review' ) ); ?>'
 					});
 				});
 			});
@@ -102,6 +103,7 @@ class CFIP_ReviewNotice {
 	public function handle_dismiss() {
 		// Handle URL parameter dismiss
 		if ( isset( $_GET[ $this->plugin_slug . '_dismiss_review' ] ) ) {
+			check_admin_referer( $this->plugin_slug . '_dismiss_review' );
 			update_user_meta( get_current_user_id(), $this->dismissed_meta_key, true );
 			wp_safe_redirect( remove_query_arg( $this->plugin_slug . '_dismiss_review' ) );
 			exit;
@@ -112,6 +114,7 @@ class CFIP_ReviewNotice {
 	}
 
 	public function ajax_dismiss() {
+		check_ajax_referer( $this->plugin_slug . '_dismiss_review', 'nonce' );
 		update_user_meta( get_current_user_id(), $this->dismissed_meta_key, true );
 		wp_die();
 	}

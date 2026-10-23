@@ -106,6 +106,19 @@ class CFIP_Blacklist {
 			)
 		);
 
+		/*
+		 * admin.js issues same-origin admin-ajax.php requests without a nonce. Rather than
+		 * editing that asset, transparently attach one here via an ajaxPrefilter so the
+		 * handlers below can verify it with check_ajax_referer().
+		 */
+		wp_add_inline_script(
+			'cfip_admin_script',
+			sprintf(
+				'jQuery(document).ajaxPrefilter(function(options){if(options.url!==ajaxurl){return;}if(typeof options.data==="string"&&/(^|&)action=cfip_/.test(options.data)){options.data+="&cfip_nonce="+encodeURIComponent(%s);}});',
+				wp_json_encode( wp_create_nonce( 'cfip_ajax_nonce' ) )
+			)
+		);
+
 		// If Cloudflare plugin is active, inherit styles from their plugin for consistent styles
 		if ( $this->isCloudflarePluginActive() ) {
 			wp_enqueue_style( 'cf-corecss', CFIP_MAIN_CLOUDFLARE_PLUGIN_DIR . '/stylesheets/cf.core.css' );
@@ -254,7 +267,7 @@ class CFIP_Blacklist {
 	public function getUserIPAddress() {
 		foreach ( array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
 			if ( array_key_exists( $key, $_SERVER ) === true ) {
-				foreach ( explode( ',', $_SERVER[ $key ] ) as $IP ) {
+				foreach ( explode( ',', sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) ) as $IP ) {
 					$IP = trim( $IP );
 					if ( filter_var( $IP, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) !== false ) {
 						return $IP;
@@ -317,17 +330,24 @@ class CFIP_Blacklist {
 	 * Remove an IP address from Cloudflare firewall rules.
 	 */
 	public function ajaxUnblacklistIP() {
+		check_ajax_referer( 'cfip_ajax_nonce', 'cfip_nonce' );
+
+		// Admin-only handler; add capability guard since this is reachable by any logged-in user via admin-ajax.php.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( json_encode( array( 'errors' => array( array( 'error' => 'Permission denied.' ) ) ) ) );
+		}
+
 		$response = array(
 			'result' => '',
 			'errors' => array(),
 		);
 
-		if ( ! isset( $_POST['ip_address'] ) || ! $_POST['ip_address'] ) {
+		if ( ! isset( $_POST['ip_address'] ) || ! sanitize_text_field( wp_unslash( $_POST['ip_address'] ) ) ) {
 			$response['errors'][] = array( 'error' => 'No IP address provided.' );
 			wp_die( json_encode( $response ) );
 		}
 
-		$ip_address     = preg_replace( array( '/\s{2,}/', '/[\t\n]/' ), '', sanitize_text_field( $_POST['ip_address'] ) );
+		$ip_address     = preg_replace( array( '/\s{2,}/', '/[\t\n]/' ), '', sanitize_text_field( wp_unslash( $_POST['ip_address'] ) ) );
 		$response['ip'] = $ip_address;
 
 		$banned_IPs = $this->getBannedIPs();
@@ -367,6 +387,13 @@ class CFIP_Blacklist {
 	 * Load/refresh log via AJAX when log tab is opened.
 	 */
 	public function ajaxLoadLog() {
+		check_ajax_referer( 'cfip_ajax_nonce', 'cfip_nonce' );
+
+		// Admin-only handler; add capability guard since the log can reveal banned usernames/IPs.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( json_encode( array( 'log' => array() ) ) );
+		}
+
 		$response = array( 'log' => array() );
 		$cfip_log = get_site_option( 'cfip_log' ) ?: array();
 		if ( $cfip_log ) {
@@ -385,8 +412,15 @@ class CFIP_Blacklist {
 	 * Clear log via AJAX.
 	 */
 	public function ajaxClearLog() {
+		check_ajax_referer( 'cfip_ajax_nonce', 'cfip_nonce' );
+
+		// Admin-only handler; add capability guard since this is reachable by any logged-in user via admin-ajax.php.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( json_encode( array( 'error' => 'Permission denied.' ) ) );
+		}
+
 		$response = array();
-		if ( ! isset( $_POST['clear_log'] ) || ! $_POST['clear_log'] ) {
+		if ( ! isset( $_POST['clear_log'] ) || ! sanitize_text_field( wp_unslash( $_POST['clear_log'] ) ) ) {
 			$response['error'] = 'An error occurred.';
 			wp_die( json_encode( $response ) );
 		}

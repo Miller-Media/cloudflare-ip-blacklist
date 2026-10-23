@@ -193,27 +193,32 @@ class CFIP_SiteSettings {
 
 		if ( isset( $_POST['cfip_settings_nonce'] ) ) {
 
+			// Verify nonce output by the settings form (also verified in verifyNonce() before this method is called).
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['cfip_settings_nonce'] ) ), 'cfip_settings_nonce' ) ) {
+				return false;
+			}
+
 			/**
 			 * Cloudflare Credentials
 			 * First, check if new values are posted
 			 * Second, check if there are already values set in the DB and that the
 			 * Third, set to nothing if both fail
 			 */
-			$settings['cf_email']         = isset( $_POST['cf_email'] ) ? sanitize_text_field( $_POST['cf_email'] ) : ( array_key_exists( 'cf_email', $settings ) ? $settings['cf_email'] : '' );
-			$settings['cf_key']           = isset( $_POST['cf_key'] ) ? sanitize_text_field( $_POST['cf_key'] ) : ( array_key_exists( 'cf_key', $settings ) ? $settings['cf_key'] : '' );
-			$settings['cf_auth_type']     = isset( $_POST['cf_auth_type'] ) ? sanitize_text_field( $_POST['cf_auth_type'] ) : ( array_key_exists( 'cf_auth_type', $settings ) ? $settings['cf_auth_type'] : 'global_key' );
-			$settings['cf_token']         = isset( $_POST['cf_token'] ) ? sanitize_text_field( $_POST['cf_token'] ) : ( array_key_exists( 'cf_token', $settings ) ? $settings['cf_token'] : '' );
-			$settings['banned_usernames'] = isset( $_POST['banned_usernames'] ) ? sanitize_text_field( $_POST['banned_usernames'] ) : ( array_key_exists( 'banned_usernames', $settings ) ? $settings['banned_usernames'] : '' );
-			$settings['zone_id']          = isset( $_POST['zone_id'] ) ? sanitize_text_field( $_POST['zone_id'] ) : ( array_key_exists( 'zone_id', $settings ) ? $settings['zone_id'] : '' );
+			$settings['cf_email']         = isset( $_POST['cf_email'] ) ? sanitize_text_field( wp_unslash( $_POST['cf_email'] ) ) : ( array_key_exists( 'cf_email', $settings ) ? $settings['cf_email'] : '' );
+			$settings['cf_key']           = isset( $_POST['cf_key'] ) ? sanitize_text_field( wp_unslash( $_POST['cf_key'] ) ) : ( array_key_exists( 'cf_key', $settings ) ? $settings['cf_key'] : '' );
+			$settings['cf_auth_type']     = isset( $_POST['cf_auth_type'] ) ? sanitize_text_field( wp_unslash( $_POST['cf_auth_type'] ) ) : ( array_key_exists( 'cf_auth_type', $settings ) ? $settings['cf_auth_type'] : 'global_key' );
+			$settings['cf_token']         = isset( $_POST['cf_token'] ) ? sanitize_text_field( wp_unslash( $_POST['cf_token'] ) ) : ( array_key_exists( 'cf_token', $settings ) ? $settings['cf_token'] : '' );
+			$settings['banned_usernames'] = isset( $_POST['banned_usernames'] ) ? sanitize_text_field( wp_unslash( $_POST['banned_usernames'] ) ) : ( array_key_exists( 'banned_usernames', $settings ) ? $settings['banned_usernames'] : '' );
+			$settings['zone_id']          = isset( $_POST['zone_id'] ) ? sanitize_text_field( wp_unslash( $_POST['zone_id'] ) ) : ( array_key_exists( 'zone_id', $settings ) ? $settings['zone_id'] : '' );
 
 			/**
 			 * Handle checkboxes differently since they don't send POST values
 			 * This is ok though because it is proper to ask people to re-enable blacklist and logging settings
 			 * if they refresh their credentials
 			 */
-			$settings['enable_ip_blacklist']      = isset( $_POST['enable_ip_blacklist'] ) ? sanitize_text_field( $_POST['enable_ip_blacklist'] ) : '';
-			$settings['enable_logging']           = isset( $_POST['enable_logging'] ) ? sanitize_text_field( $_POST['enable_logging'] ) : '';
-			$settings['delete_data_on_uninstall'] = isset( $_POST['delete_data_on_uninstall'] ) ? sanitize_text_field( $_POST['delete_data_on_uninstall'] ) : '';
+			$settings['enable_ip_blacklist']      = isset( $_POST['enable_ip_blacklist'] ) ? sanitize_text_field( wp_unslash( $_POST['enable_ip_blacklist'] ) ) : '';
+			$settings['enable_logging']           = isset( $_POST['enable_logging'] ) ? sanitize_text_field( wp_unslash( $_POST['enable_logging'] ) ) : '';
+			$settings['delete_data_on_uninstall'] = isset( $_POST['delete_data_on_uninstall'] ) ? sanitize_text_field( wp_unslash( $_POST['delete_data_on_uninstall'] ) ) : '';
 
 			if ( update_option( 'cfip_settings', $settings ) ) {
 				return true;
