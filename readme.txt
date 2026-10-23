@@ -2,7 +2,7 @@
 Contributors: MillerMediaNow, mikemm01
 Tags: cloudflare, firewall, security, ip-block, blacklist
 Tested up to: 7.1
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -77,7 +77,7 @@ This plugin is available in the following languages:
 
 = How do I set up my Cloudflare API credentials? =
 
-Go to Settings > Cloudflare IP Blacklist in your WordPress admin. You can authenticate using either a scoped API Token (recommended) or your Global API Key (legacy). For API Tokens, create one in your Cloudflare dashboard with the "Account > Account Firewall Access Rules > Edit" permission. You can create API Tokens and find your Global API Key at https://dash.cloudflare.com/profile/api-tokens.
+Go to Settings > Cloudflare IP Blacklist in your WordPress admin. You can authenticate using either a scoped API Token (recommended) or your Global API Key (legacy). For API Tokens, create one in your Cloudflare dashboard with exactly these two permissions: "Zone > Zone > Read" and "Zone > Firewall Services > Edit", with Zone Resources including the zone(s) for your site. You can create API Tokens and find your Global API Key at https://dash.cloudflare.com/profile/api-tokens.
 
 = What happens when someone tries to log in with a banned username? =
 
@@ -85,7 +85,7 @@ Their IP address is automatically added to your Cloudflare firewall block list. 
 
 = Can I use an API Token instead of the Global API Key? =
 
-Yes! As of version 1.0.5, scoped API Tokens are fully supported and recommended over the Global API Key. Create a token in your Cloudflare dashboard with the required firewall permissions.
+Yes! As of version 1.0.5, scoped API Tokens are fully supported and recommended over the Global API Key. Create a token in your Cloudflare dashboard with "Zone > Zone > Read" and "Zone > Firewall Services > Edit" permissions.
 
 = What PHP and WordPress versions are supported? =
 
@@ -96,6 +96,10 @@ The plugin requires PHP 8.1 or higher and has been tested up to WordPress 7.1.
 The plugin is available in 30 languages with more being added regularly. We are working toward supporting 50 languages total!
 
 == Changelog ==
+
+= 1.2.4 =
+* Fixed: the admin stylesheet and script now load on installs from WordPress.org. Their URLs were built with a hardcoded folder name (ip-blacklist-for-cloudflare) that doesn't match the installed folder (ip-blacklist-cloudflare), so both returned 404
+* Fixed: the readme FAQ now lists the correct API token permissions (Zone > Zone > Read and Zone > Firewall Services > Edit), matching the API Token field on the settings page. It previously said Account > Account Firewall Access Rules > Edit, which the zone-level endpoints the plugin uses don't accept
 
 = 1.2.3 =
 * Fixed: repeated login attempts with a banned username no longer send duplicate block requests to Cloudflare (error 10009) when the IP is already recorded as blocked
