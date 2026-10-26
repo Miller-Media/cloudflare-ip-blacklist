@@ -1,18 +1,13 @@
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&pause=1000&color=F38020&center=true&vCenter=true&width=573&lines=IP+Blacklist+for+Cloudflare" alt="IP Blacklist for Cloudflare" />
-</p>
+<h1 align="center">IP Blacklist for Cloudflare</h1>
 
 <p align="center">
 <pre align="center">
-                  ___ ___
-                 |_ _| _ \
-                  | ||  _/
-                 |___|_|
+       ___ ___ ___ ___
+      / __| __|_ _| _ \
+     | (__| _| | ||  _/
+      \___|_| |___|_|
 &nbsp;
- ___ _      _   ___ _  ___    ___ ___ _____
-| _ ) |    /_\ / __| |/ / |  |_ _/ __|_   _|
-| _ \ |__ / _ \ (__| ' &lt;| |__ | |\__ \ | |
-|___/____/_/ \_\___|_|\_\____|___|___/ |_|
+[ blacklist for cloudflare ]
 </pre>
 </p>
 
@@ -31,8 +26,11 @@
 
 ---
 
-Our plugin can be downloaded for free from the WordPress repository here:
-https://wordpress.org/plugins/ip-blacklist-cloudflare/
+Add a list of prohibited usernames. When someone tries to log in with one of them, their IP address is automatically added to your Cloudflare blacklist, so Cloudflare blocks them before their requests reach your server.
+
+This plugin relies on Cloudflare, a third-party service. It is not officially endorsed, built or maintained by the Cloudflare team.
+
+Available for free on [WordPress.org](https://wordpress.org/plugins/ip-blacklist-cloudflare/).
 
 ## Support Development
 
