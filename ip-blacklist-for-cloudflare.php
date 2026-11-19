@@ -8,7 +8,6 @@
  * Depends:
  * Version:           1.2.4
  * Requires PHP: 8.1
- * Tested up to: 7.1
  * Text Domain: ip-blacklist-cloudflare
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
