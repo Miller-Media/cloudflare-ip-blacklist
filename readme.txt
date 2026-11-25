@@ -2,7 +2,7 @@
 Contributors: MillerMediaNow, mikemm01
 Tags: cloudflare, firewall, security, ip-block, blacklist
 Tested up to: 7.2
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -89,13 +89,18 @@ Yes! As of version 1.0.5, scoped API Tokens are fully supported and recommended 
 
 = What PHP and WordPress versions are supported? =
 
-The plugin requires PHP 8.1 or higher and has been tested up to WordPress 7.1.
+The plugin requires PHP 8.1 or higher and has been tested up to WordPress 7.2.
 
 = What languages are supported? =
 
 The plugin is available in 30 languages with more being added regularly. We are working toward supporting 50 languages total!
 
 == Changelog ==
+
+= 1.2.5 =
+* Security: hardened request handling with nonces, capability checks, sanitization, prepared queries, and escaping
+* Tested with WordPress 7.2
+* Removed the outdated Tested up to line from the plugin header (WordPress.org reads it from the readme)
 
 = 1.2.4 =
 * Fixed: the admin stylesheet and script now load on installs from WordPress.org. Their URLs were built with a hardcoded folder name (ip-blacklist-for-cloudflare) that doesn't match the installed folder (ip-blacklist-cloudflare), so both returned 404
